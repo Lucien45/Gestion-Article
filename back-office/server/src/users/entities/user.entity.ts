@@ -22,10 +22,10 @@ export class Users {
   password: string;
 
   @Column({ type: 'varchar', nullable: true })
-  usrname: string;
+  username: string;
 
   @Column({ type: 'varchar', nullable: true })
-  profile?: string;
+  profile?: string | null;
 
   @Column({
     type: 'enum',
@@ -43,6 +43,9 @@ export class Users {
     onUpdate: 'CURRENT_TIMESTAMP',
   })
   updatedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastLogin: Date | null;
 
   @OneToMany(() => Articles, (article) => article.auteur)
   articles: Articles[];
