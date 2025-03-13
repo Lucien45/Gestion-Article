@@ -24,8 +24,6 @@ const AuthRoute = ({ setLoading }: AdminRouteProps) => {
     <Routes>
       <Route element={<AuthLayout/>}>
         <Route index element={<AuthPage/>} />
-        {/* <Route path='/login' element={<Login />} />
-        <Route path='/register' element={<Register/>} /> */}
         <Route path='*' element={<Page404/>} />
       </Route>
     </Routes>
