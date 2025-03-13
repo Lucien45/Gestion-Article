@@ -10,7 +10,7 @@ export class Categories {
   nom: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string;
+  description?: string | null;
 
   @OneToMany(() => Articles, (article) => article.categorie)
   articles: Articles[];

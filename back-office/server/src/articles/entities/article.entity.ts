@@ -19,11 +19,14 @@ export class Articles {
 
   // Contenu de l'article en fichier pdf
   @Column({ type: 'varchar', nullable: false })
-  contenu: string;
+  contenu: string | null;
+
+  @Column({ type: 'varchar', nullable: false })
+  description: string;
 
   // Photo de couverture article
   @Column({ type: 'varchar', nullable: true })
-  couverture: string;
+  couverture?: string | null;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   date_publication: Date;
