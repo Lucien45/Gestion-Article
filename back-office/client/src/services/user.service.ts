@@ -1,6 +1,12 @@
+import { Token } from "../utils/Token";
 import Axios from "./axios"
 
-const token = localStorage.getItem("authUser");
+const token = Token.GetToken('authUser');
+
+export interface LoginResponse {
+    identification: string;
+    password: string;
+}
 
 /**
  * service for users
@@ -45,12 +51,13 @@ const SignUp = (data: FormData): Promise<FormData> => {
     });
 }
 
-const SignIn = (data: FormData): Promise<FormData> => {
+const SignIn = (data: LoginResponse): Promise<LoginResponse> => {
     return Axios.post("/users/login", data);
 }
 
 const SignOut = () => {
-    localStorage.removeItem("token");
+    // localStorage.removeItem("token");
+    Token.RemoveToken('authUser')
     window.location.href = '/';
 };
 export const UserService = {

@@ -79,14 +79,16 @@ export class UsersController {
 
   @Get('profile')
   @UseGuards(JwtAuthGuard)
-  async getUserConnected(@Req() req: any) {
+  getUserConnected(@Req() req: any) {
+    console.log('User payload:', req.user); // Debugging
+    console.log(JSON.stringify(req.user, null, 2));
     const userId = Number(req.user.sub);
-    if (!userId || isNaN(Number(userId))) {
+    if (!userId || isNaN(userId)) {
       throw new BadRequestException(
         'Impossible de récupérer le profil utilisateur.',
       );
     }
-    return this.usersService.getUserConnected(userId);
+    // return this.usersService.getUserConnected(userId);
   }
 
   @Patch(':id')

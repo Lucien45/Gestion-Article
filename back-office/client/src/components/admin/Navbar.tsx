@@ -1,10 +1,35 @@
+import { useEffect, useState } from 'react';
 import profile from '../../../public/profile-removebg-preview.png'
+import { UserService } from '../../services/user.service';
 
 interface NavbarProps {
   toggleSidebar: () => void;
 }
 
+interface User {
+  id: number;
+  email: string;
+  username: string;
+  profile?: string;
+  role: string;
+}
+
 const Navbar = ({ toggleSidebar }: NavbarProps) => {
+  const [dataUser, setDataUser] = useState<User>();
+  const [isPopupVisible, setIsPopupVisible] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false); 
+
+  useEffect(() => {
+    // UserService.getUser()
+    // .then(function (res) {
+    //   setDataUser(res.data);
+    //   console.log('User data:', res.data);
+    // })
+    // .catch(function (error) {
+    //   console.warn(error.response.data.message);
+    // });
+  }, []);
+
   return (
     <>
       <div className="logosec">

@@ -64,7 +64,7 @@ export class UsersService {
     user.lastLogin = new Date();
     await this.userRepository.save(user);
 
-    const payload = { sub: Number(user.id), email: user.email };
+    const payload = { sub: user.id, email: user.email };
     const token = this.jwtService.sign(payload);
 
     return {

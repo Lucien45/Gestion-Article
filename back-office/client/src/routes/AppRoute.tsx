@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Route, Routes, useLocation } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import AdminLayout from '../views/admin/AdminLayout';
 import Dashboard from '../views/admin/Dashboard';
 import Articles from '../views/admin/Articles';
@@ -9,6 +9,7 @@ import Profile from '../views/admin/Profile';
 import Settings from '../views/admin/Settings';
 import Logout from '../views/admin/Logout';
 import Page404 from '../views/Page404';
+import { isAuthenticated } from '../context/AuthContext';
 
 interface AdminRouteProps {
     setLoading: (value: boolean) => void;
@@ -26,6 +27,10 @@ const AppRoute = ({ setLoading }: AdminRouteProps) => {
     
         return () => clearTimeout(timeout);
     }, [location, setLoading]);
+
+    if (!isAuthenticated()) {
+        return <Navigate to="/" replace />;
+    }
 
     return (
         <Routes>
