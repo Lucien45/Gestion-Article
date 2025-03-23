@@ -23,8 +23,8 @@ const AppRoute = ({ setLoading }: AdminRouteProps) => {
 
     return (
         <Routes>
-            <Route index element={<HomePage />} />
-            <Route path="/articles/:id" element={<ArticleDetail />} />
+            <Route path='home' element={<HomePage />} />
+            <Route path="articles/:id" element={<ArticleDetail />} />
             <Route path="profile" element={<div>Profile Page</div>} />
             <Route path="dashboard" element={<div>Dashboard Page</div>} />
         </Routes>

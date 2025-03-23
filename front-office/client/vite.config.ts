@@ -5,10 +5,10 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 4200,
+    port: 3000,
     strictPort: true,
     host: true,
-    origin: "http://localhost:4200",
+    origin: "http://localhost:3000",
   },
   optimizeDeps: {
     exclude: ['lucide-react'],
