@@ -1,52 +1,97 @@
-import { useState } from 'react';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Box, Typography } from "@mui/material";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import ArticleIcon from "@mui/icons-material/Article";
+import BarChartIcon from "@mui/icons-material/BarChart";
+import BusinessIcon from "@mui/icons-material/Business";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import SettingsIcon from "@mui/icons-material/Settings";
+import ExitToAppIcon from "@mui/icons-material/ExitToApp";
+import { logout } from "../../context/AuthContext";
+import { Utils } from "../../utils/Utils";
 
-const Sidebar = () => {
-  const [activeOption, setActiveOption] = useState('option1'); 
+const drawerWidth = 240;
 
-  const handleOptionClick = (option: string) => {
-    setActiveOption(option); 
+interface SidebarProps {
+  isOpen: boolean;
+  toggleSidebar: () => void;
+}
+
+const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
+  const [activeOption, setActiveOption] = useState("dashboard");
+  const navigate = useNavigate();
+
+  const handleOptionClick = (option: string, path: string) => {
+    setActiveOption(option);
+    navigate(path);
+  };
+
+  const handleLogout = () => {
+    Utils.confirmMessage(
+      "Êtes-vous sûr de vouloir déconnecter ?", 
+      async () => {
+        logout();
+        navigate("/");
+      },
+      () => { 
+        console.log("Déconnexion annulée par l'utilisateur.");
+      }
+    );
   };
 
   return (
-    <nav className="nav">
-      <div className="nav-upper-options">
-        <div className={`nav-option option1 ${activeOption === 'option1' ? 'active' : ''}`} onClick={() => handleOptionClick('option1')} >
-          <i className="fas fa-tachometer-alt nav-icon"></i>
-          <h3>Dashboard</h3>
-        </div>
+    <Drawer
+      variant="persistent"
+      anchor="left"
+      open={isOpen}
+      sx={{
+        width: isOpen ? drawerWidth : 0,
+        flexShrink: 0,
+        "& .MuiDrawer-paper": {
+          width: drawerWidth,
+          boxSizing: "border-box",
+          backgroundColor: "#1E293B",
+          color: "#FFF",
+        },
+      }}
+    >
 
-        <div className={`nav-option option2 ${activeOption === 'option2' ? 'active' : ''}`} onClick={() => handleOptionClick('option2')} >
-          <i className="fas fa-newspaper nav-icon"></i>
-          <h3>Articles</h3>
-        </div>
+      <Divider />
 
-        <div className={`nav-option option3 ${activeOption === 'option3' ? 'active' : ''}`} onClick={() => handleOptionClick('option3')} >
-          <i className="fas fa-chart-line nav-icon"></i>
-          <h3>Report</h3>
-        </div>
+      <List>
+        {[
+          { text: "Dashboard", icon: <DashboardIcon />, path: "/admin", option: "dashboard" },
+          { text: "Articles", icon: <ArticleIcon />, path: "/admin/article", option: "articles" },
+          { text: "Report", icon: <BarChartIcon />, path: "/admin/report", option: "report" },
+          { text: "Institution", icon: <BusinessIcon />, path: "/admin/institution", option: "institution" },
+          { text: "Profile", icon: <AccountCircleIcon />, path: "/admin/profile", option: "profile" },
+          { text: "Settings", icon: <SettingsIcon />, path: "/admin/settings", option: "settings" },
+        ].map(({ text, icon, path, option }) => (
+          <ListItem key={option} disablePadding>
+            <ListItemButton selected={activeOption === option} onClick={() => handleOptionClick(option, path)}>
+              <ListItemIcon sx={{ color: "#FFF" }}>{icon}</ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
 
-        <div className={`nav-option option4 ${activeOption === 'option4' ? 'active' : ''}`} onClick={() => handleOptionClick('option4')} >
-          <i className="fas fa-building nav-icon"></i>
-          <h3>Institution</h3>
-        </div>
+      <Divider />
 
-        <div className={`nav-option option5 ${activeOption === 'option5' ? 'active' : ''}`} onClick={() => handleOptionClick('option5')} >
-          <i className="fas fa-user nav-icon"></i>
-          <h3>Profile</h3>
-        </div>
-
-        <div className={`nav-option option6 ${activeOption === 'option6' ? 'active' : ''}`} onClick={() => handleOptionClick('option6')} >
-          <i className="fas fa-cog nav-icon"></i>
-          <h3>Settings</h3>
-        </div>
-
-        <div className={`nav-option logout ${activeOption === 'logout' ? 'active' : ''}`} onClick={() => handleOptionClick('logout')} >
-          <i className="fas fa-sign-out-alt nav-icon"></i>
-          <h3>Logout</h3>
-        </div>
-      </div>
-    </nav>
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton onClick={handleLogout}>
+            <ListItemIcon sx={{ color: "#FFF" }}>
+              <ExitToAppIcon />
+            </ListItemIcon>
+            <ListItemText primary="Logout" />
+          </ListItemButton>
+        </ListItem>
+      </List>
+    </Drawer>
   );
 };
 
-export default Sidebar
+export default Sidebar;

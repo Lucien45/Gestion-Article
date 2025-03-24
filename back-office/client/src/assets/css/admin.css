@@ -85,7 +85,7 @@ header {
 }
 
 .message {
-  gap: 40px;
+  gap: 10px;
   position: relative;
   cursor: pointer;
 }
@@ -93,7 +93,7 @@ header {
   height: 7px;
   width: 7px;
   position: absolute;
-  background-color: #fa7bb4;
+  background-color: #7bdcfa;
   border-radius: 50%;
   left: 19px;
   top: 8px;
@@ -222,10 +222,11 @@ header {
 .searchbtn .srchicn{
   font-size: 20px;
   color: white;
+  justify-content: center;
 }
 
 .dpicn {
-  font-size: 28px;
+  font-size: 60px;
   color: rgb(10, 10, 10);
 }
 

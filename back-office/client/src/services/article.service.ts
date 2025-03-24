@@ -1,5 +1,10 @@
 import Axios from "./axios"
 
+interface Categorie {
+    nom: string;
+    description: string;
+}
+
 /**
  * service for categories
  */
@@ -15,11 +20,11 @@ const deleteCategorie = (id: number | string) => {
     return Axios.delete(`/articles/categories/${id}`);
 }
 
-const createCategorie = (data: FormData): Promise<FormData> => {
+const createCategorie = (data: Categorie): Promise<Categorie> => {
     return Axios.post("/articles/categories", data);
 }
 
-const updateCategorie = (id: number | string, data: Partial<FormData>): Promise<FormData> => {
+const updateCategorie = (id: number | string, data: Partial<Categorie>): Promise<Categorie> => {
     return Axios.put(`/articles/categories/${id}`, data);
 }
 

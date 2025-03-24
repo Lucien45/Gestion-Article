@@ -73,6 +73,8 @@ export class UsersService {
         id: user.id,
         username: user.username,
         email: user.email,
+        profile: user?.profile,
+        role: user.role,
       },
     };
   }

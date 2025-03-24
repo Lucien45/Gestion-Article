@@ -7,7 +7,6 @@ import Report from '../views/admin/Report';
 import { Institution } from '../views/admin/Institution';
 import Profile from '../views/admin/Profile';
 import Settings from '../views/admin/Settings';
-import Logout from '../views/admin/Logout';
 import Page404 from '../views/Page404';
 import { isAuthenticated } from '../context/AuthContext';
 
@@ -42,7 +41,6 @@ const AppRoute = ({ setLoading }: AdminRouteProps) => {
                 <Route path='/institution' element={<Institution/>}/>
                 <Route path='/profile' element={<Profile/>}/>
                 <Route path='/settings' element={<Settings/>}/>
-                <Route path='/logout' element={<Logout/>}/>
             </Route>
             {/* ERREUR */}
             <Route path='*' element={<Page404/>} />

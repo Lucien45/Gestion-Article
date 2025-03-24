@@ -81,8 +81,8 @@ const AuthPage: React.FC = () => {
             UserService.SignIn(data)
             .then((res)=>{
                 setSignInData({identification: '', password: ''});
-                // localStorage.setItem("token", res.data.token);
                 Token.AddToken('authUser', res.data.token);
+                Token.AddToken('user', JSON.stringify(res.data.user));
                 window.location.href = '/admin';  
             })
             .catch(() => {
