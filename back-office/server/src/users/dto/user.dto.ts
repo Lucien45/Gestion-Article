@@ -23,6 +23,14 @@ export class CreateUserDto {
 
   @IsString()
   @IsOptional()
+  nom?: string;
+
+  @IsString()
+  @IsOptional()
+  prenom?: string;
+
+  @IsString()
+  @IsOptional()
   profile?: string;
 
   @IsEnum(['admin', 'editeur', 'auteur'])

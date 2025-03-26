@@ -54,7 +54,6 @@ const Navbar = ({ toggleSidebar, isOpen }: NavbarProps) => {
 
   useEffect(() => {
     if (userProfile) {
-      // setDataUser(userProfile);
       UserService.getUserById(userProfile.id)
       .then((res) => {
         setDataUser(res.data);

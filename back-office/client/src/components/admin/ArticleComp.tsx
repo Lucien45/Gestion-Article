@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ChangeEvent, useEffect, useState } from "react";
 import {
-  Card,
-  CardContent,
   Typography,
   Button,
   Box,
@@ -342,54 +340,76 @@ export const ListArticle: React.FC = () => {
 
       {/* Modal d'édition */}
       <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
-        <DialogTitle>Modifier l'Article</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Titre"
-            margin="dense"
-            value={selectedArticle?.titre || ""}
-            onChange={(e) => setSelectedArticle({ ...selectedArticle, titre: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label="Description"
-            margin="dense"
-            multiline
-            rows={3}
-            value={selectedArticle?.description || ""}
-            onChange={(e) => setSelectedArticle({ ...selectedArticle, description: e.target.value })}
-          />
-          <FormControl fullWidth>
-            <InputLabel>Catégorie</InputLabel>
-            <Select name="categorie" label="Catégorie" 
-              onChange={(e) => setSelectedArticle({
-                ...selectedArticle, categorie: { ...selectedArticle.categorie, id: e.target.value }
-              })} 
-              value={selectedArticle?.categorie?.id || ""} margin="dense">
-              {categories.map((categorie) => (
-                <MenuItem key={categorie.id} value={categorie.id}>{categorie.nom}</MenuItem>
-              ))}  
-            </Select>
-          </FormControl>
-          <TextField
-            fullWidth
-            label="Nombre de vues"
-            margin="dense"
-            type="number"
-            value={selectedArticle?.vue || ""}
-            onChange={(e) => setSelectedArticle({ ...selectedArticle, vue: e.target.value })}
-          />
-          <TextField
-            fullWidth
-            label="Nombre de likes"
-            margin="dense"
-            type="number"
-          />
+        <DialogTitle>
+          <Typography variant="h6" gutterBottom>
+            Modifier l'Article
+          </Typography>
+        </DialogTitle>
+        <DialogContent dividers>
+          <DialogContentText>
+            <Grid2
+              container
+              rowSpacing={5}
+              columnSpacing={{ xs: 1, sm: 2, md: 3 }}
+            >
+              <Grid2 size={6}>
+                <TextField
+                  label="Titre"
+                  variant="outlined"
+                  value={selectedArticle?.titre || ""}
+                  onChange={(e) => setSelectedArticle({ ...selectedArticle, titre: e.target.value })}
+                  fullWidth
+                />
+              </Grid2>
+              <Grid2 size={6}>
+                <TextField
+                  label="Description"
+                  variant="outlined"
+                  margin="dense"
+                  multiline
+                  rows={3}
+                  value={selectedArticle?.description || ""}
+                  onChange={(e) => setSelectedArticle({ ...selectedArticle, description: e.target.value })}
+                  fullWidth
+                />
+              </Grid2>
+              <Grid2 size={6}>
+                <FormControl variant="outlined" fullWidth>
+                  <InputLabel>Catégorie</InputLabel>
+                  <Select
+                    value={selectedArticle?.categorie?.id || ""} margin="dense"
+                    onChange={(e) => setSelectedArticle({
+                      ...selectedArticle, categorie: { ...selectedArticle.categorie, id: e.target.value }
+                    })} 
+                    label="Catégorie"
+                  >
+                  {categories.map((categorie) => (
+                    <MenuItem key={categorie.id} value={categorie.id}>{categorie.nom}</MenuItem>
+                  ))}  
+                  </Select>
+                </FormControl>
+              </Grid2>
+              <Grid2 size={6}>
+                <FormControl variant="outlined" fullWidth required>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={selectedArticle?.status}
+                    onChange={(e) => setSelectedArticle({ ...selectedArticle, status: e.target.value })}
+                    label="Status"
+                  >
+                    <MenuItem value="brouillon">Brouillon</MenuItem>
+                    <MenuItem value="publié">Publié</MenuItem>
+                    <MenuItem value="archivé">Archivé</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid2>
+
+            </Grid2>
+          </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenEditModal(false)} color="secondary">Annuler</Button>
-          <Button onClick={handleSaveEdit} color="primary" variant="contained">Enregistrer</Button>
+          <Button onClick={handleSaveEdit} color="primary" variant="contained">Sauvegarder</Button>
         </DialogActions>
       </Dialog>
 

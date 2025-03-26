@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   TextField,
   Button,
@@ -9,7 +9,6 @@ import {
   Paper,
   Typography,
   Grid2,
-  Card,
   CardContent,
   FormLabel,
   RadioGroup,
@@ -20,24 +19,148 @@ import {
   TableHead,
   TableBody,
   IconButton,
+  Avatar,
+  Box,
+  Divider,
+  Grid,
+  CircularProgress
 } from "@mui/material";
-import { DeleteForever, ManageAccounts } from "@mui/icons-material";
+import { Article, CalendarToday, DeleteForever, Email, ManageAccounts, Badge } from "@mui/icons-material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
+import { Token } from '../../utils/Token';
+import { UserService } from '../../services/user.service';
+import { apiUrl } from '../../services/api';
 
+interface User {
+  id: number;
+  email: string;
+  nom: string;
+  prenom: string;
+  username: string;
+  profile?: string;
+  role: string;
+  lastLogin: string;
+  articles: Article;
+}
+
+interface Article {
+  length: number;
+}
 
 export const UserAccount: React.FC = () => {
+  const [dataUser, setDataUser] = useState<User | null>(null);
+  const userProfile = JSON.parse(Token.GetToken("user") as string);
+
+  useEffect(() => {
+    if (userProfile) {
+      UserService.getUserById(userProfile.id)
+      .then((res) => {
+        setDataUser(res.data);
+      })
+      .catch((err) => {
+        console.log(err)
+      });
+    }
+  }, []);
+  
   return (
-    <Card sx={{  width: "100%", maxWidth: "1500px", margin: "10px auto"}}>
+    <Paper elevation={4} sx={{ padding: "20px", margin: "20px auto", borderRadius: 3, background: "#f9f9f9" }}>
       <CardContent>
-        <Typography variant="h5">UserAccount</Typography>
+        <Box display="flex" justifyContent="center" mb={2}>
+          <Avatar
+            src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : ''}
+            alt={dataUser?.username || "profileDefault"}
+            sx={{ width: 80, height: 80, border: "3px solid #ddd" }}
+          />
+        </Box>
+
+        <Typography variant="h5" align="center" fontWeight="bold" gutterBottom>
+          {dataUser?.username || "Utilisateur"}
+        </Typography>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Grid container spacing={2}>
+          <Grid item xs={12} display="flex" alignItems="center">
+            <Email sx={{ marginRight: 1, color: "gray" }} />
+            <Typography variant="body1">
+              <strong>Email :</strong> {dataUser?.email || "Non spécifié"}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} display="flex" alignItems="center">
+            <CalendarToday sx={{ marginRight: 1, color: "gray" }} />
+            <Typography variant="body1">
+              <strong>Dernière connexion :</strong> {dataUser?.lastLogin ? new Date(dataUser.lastLogin).toLocaleString() : "Jamais connecté"}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} display="flex" alignItems="center">
+            <Article sx={{ marginRight: 1, color: "gray" }} />
+            <Typography variant="body1">
+              <strong>Nombre d'articles :</strong> {dataUser?.articles?.length || 0}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} display="flex" alignItems="center">
+            <Badge sx={{ marginRight: 1, color: "gray" }} />
+            <Typography variant="body1">
+              <strong>Rôle :</strong> {dataUser?.role || "Utilisateur"}
+            </Typography>
+          </Grid>
+        </Grid>
+
+        <Divider sx={{ my: 2 }} />
+
+        <Grid container size={6}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            // onClick={() => setShowDialogue(true)}
+          >
+            Modifier
+          </Button>
+        </Grid>
       </CardContent>
-    </Card>
+    </Paper>
   )
 }
 
 export const UserList: React.FC = () => {
-  
+  const [dataUser, setDataUser] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [openError, setOpenError] = useState(false);
+
+  const [researchMode, setResearchMode] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const response = await UserService.getAllUsers();
+      setDataUser(response.data);
+    } catch (error) {
+      console.warn(error);
+      setOpenError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleRadioChange = (e: { target: { value: string } }) => {
+    setResearchMode(e.target.value);
+  };
+
+  function enableResearch() {
+    return researchMode;
+  }
+
+  useEffect(() => {
+    fetchUsers()
+  }, []);
+
   return (
     <Paper elevation={3} style={{ padding: "20px", margin: "20px auto" }}>
       <Typography variant="h6" mb={4} gutterBottom>
@@ -52,47 +175,48 @@ export const UserList: React.FC = () => {
         <RadioGroup
           aria-label="options"
           name="researchMode"
-          // value={researchMode}
-          // onChange={handleRadioChange}
+          value={researchMode}
+          onChange={handleRadioChange}
           row
         >
           <FormControlLabel
-            value="userMatricule"
-            control={
-              <Radio sx={{ "& .MuiSvgIcon-root": { fontSize: "1em" } }} />
-            }
-            label={<span style={{ fontSize: "0.8em" }}>Matricule</span>}
-          />
-          <FormControlLabel
-            value="userName"
+            value="nom"
             control={
               <Radio sx={{ "& .MuiSvgIcon-root": { fontSize: "1em" } }} />
             }
             label={<span style={{ fontSize: "0.8em" }}>Nom</span>}
+          />
+          <FormControlLabel
+            value="username"
+            control={
+              <Radio sx={{ "& .MuiSvgIcon-root": { fontSize: "1em" } }} />
+            }
+            label={<span style={{ fontSize: "0.8em" }}>username</span>}
           />
         </RadioGroup>
       </FormControl>
       <TextField
         label="Rechercher un utilisateur"
         variant="outlined"
-        // value={searchTerm}
-        // onChange={(e) => setSearchTerm(e.target.value)}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
         style={{ marginBottom: "20px", marginTop: "10px", width: "100%" }}
-        // disabled={!enableResearch()}
+        disabled={!enableResearch()}
       />
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <StyledTableRow>
-              <StyledTableCell>Matricule</StyledTableCell>
               <StyledTableCell>Nom</StyledTableCell>
               <StyledTableCell>Prénom</StyledTableCell>
+              <StyledTableCell>username</StyledTableCell>
               <StyledTableCell>Email</StyledTableCell>
               <StyledTableCell>Rôle</StyledTableCell>
+              <StyledTableCell>Profile</StyledTableCell>
               <StyledTableCell>Actions</StyledTableCell>
             </StyledTableRow>
           </TableHead>
-          {/* {loader && (
+          {loading && (
             <Box
               display="flex"
               alignItems="center"
@@ -101,25 +225,32 @@ export const UserList: React.FC = () => {
             >
               <CircularProgress />
             </Box>
-          )} */}
-          {/* {!loader && ( */}
+          )}
+          {!loading && (
             <TableBody>
-              {/* {userData?.map((user) => ( */}
-                <StyledTableRow key='{user.id}'>
+              {dataUser.map((user) => (
+                <StyledTableRow key={user.id}>
                   <StyledTableCell component="th" scope="row">
-                    Matricule
+                    {user.nom}
                   </StyledTableCell>
                   <StyledTableCell align="left">
-                    Nom
+                    {user.prenom}
                   </StyledTableCell>
                   <StyledTableCell align="left">
-                    Prenom
+                    {user.username}
                   </StyledTableCell>
                   <StyledTableCell align="left">
-                    email
+                    {user.email}
                   </StyledTableCell>
                   <StyledTableCell align="left">
-                    Role
+                    {user.role}
+                  </StyledTableCell>
+                  <StyledTableCell align="left">
+                    <Avatar
+                      src={user?.profile ? `${apiUrl}/${user.profile}` : ''}
+                      alt={user.username || "profileDefault"}
+                      sx={{ width: 60, height: 60, border: "2px solid #ddd" }}
+                    />
                   </StyledTableCell>
                   <StyledTableCell align="left">
                     <IconButton
@@ -153,9 +284,9 @@ export const UserList: React.FC = () => {
                     </IconButton>
                   </StyledTableCell>
                 </StyledTableRow>
-              {/* ))} */}
+              ))} 
             </TableBody>
-          {/* )} */}
+          )}
         </Table>
       </TableContainer>
     </Paper>

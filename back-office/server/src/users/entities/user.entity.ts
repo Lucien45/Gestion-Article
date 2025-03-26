@@ -25,12 +25,18 @@ export class Users {
   username: string;
 
   @Column({ type: 'varchar', nullable: true })
+  nom: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  prenom: string;
+
+  @Column({ type: 'varchar', nullable: true })
   profile?: string | null;
 
   @Column({
     type: 'enum',
-    enum: ['admin', 'editeur', 'auteur'],
-    default: 'auteur',
+    enum: ['admin', 'editeur', 'auteur', 'autre'],
+    default: 'autre',
   })
   role: string;
 
