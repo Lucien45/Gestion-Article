@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Card,
   Box,
   Typography,
   TextField,
@@ -12,18 +11,17 @@ import {
   DialogTitle,
   CircularProgress,
   IconButton,
-  CardContent,
   Paper,
   TableContainer,
   Table,
   TableHead,
-  TableRow,
-  TableCell,
   TableBody,
+  Grid2,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { ArticleService } from "../../services/article.service";
-import { Delete, Edit } from "@mui/icons-material";
+import { DeleteForever, Edit } from "@mui/icons-material";
+import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 
 interface Categorie {
   id: number;
@@ -109,37 +107,62 @@ export const ListCategorie: React.FC = () => {
   };
 
   return (
-    <Card sx={{  width: "100%", maxWidth: "1500px", margin: "10px auto"}}>
-      <CardContent>
-        <Typography variant="h5">Liste des Catégories</Typography>
-        <TableContainer component={Paper} sx={{ marginTop: 2 }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Nom</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
+    <Paper elevation={3} style={{ padding: "20px", margin: "20px auto" }}>
+      <Typography variant="h6" mb={4} gutterBottom>
+        Informations sur les categories
+        {}
+        <hr />
+      </Typography>
+      <TextField
+        label="Rechercher une categorie"
+        variant="outlined"
+        style={{ marginBottom: "20px", marginTop: "10px", width: "100%" }}
+      />
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <StyledTableRow>
+              <StyledTableCell>Nom</StyledTableCell>
+              <StyledTableCell>Description</StyledTableCell>
+              <StyledTableCell>Actions</StyledTableCell>
+            </StyledTableRow>
+          </TableHead>
+          <TableBody>
             {categories.map((categorie) => (
-                <TableRow>
-                  <TableCell>{categorie.nom}</TableCell>
-                  <TableCell>{categorie.description}</TableCell>
-                  <TableCell>
-                    <IconButton color="secondary" onClick={() => handleEdit(categorie)}>
-                      <Edit />
-                    </IconButton>
-                    <IconButton color="error" onClick={() => handleDelete(categorie)}>
-                      <Delete />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
+              <StyledTableRow key={categorie.id}>
+                <StyledTableCell component="th" scope="row">
+                  {categorie.nom}
+                </StyledTableCell>
+                <StyledTableCell align="left">
+                  {categorie.description}
+                </StyledTableCell>
+                <StyledTableCell align="left">
+                  <IconButton
+                    aria-label="Gérer le categorie"
+                    onClick={() => handleEdit(categorie)}
+                  >
+                    <Edit
+                      titleAccess="Gérer le categorie"
+                      fontSize="medium"
+                      color="primary"
+                    ></Edit>
+                  </IconButton>
+                  <IconButton 
+                    onClick={() => handleDelete(categorie)}
+                  >
+                    <DeleteForever
+                      titleAccess="Supprimer le categorie"
+                      fontSize="medium"
+                      color="error"
+                    ></DeleteForever>
+                  </IconButton>
+                </StyledTableCell>
+              </StyledTableRow>
+            ))}
             </TableBody>
-          </Table>
-        </TableContainer>
-      </CardContent>
+        </Table>
+      </TableContainer>
+      
       {/* Modal d'édition */}
       <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
         <DialogTitle>Modifier la Catégorie</DialogTitle>
@@ -176,7 +199,7 @@ export const ListCategorie: React.FC = () => {
           <Button onClick={handleConfirmDelete} color="error" variant="contained">Supprimer</Button>
         </DialogActions>
       </Dialog>
-    </Card>
+    </Paper>
   );
 };
 
@@ -212,20 +235,54 @@ export const AddEditCategorie: React.FC = () => {
     }
   };
 
+  function desableButton() {
+    return (
+      newCategorie.nom &&
+      newCategorie.description
+    );
+  }
+
   return (
-    <Card sx={{ width: "100%", maxWidth: "1500px", margin: "10px auto" }}>
-      <Box sx={{ maxWidth: "600px", margin: "20px auto" }}>
-        <Typography variant="h5">Ajouter une Catégorie</Typography>
-        <Box sx={{ maxWidth: "800px", margin: "20px auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
-          <TextField onChange={handleChange} value={newCategorie.nom} name="nom" label="Nom" variant="outlined" required fullWidth />
-          <TextField onChange={handleChange} value={newCategorie.description} name="description" label="Description" variant="outlined" required fullWidth />
-        </Box>
-        <Box sx={{ textAlign: "center", marginTop: 2 }}>
-          <Button variant="contained" color="primary" onClick={handleOpenDialog}>
+    <Paper elevation={3} style={{ padding: "20px", marginBottom: "20px", margin: "20px auto" }}>
+      <Typography variant="h6" mb={5} gutterBottom>
+        Remplir les informations suivantes
+        <hr />
+      </Typography>
+      <Grid2 container rowSpacing={5} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+        <Grid2 size={6}>
+          <TextField
+            label="Nom"
+            variant="outlined"
+            name="nom"
+            onChange={handleChange} 
+            value={newCategorie.nom}
+            required
+            fullWidth
+          />
+        </Grid2>
+        <Grid2 size={6}>
+          <TextField
+            label="Description"
+            variant="outlined"
+            name="description"
+            onChange={handleChange} 
+            value={newCategorie.description}
+            fullWidth
+          />
+        </Grid2>
+
+        <Grid2 size={6}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={!desableButton()}
+            onClick={handleOpenDialog}
+          >
             Sauvegarder
           </Button>
-        </Box>
-      </Box>
+        </Grid2>
+      </Grid2>
 
       {/* Dialog de confirmation */}
       <Dialog fullWidth open={openDialog} onClose={handleCloseDialog}>
@@ -279,6 +336,6 @@ export const AddEditCategorie: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Card>
+    </Paper>
   );
 };

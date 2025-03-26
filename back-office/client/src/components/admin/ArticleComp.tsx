@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
- 
 import React, { ChangeEvent, useEffect, useState } from "react";
 import {
   Card,
@@ -10,10 +9,8 @@ import {
   TextField,
   Table,
   TableBody,
-  TableCell,
   TableContainer,
   TableHead,
-  TableRow,
   Paper,
   Select,
   MenuItem,
@@ -29,13 +26,19 @@ import {
   Avatar,
   Snackbar,
   Alert,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Grid2,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { Visibility, Edit, Delete } from "@mui/icons-material";
+import { Visibility, Edit, DeleteForever } from "@mui/icons-material";
 import { ArticleService } from "../../services/article.service";
 import { Token } from "../../utils/Token";
 import { Utils } from "../../utils/Utils";
 import { apiUrl } from "../../services/api";
+import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 
 interface Article {
   id: string;
@@ -102,6 +105,7 @@ const DialogAddArticle: React.FC<DialogArtcileProps> = ({ articledata }) => {
 
 export const ListArticle: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [categories, setCategories] = useState<Categorie[]>([]);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openViewModal, setOpenViewModal] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -110,6 +114,9 @@ export const ListArticle: React.FC = () => {
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [researchMode, setResearchMode] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchArticles = async () => {
     setLoading(true);
@@ -126,6 +133,9 @@ export const ListArticle: React.FC = () => {
 
   useEffect(() => {
     fetchArticles();
+    ArticleService.getAllCategories()
+      .then((response) => setCategories(response.data))
+      .catch(console.warn);
   }
   , []);
 
@@ -168,61 +178,145 @@ export const ListArticle: React.FC = () => {
     }
   };
 
+  const handleRadioChange = (e: { target: { value: string } }) => {
+    setResearchMode(e.target.value);
+  };
+
+  function enableResearch() {
+    return researchMode;
+  }
+
   return (
-    <Card sx={{  width: "100%", maxWidth: "1500px", margin: "10px auto"}}>
-      <CardContent>
-        <Typography variant="h5">Liste des Articles</Typography>
-        {loading ? (
-          <Box display="flex" justifyContent="center" my={2}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <TableContainer component={Paper} sx={{ marginTop: 2 }}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Titre</TableCell>
-                  <TableCell>Description</TableCell>
-                  <TableCell>Couverture</TableCell>
-                  <TableCell>Catégorie</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Vues</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
+    <Paper elevation={3} style={{ padding: "20px", margin: "20px auto" }}>
+      <Typography variant="h6" mb={4} gutterBottom>
+        Informations sur les Articles
+        {}
+        <hr />
+      </Typography>
+      <FormControl component="fieldset">
+        <FormLabel component="legend" sx={{ fontSize: "0.8em" }}>
+          Choisissez une méthode de recherche
+        </FormLabel>
+        <RadioGroup
+          aria-label="options"
+          name="researchMode"
+          value={researchMode}
+          onChange={handleRadioChange}
+          row
+        >
+          <FormControlLabel
+            value="titre"
+            control={
+              <Radio sx={{ "& .MuiSvgIcon-root": { fontSize: "1em" } }} />
+            }
+            label={<span style={{ fontSize: "0.8em" }}>Titre</span>}
+          />
+          <FormControlLabel
+            value="categorie"
+            control={
+              <Radio sx={{ "& .MuiSvgIcon-root": { fontSize: "1em" } }} />
+            }
+            label={<span style={{ fontSize: "0.8em" }}>Catégorie</span>}
+          />
+          <FormControlLabel
+            value="status"
+            control={
+              <Radio sx={{ "& .MuiSvgIcon-root": { fontSize: "1em" } }} />
+            }
+            label={<span style={{ fontSize: "0.8em" }}>Status</span>}
+          />
+        </RadioGroup>
+      </FormControl>
+      <TextField
+        label="Rechercher une article"
+        variant="outlined"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        style={{ marginBottom: "20px", marginTop: "10px", width: "100%" }}
+        disabled={!enableResearch()}
+      />
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <StyledTableRow>
+              <StyledTableCell>Titre</StyledTableCell>
+              <StyledTableCell>Description</StyledTableCell>
+              <StyledTableCell>Couverture</StyledTableCell>
+              <StyledTableCell>Catégorie</StyledTableCell>
+              <StyledTableCell>Status</StyledTableCell>
+              <StyledTableCell>Actions</StyledTableCell>
+            </StyledTableRow>
+          </TableHead>
+          {loading && (
+            <Box
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              height="100%"
+            >
+              <CircularProgress />
+            </Box>
+          )}
+          {!loading && (
+            <TableBody>
               {articles.map((article) => (
-                  <TableRow key={article.id}>
-                    <TableCell>{article.titre}</TableCell>
-                    <TableCell>{article.description}</TableCell>
-                    <TableCell>
+                <StyledTableRow key={article.id}>
+                  <StyledTableCell component="th" scope="row">
+                    {article.titre}
+                  </StyledTableCell>
+                  <StyledTableCell align="left">
+                    {article.description}
+                  </StyledTableCell>
+                  <StyledTableCell component="th" scope="row">
                     <Avatar
                       src={article?.couverture ? `${apiUrl}/${article.couverture}` : ''}
                       alt={article.titre || "profileDefault"}
                       sx={{ width: 60, height: 60, border: "2px solid #ddd" }}
                     />
-                    </TableCell>
-                    <TableCell>{article.categorie?.nom}</TableCell>
-                    <TableCell>{article.status}</TableCell>
-                    <TableCell>{article.vue}</TableCell>
-                    <TableCell>
-                      <IconButton color="primary" onClick={() => handleView(article)}>
-                        <Visibility />
-                      </IconButton>
-                      <IconButton color="secondary" onClick={() => handleEdit(article)}>
-                        <Edit />
-                      </IconButton>
-                      <IconButton color="error" onClick={() => handleDelete(article)}>
-                        <Delete />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </CardContent>
+                  </StyledTableCell>
+                  <StyledTableCell align="left">
+                    {article.categorie?.nom}
+                  </StyledTableCell>
+                  <StyledTableCell component="th" scope="row">
+                    {article.status}
+                  </StyledTableCell>
+                  <StyledTableCell align="left">
+                  <IconButton
+                      aria-label="Détails sur l'article"
+                      onClick={() => handleView(article)}
+                    >
+                      <Visibility
+                        titleAccess="Détails sur l'article"
+                        fontSize="medium"
+                        color="primary"
+                      ></Visibility>
+                    </IconButton>
+                    <IconButton
+                      aria-label="Gérer l'article"
+                      onClick={() => handleEdit(article)}
+                    >
+                      <Edit
+                        titleAccess="Gérer l'article"
+                        fontSize="medium"
+                        color="secondary"
+                      ></Edit>
+                    </IconButton>
+                    <IconButton 
+                      onClick={() => handleDelete(article)}
+                    >
+                      <DeleteForever
+                        titleAccess="Supprimer l'article"
+                        fontSize="medium"
+                        color="error"
+                      ></DeleteForever>
+                    </IconButton>
+                  </StyledTableCell>
+                </StyledTableRow>
+              ))}
+            </TableBody>
+          )}
+        </Table>
+      </TableContainer>
 
       {/* Modal de visualisation */}
       <Dialog open={openViewModal} onClose={() => setOpenViewModal(false)}>
@@ -266,15 +360,18 @@ export const ListArticle: React.FC = () => {
             value={selectedArticle?.description || ""}
             onChange={(e) => setSelectedArticle({ ...selectedArticle, description: e.target.value })}
           />
-          <TextField
-            fullWidth
-            label="Catégorie"
-            margin="dense"
-            value={selectedArticle?.categorie?.nom || ""}
-            onChange={(e) => setSelectedArticle({
-              ...selectedArticle, categorie: { ...selectedArticle.categorie, nom: e.target.value }
-            })}
-          />
+          <FormControl fullWidth>
+            <InputLabel>Catégorie</InputLabel>
+            <Select name="categorie" label="Catégorie" 
+              onChange={(e) => setSelectedArticle({
+                ...selectedArticle, categorie: { ...selectedArticle.categorie, id: e.target.value }
+              })} 
+              value={selectedArticle?.categorie?.id || ""} margin="dense">
+              {categories.map((categorie) => (
+                <MenuItem key={categorie.id} value={categorie.id}>{categorie.nom}</MenuItem>
+              ))}  
+            </Select>
+          </FormControl>
           <TextField
             fullWidth
             label="Nombre de vues"
@@ -320,8 +417,7 @@ export const ListArticle: React.FC = () => {
           Une erreur est survenue !
         </Alert>
       </Snackbar>
-
-    </Card>
+    </Paper>      
   );
 };
 
@@ -405,20 +501,50 @@ export const AddEditArticle: React.FC = () => {
       .then((response) => setCategories(response.data))
       .catch(console.warn);
   }, []);
+
+  function desableButton() {
+    return (
+      Newarticles.titre &&
+      Newarticles.couverture &&
+      Newarticles.contenu &&
+      Newarticles.categorie &&
+      Newarticles.status
+    );
+  }
+
   return (
-    <Card sx={{ width: "100%", maxWidth: "800px", margin: "20px auto", padding: 2}}>
-      <CardContent>
-        <Typography variant="h5">Ajouter un Article</Typography>
-        <Box
-          sx={{ display: "grid", gap: 2, marginTop: 2 }}
-        >
-          <TextField name="titre" onChange={handleChange} value={Newarticles.titre} label="Titre" variant="outlined" required fullWidth />
-          <TextField name="description" onChange={handleChange} value={Newarticles.description} label="Description" variant="outlined" required fullWidth />
-          
-          {/* Upload Image */}
-          <FormControl>
+    <Paper elevation={3} style={{ padding: "20px", marginBottom: "20px", margin: "20px auto" }}>
+      <Typography variant="h6" mb={5} gutterBottom>
+        Remplir les informations suivantes
+        <hr />
+      </Typography>
+
+      <Grid2 container rowSpacing={5} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
+        <Grid2 size={6}>
+          <TextField
+            label="Titre"
+            variant="outlined"
+            name="titre"
+            onChange={handleChange} 
+            value={Newarticles.titre}
+            required
+            fullWidth
+          />
+        </Grid2>
+        <Grid2 size={6}>
+          <TextField
+            label="Description"
+            variant="outlined"
+            name="description"
+            onChange={handleChange} 
+            value={Newarticles.description}
+            fullWidth
+          />
+        </Grid2>
+        <Grid2 size={6}>
+          <FormControl variant="outlined" fullWidth>
             <Button variant="outlined" component="label">
-              Importer une image
+              Couverture
               <input type="file" hidden accept="image/*" onChange={(e) => handleFileUpload(e, "couverture")} />
             </Button>
             {Newarticles.couverture?.file && (
@@ -427,11 +553,11 @@ export const AddEditArticle: React.FC = () => {
               </>
             )}
           </FormControl>
-          
-          {/*Upload PDF*/}
-          <FormControl>
+        </Grid2>
+        <Grid2 size={6}>
+          <FormControl variant="outlined" fullWidth>
             <Button variant="outlined" component="label">
-              Importer un PDF
+              Contenu
               <input type="file" hidden accept="application/pdf" onChange={(e) => handleFileUpload(e, "contenu")} />
             </Button>
             {Newarticles.contenu?.file && (
@@ -440,33 +566,52 @@ export const AddEditArticle: React.FC = () => {
               </>
             )}
           </FormControl>
-          
-          <FormControl fullWidth required>
-            <InputLabel>Catégorie</InputLabel>
-            <Select name="categorie" label="Catégorie" onChange={(e) => setNewArticles({ ...Newarticles, categorie: e.target.value })} value={Newarticles.categorie}>
+        </Grid2>
+        <Grid2 size={6}>
+          <FormControl variant="outlined" fullWidth required>
+            <InputLabel>Categorie</InputLabel>
+            <Select
+              name="Categorie"
+              onChange={(e) => setNewArticles({ ...Newarticles, categorie: e.target.value })} 
+              value={Newarticles.categorie}
+              label="Categorie"
+            >
               <MenuItem value="" disabled>Selectionner un categorie</MenuItem>
               {categories.map((categorie) => (
                 <MenuItem key={categorie.id} value={categorie.id}>{categorie.nom}</MenuItem>
-              ))}  
+              ))} 
             </Select>
           </FormControl>
-
-          <FormControl fullWidth required>
+        </Grid2>
+        <Grid2 size={6}>
+          <FormControl variant="outlined" fullWidth required>
             <InputLabel>Status</InputLabel>
-            <Select name="status" label="Status" onChange={(e) => setNewArticles({ ...Newarticles, status: e.target.value })} value={Newarticles.status}>  
+            <Select
+              name="status"
+              onChange={(e) => setNewArticles({ ...Newarticles, status: e.target.value })} 
+              value={Newarticles.status}
+              label="Status"
+            >
               <MenuItem value="" disabled>Selectionner un status</MenuItem>
               <MenuItem value="publié">Publié</MenuItem>
               <MenuItem value="brouillon">Brouillon</MenuItem>
               <MenuItem value="archivé">Archivé</MenuItem>
             </Select>
           </FormControl>
-        </Box>
-
-        <Box sx={{ textAlign: "right", marginTop: 2 }}>
-          <Button variant="contained" color="primary" onClick={handleOpenDialog}>Sauvegarder</Button>
-        </Box>
-      </CardContent>
-
+        </Grid2>
+        <Grid2 size={6}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            disabled={!desableButton()}
+            onClick={handleOpenDialog}
+          >
+            Créer
+          </Button>
+        </Grid2>
+      </Grid2>
+      
       {/* Dialog de confirmation */}
       <Dialog fullWidth open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Veuillez vérifier les informations</DialogTitle>
@@ -519,6 +664,6 @@ export const AddEditArticle: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Card>
+    </Paper>
   );
 };
