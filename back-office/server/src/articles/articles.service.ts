@@ -82,7 +82,7 @@ export class ArticlesService {
     file?: Express.Multer.File,
     pdf?: Express.Multer.File,
   ): Promise<Articles> {
-    const { auteur_id, categorie_id } = articleDto;
+    const { titre, description, status, auteur_id, categorie_id } = articleDto;
 
     const auteur = await this.userRepository.findOne({
       where: { id: auteur_id },
@@ -99,12 +99,16 @@ export class ArticlesService {
         `Categorie avec ID ${categorie_id} introuvable`,
       );
     }
-    const article = new Articles();
-    Object.assign(article, articleDto);
-    article.couverture = file ? `media/couverture/${file.filename}` : null;
-    article.contenu = pdf ? `media/livre/${pdf.filename}` : null;
-    article.auteur = auteur;
-    article.categorie = categorie;
+    const article = this.articleRepository.create({
+      titre,
+      description,
+      status: status || 'publié',
+      contenu: pdf ? `media/livre/${pdf.filename}` : null,
+      couverture: file ? `media/couverture/${file.filename}` : null,
+      auteur,
+      categorie,
+    });
+
     return await this.articleRepository.save(article);
   }
 

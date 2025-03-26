@@ -26,21 +26,39 @@ import { ArticleService } from "../../services/article.service";
 import { Delete, Edit } from "@mui/icons-material";
 
 interface Categorie {
+  id: number;
   nom: string;
   description: string;
 }
 
 interface DialogCategorieProps {
-  categorieData: Categorie;
+  categorieData: CategorieData;
 }
 
-interface Categorie {
+interface CategorieData {
   nom: string;
   description: string;
 }
 
+const DialogCategorie: React.FC<DialogCategorieProps> = ({ categorieData }) => {
+  return (
+    <Box>
+      <Typography mb={1} variant="body1">
+        <b>Nom:</b> {categorieData.nom}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Description:</b> {categorieData.description}
+      </Typography>
+    </Box>
+  );
+};
+
+
 export const ListCategorie: React.FC = () => {
   const [categories, setCategories] = useState<Categorie[]>([]);
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [selectedCategorie, setSelectedCategorie] = useState<Categorie | null>(null);
 
   const fetchCategories = async () => {
     await ArticleService.getAllCategories()
@@ -56,8 +74,40 @@ export const ListCategorie: React.FC = () => {
 
   useEffect(() => {
     fetchCategories();
-  }
-  , []);
+  }, []);
+
+  const handleEdit = (categorie: Categorie) => {
+    setSelectedCategorie(categorie);
+    setOpenEditModal(true);
+  };
+
+  const handleDelete = (categorie: Categorie) => {
+    setSelectedCategorie(categorie);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedCategorie) return;
+    try {
+      await ArticleService.updateCategorie(selectedCategorie.id, selectedCategorie);
+      setOpenEditModal(false);
+      fetchCategories();
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedCategorie) return;
+    try {
+      await ArticleService.deleteCategorie(selectedCategorie.id);
+      setOpenDeleteDialog(false);
+      fetchCategories();
+    } catch (error) {
+      console.warn(error);
+    }
+  };
+
   return (
     <Card sx={{  width: "100%", maxWidth: "1500px", margin: "10px auto"}}>
       <CardContent>
@@ -77,10 +127,10 @@ export const ListCategorie: React.FC = () => {
                   <TableCell>{categorie.nom}</TableCell>
                   <TableCell>{categorie.description}</TableCell>
                   <TableCell>
-                    <IconButton color="secondary">
+                    <IconButton color="secondary" onClick={() => handleEdit(categorie)}>
                       <Edit />
                     </IconButton>
-                    <IconButton color="error">
+                    <IconButton color="error" onClick={() => handleDelete(categorie)}>
                       <Delete />
                     </IconButton>
                   </TableCell>
@@ -90,25 +140,48 @@ export const ListCategorie: React.FC = () => {
           </Table>
         </TableContainer>
       </CardContent>
+      {/* Modal d'édition */}
+      <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
+        <DialogTitle>Modifier la Catégorie</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Nom"
+            value={selectedCategorie?.nom || ""}
+            onChange={(e) => setSelectedCategorie({ ...selectedCategorie!, nom: e.target.value })}
+            margin="dense"
+          />
+          <TextField
+            fullWidth
+            label="Description"
+            value={selectedCategorie?.description || ""}
+            onChange={(e) => setSelectedCategorie({ ...selectedCategorie!, description: e.target.value })}
+            margin="dense"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenEditModal(false)} color="secondary">Annuler</Button>
+          <Button onClick={handleSaveEdit} color="primary" variant="contained">Enregistrer</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialogue de suppression */}
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+        <DialogTitle>Confirmation</DialogTitle>
+        <DialogContent>
+          <Typography>Êtes-vous sûr de vouloir supprimer cette catégorie ?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)} color="secondary">Annuler</Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">Supprimer</Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   );
 };
 
-const DialogCategorie: React.FC<DialogCategorieProps> = ({ categorieData }) => {
-  return (
-    <Box>
-      <Typography mb={1} variant="body1">
-        <b>Nom:</b> {categorieData.nom}
-      </Typography>
-      <Typography mb={1} variant="body1">
-        <b>Description:</b> {categorieData.description}
-      </Typography>
-    </Box>
-  );
-};
-
 export const AddEditCategorie: React.FC = () => {
-  const [newCategorie, setNewCategorie] = useState<Categorie>({ nom: "", description: "" });
+  const [newCategorie, setNewCategorie] = useState<CategorieData>({ nom: "", description: "" });
   const [openDialog, setOpenDialog] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [successDialog, setSuccessDialog] = useState(false);
@@ -142,7 +215,7 @@ export const AddEditCategorie: React.FC = () => {
   return (
     <Card sx={{ width: "100%", maxWidth: "1500px", margin: "10px auto" }}>
       <Box sx={{ maxWidth: "600px", margin: "20px auto" }}>
-        <Typography variant="h5">Ajouter / Modifier une Catégorie</Typography>
+        <Typography variant="h5">Ajouter une Catégorie</Typography>
         <Box sx={{ maxWidth: "800px", margin: "20px auto", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 2 }}>
           <TextField onChange={handleChange} value={newCategorie.nom} name="nom" label="Nom" variant="outlined" required fullWidth />
           <TextField onChange={handleChange} value={newCategorie.description} name="description" label="Description" variant="outlined" required fullWidth />

@@ -36,9 +36,6 @@ export class CreateArticleDto {
   @IsEnum(['brouillon', 'publié', 'archivé'])
   @IsNotEmpty()
   status: string;
-
-  @IsNumber()
-  vue: number;
 }
 
 export class UpdateArticleDto extends PartialType(CreateArticleDto) {}

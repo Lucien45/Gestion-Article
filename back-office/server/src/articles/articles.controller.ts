@@ -9,8 +9,9 @@ import {
   UploadedFile,
   UseInterceptors,
   ParseIntPipe,
+  UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto, UpdateArticleDto } from './dto/article.dto';
 import { CreateCategorieDto, UpdateCategorieDto } from './dto/categorie.dto';
@@ -82,15 +83,39 @@ export class ArticlesController {
    **/
   @Post()
   @UseInterceptors(
-    FileInterceptor('couverture', ArticlesController.uploadConfig('articles')),
-    FileInterceptor('livre', ArticlesController.uploadConfig('livre')),
+    FilesInterceptor('files', 2, {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          if (file.mimetype.includes('image')) {
+            cb(null, './media/couverture');
+          } else if (file.mimetype.includes('pdf')) {
+            cb(null, './media/livre');
+          } else {
+            cb(new Error('Type de fichier non pris en charge'), '');
+          }
+        },
+        filename: (_, file, callback) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(
+            null,
+            `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`,
+          );
+        },
+      }),
+    }),
   )
   createArticle(
     @Body() dto: CreateArticleDto,
-    @UploadedFile() file?: Express.Multer.File,
-    @UploadedFile() pdf?: Express.Multer.File,
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
-    return this.articlesService.createArticle(dto, file, pdf);
+    const couverture = files.find((file) => file.mimetype.includes('image'));
+    const pdf = files.find((file) => file.mimetype.includes('pdf'));
+
+    console.log('Photo recu:', couverture);
+    console.log('pdf recu:', pdf);
+    console.log('Données recu:', dto);
+    return this.articlesService.createArticle(dto, couverture, pdf);
   }
 
   @Get()

@@ -5,6 +5,17 @@ interface Categorie {
     description: string;
 }
 
+interface ArticleData {
+    titre: string;
+    description: string;
+    contenu: File | null;
+    couverture: File | null;
+    auteur_id: number | string;
+    categorie_id: number | string;
+    status: string;
+}  
+  
+
 /**
  * service for categories
  */
@@ -44,10 +55,14 @@ const deleteArticle = (id: number | string) => {
 }
 
 const createArticle = (data: FormData): Promise<FormData> => {
-    return Axios.post("/articles", data);
+    return Axios.post("/articles", data,{
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        }
+    });
 }
 
-const updateArticle = (id: number | string, data: Partial<FormData>): Promise<FormData> => {
+const updateArticle = (id: number | string, data: Partial<ArticleData>): Promise<ArticleData> => {
     return Axios.put(`/articles/${id}`, data);
 }
 

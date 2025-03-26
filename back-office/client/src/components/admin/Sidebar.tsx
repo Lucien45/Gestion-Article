@@ -62,12 +62,12 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
 
       <List>
         {[
-          { text: "Dashboard", icon: <DashboardIcon />, path: "/admin", option: "dashboard" },
+          { text: "Tableau de bord", icon: <DashboardIcon />, path: "/admin", option: "dashboard" },
           { text: "Articles", icon: <ArticleIcon />, path: "/admin/article", option: "articles" },
-          { text: "Report", icon: <BarChartIcon />, path: "/admin/report", option: "report" },
+          { text: "Rapport", icon: <BarChartIcon />, path: "/admin/report", option: "report" },
           { text: "Institution", icon: <BusinessIcon />, path: "/admin/institution", option: "institution" },
           { text: "Profile", icon: <AccountCircleIcon />, path: "/admin/profile", option: "profile" },
-          { text: "Settings", icon: <SettingsIcon />, path: "/admin/settings", option: "settings" },
+          { text: "Paramètres", icon: <SettingsIcon />, path: "/admin/settings", option: "settings" },
         ].map(({ text, icon, path, option }) => (
           <ListItem key={option} disablePadding>
             <ListItemButton selected={activeOption === option} onClick={() => handleOptionClick(option, path)}>
@@ -86,7 +86,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
             <ListItemIcon sx={{ color: "#FFF" }}>
               <ExitToAppIcon />
             </ListItemIcon>
-            <ListItemText primary="Logout" />
+            <ListItemText primary="Déconnexion" />
           </ListItemButton>
         </ListItem>
       </List>

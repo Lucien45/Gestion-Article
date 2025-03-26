@@ -3,22 +3,22 @@ import {
   Entity,
   CreateDateColumn,
   ManyToOne,
-  PrimaryColumn,
   JoinColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Categories } from './categorie.entity';
 import { Users } from 'src/users/entities/user.entity';
 
 @Entity('article')
 export class Articles {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'varchar', nullable: false })
   titre: string;
 
   // Contenu de l'article en fichier pdf
-  @Column({ type: 'varchar', nullable: false })
+  @Column({ type: 'varchar', nullable: true })
   contenu: string | null;
 
   @Column({ type: 'varchar', nullable: false })
