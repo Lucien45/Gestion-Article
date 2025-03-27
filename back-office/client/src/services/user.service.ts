@@ -8,6 +8,11 @@ export interface LoginResponse {
     password: string;
 }
 
+interface UserStatus {
+    role: string;
+    is_active: boolean;
+}
+
 /**
  * service for users
  */
@@ -24,6 +29,15 @@ const getUserById = (id: number | string) => {
 }
 
 const updateUser = (id: number | string, data: FormData): Promise<FormData> => {
+    return Axios.patch(`/users/${id}`, data,{
+        headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+        }
+    });
+}
+
+const updateUserStatus = (id: number | string, data: UserStatus): Promise<UserStatus> => {
     return Axios.patch(`/users/${id}`, data,{
         headers: {
             Authorization: `Bearer ${token}`,
@@ -56,10 +70,9 @@ const SignIn = (data: LoginResponse): Promise<LoginResponse> => {
 }
 
 const SignOut = () => {
-    // localStorage.removeItem("token");
     Token.RemoveToken('authUser')
     window.location.href = '/';
 };
 export const UserService = {
-    getUser, SignUp, SignIn, SignOut, getAllUsers, getUserById, updateUser, deleteUser
+    getUser, SignUp, SignIn, SignOut, getAllUsers, getUserById, updateUser, deleteUser, updateUserStatus
 }

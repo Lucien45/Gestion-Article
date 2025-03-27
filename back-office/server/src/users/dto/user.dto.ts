@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { PartialType } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -36,6 +37,10 @@ export class CreateUserDto {
   @IsEnum(['admin', 'editeur', 'auteur'])
   @IsOptional()
   role?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  is_active?: boolean;
 }
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {}

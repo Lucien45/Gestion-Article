@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from 'react'
+import React, { ChangeEvent, Dispatch, FormEvent, SetStateAction, useEffect, useState } from 'react'
 import {
   TextField,
   Button,
@@ -31,10 +31,14 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions
+  DialogActions,
+  Snackbar,
+  FormGroup,
+  Switch,
+  Checkbox
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { Article, CalendarToday, DeleteForever, Email, ManageAccounts, Badge } from "@mui/icons-material";
+import { Article, CalendarToday, DeleteForever, Email, ManageAccounts, Badge, Edit } from "@mui/icons-material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 import { Token } from '../../utils/Token';
@@ -59,7 +63,6 @@ interface User {
 }
 
 interface UserData {
-  id: number;
   username: string;
   email: string;
   password: string;
@@ -77,12 +80,20 @@ interface Article {
   length: number;
 }
 
+interface UserStatus {
+  status: boolean;
+  role: string;
+}
+
 interface DialogUserProps {
   userData: UserData;
 }
 
 interface DialogUserUpdateProps {
   userData: Partial<User>;
+}
+interface DialogUserUpdateStatusProps {
+  userStatus: Partial<UserStatus>;
 }
 
 
@@ -129,10 +140,6 @@ const DialogUpdateUser: React.FC<DialogUserUpdateProps> = ({ userData }) => {
   return (
     <Grid2>
       <Typography mb={1} variant="body1">
-        <b>Role: </b>
-        {userData.role}
-      </Typography>
-      <Typography mb={1} variant="body1">
         <b>Nom: </b>
         {userData.nom}
       </Typography>
@@ -164,6 +171,16 @@ const DialogUpdateUser: React.FC<DialogUserUpdateProps> = ({ userData }) => {
   );
 };
 
+const DialogUpdateStatus: React.FC<DialogUserUpdateStatusProps> = ({ userStatus }) => {
+  return (
+    <Typography>
+      <b>Statut: </b> {userStatus.status ? "Actif" : "Inactif"}
+      <br />
+      <b>Rôles sélectionnés: </b>{" "}
+      {userStatus.role ? userStatus.role: "Aucun"}
+    </Typography>
+  );
+};
 export const UserAccount: React.FC = () => {
   const [dataUser, setDataUser] = useState<Partial<User> | null>(null);
   const userProfile = JSON.parse(Token.GetToken("user") as string);
@@ -269,6 +286,11 @@ export const UserList: React.FC = () => {
 
   const [researchMode, setResearchMode] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [openEditStatusModal, setOpenEditStatusModal] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openSuccess, setOpenSuccess] = useState(false);
+  const [selectedId, setSelectedId] = useState<number | string>(0);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -294,6 +316,33 @@ export const UserList: React.FC = () => {
   useEffect(() => {
     fetchUsers()
   }, []);
+
+  const handleEdit = (id: number | string) => {
+    setOpenEditModal(true);
+    setSelectedId(id);
+  };
+
+  const handleManage = (id: number | string) => {
+    setOpenEditStatusModal(true);
+    setSelectedId(id);
+  };
+
+  const handleDelete = (user: User) => {
+    setSelectedId(user.id);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedId) return;
+    try {
+      setOpenDeleteDialog(false);
+      setOpenSuccess(true);
+      fetchUsers();
+    } catch (error) {
+      console.warn(error);
+      setOpenError(true);
+    }
+  };
 
   return (
     <Paper elevation={3} style={{ padding: "20px", margin: "20px auto" }}>
@@ -389,7 +438,7 @@ export const UserList: React.FC = () => {
                   <StyledTableCell align="left">
                     <IconButton
                       aria-label="Détails sur l'utilisateur"
-                      // onClick={() => handleUpdateOpen(user)}
+                      // onClick={() => handleDetailOpen(user)}
                     >
                       <VisibilityIcon
                         titleAccess="Détails sur l'utilisateur"
@@ -398,17 +447,27 @@ export const UserList: React.FC = () => {
                       ></VisibilityIcon>
                     </IconButton>
                     <IconButton
-                      aria-label="Gérer le compte utilisateur"
-                      // onClick={() => handleManageOpen(user)}
+                      aria-label="Modifier l'information"
+                      onClick={() => handleEdit(user.id)}
+                    >
+                      <Edit
+                        titleAccess="Modifier l'information"
+                        fontSize="medium"
+                        color="secondary"
+                      ></Edit>
+                    </IconButton>
+                    <IconButton
+                      aria-label="Gérer de l'utilisateur"
+                      onClick={() => handleManage(user.id)}
                     >
                       <ManageAccounts
-                        titleAccess="Gérer le compte utilisateur"
+                        titleAccess="Gérer l'acces de l'utilisateur"
                         fontSize="medium"
                         color="primary"
                       ></ManageAccounts>
                     </IconButton>
                     <IconButton 
-                      // onClick={() => handleDeleteOpen(user)}
+                      onClick={() => handleDelete(user)}
                     >
                       <DeleteForever
                         titleAccess="Supprimer le compte utilisateur"
@@ -423,6 +482,46 @@ export const UserList: React.FC = () => {
           )}
         </Table>
       </TableContainer>
+
+      {/* Composant UpdateUser */}
+      <UpdateUser
+        open={openEditModal}
+        setOpen={setOpenEditModal}
+        id={selectedId}
+        refreshUser={fetchUsers}
+      />
+
+      {/* Composant UpdateStatus */}
+      <UpdateStatus
+        open={openEditStatusModal}
+        setOpen={setOpenEditStatusModal}
+        id={selectedId}
+        refreshUser={fetchUsers}
+      />
+
+      {/* Dialogue de suppression */}
+      <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
+        <DialogTitle>Confirmation</DialogTitle>
+        <DialogContent>
+          <Typography>Êtes-vous sûr de vouloir supprimer cette utilisateur ?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDeleteDialog(false)} color="secondary">Annuler</Button>
+          <Button onClick={handleConfirmDelete} color="error" variant="contained">Supprimer</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbars */}
+      <Snackbar open={openSuccess} autoHideDuration={3000} onClose={() => setOpenSuccess(false)}>
+        <Alert onClose={() => setOpenSuccess(false)} severity="success">
+          Action réalisée avec succès !
+        </Alert>
+      </Snackbar>
+      <Snackbar open={openError} autoHideDuration={3000} onClose={() => setOpenError(false)}>
+        <Alert onClose={() => setOpenError(false)} severity="error">
+          Une erreur est survenue !
+        </Alert>
+      </Snackbar>
     </Paper>
   )
 }
@@ -544,6 +643,14 @@ export const AddUser: React.FC = () => {
     }    
     if (image) {
      formData.append('profile', image);
+    }
+
+    if (NewUserData.date_naissance) {
+      formData.append("date_naissance", NewUserData.date_naissance);
+    }
+
+    if (NewUserData.civilite) {
+      formData.append("civilite", NewUserData.civilite);
     }
   
     for (const [key, value] of formData.entries()) {
@@ -790,7 +897,6 @@ export const AddUser: React.FC = () => {
         </IconButton>
         <DialogContent dividers>
           <DialogContentText>
-            {/* L'Utilisateur <b>{NewUserData.username}</b> a été ajoutée avec succès. */}
             <Grid2>
               <Typography variant="body1">{processMessage}</Typography>
             </Grid2>
@@ -819,10 +925,13 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
   
   const [dataUserUpdate, setDataUserUpdate] = useState<Partial<User>>({ 
     username: '', email: '', password: '', confirmPassword: '', profile: '', 
-    role: '', nom: '', prenom: '', civilite: '', date_naissance: '', contact:'',
+    nom: '', prenom: '', civilite: '', date_naissance: '', contact:'',
   });
   const [initialData, setInitialData] = useState<Partial<User> | null>(null);
   const [image, setImage] = useState<File | null>(null);
+
+  const [processMessage, setProcessMessage] = useState("");
+  const [userUpdateSuccess, setUserUpdateSuccess] = useState<boolean>(false);
 
   const loadProfile = (e: ChangeEvent<HTMLInputElement>) => {
     const photo = e.target.files?.[0];
@@ -835,25 +944,23 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
 
   const fetchUser = async() => {
     try {
-        const res = await UserService.getUserById(Number(id));
-        console.log('data update: ', res.data);
-        const data = {
-          username: res.data.username,
-          email: res.data.email,
-          password: res.data.password, 
-          confirme_mdp: "",
-          profile: res.data.profile ? `${apiUrl}/${res.data.profile}` : '',
-          role: res.data.role,
-          nom: res.data.nom,
-          prenom: res.data.prenom,
-          civilite: res.data.civilite,
-          date_naissance: res.data.date_naissance,
-          contact: res.data.contact,
-        };
-        setDataUserUpdate(data);
-        setInitialData(data);
+      const res = await UserService.getUserById(Number(id));
+      const data = {
+        username: res.data.username,
+        email: res.data.email,
+        password: res.data.password, 
+        confirme_mdp: "",
+        profile: res.data.profile ? `${apiUrl}/${res.data.profile}` : '',
+        nom: res.data.nom,
+        prenom: res.data.prenom,
+        civilite: res.data.civilite,
+        date_naissance: res.data.date_naissance,
+        contact: res.data.contact,
+      };
+      setDataUserUpdate(data);
+      setInitialData(data);
     } catch (error) {
-        console.log(`Échec de récupération des détails du club ${error}`);
+      console.log(`Échec de récupération des détails du club ${error}`);
     }
   }
 
@@ -867,40 +974,76 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
     setOpen(true);
   };
 
-  const handleSaveEdit = async () => {
-    await refreshUser();
-    setOpenDialog(false);
-    setSuccessDialog(true);
+  const handleSaveEdit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const formData = new FormData();
+    if (dataUserUpdate.username) {
+      formData.append("username", dataUserUpdate.username);
+    }
+    if (dataUserUpdate.email) {
+      formData.append("email", dataUserUpdate.email);
+    }
+    if (dataUserUpdate.password) {
+      formData.append("password", dataUserUpdate.password);
+    }
+    if (dataUserUpdate.nom) {
+      formData.append("nom", dataUserUpdate.nom);
+    }
+    if (dataUserUpdate.prenom) {
+      formData.append("prenom", dataUserUpdate.prenom);
+    }
+    if (dataUserUpdate.contact) {
+      formData.append("contact", dataUserUpdate.contact);
+    }    
+    if (image) {
+     formData.append('profile', image);
+    }
+
+    if (dataUserUpdate.date_naissance) {
+      formData.append("date_naissance", dataUserUpdate.date_naissance);
+    }
+
+    if (dataUserUpdate.civilite) {
+      formData.append("civilite", dataUserUpdate.civilite);
+    }
+  
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }    
+
+    try {
+      const response = await UserService.updateUser(Number(id), formData);
+      console.log("Réponse serveur :", response);
+      setProcessMessage(`L'utilisateur ${dataUserUpdate.username} a été ajoutée avec succès ✅`);
+      await refreshUser();
+      setOpenDialog(false);
+      setSuccessDialog(true);
+      setUserUpdateSuccess(true)
+    } catch (error: any) {
+      setUserUpdateSuccess(false)
+      setProcessMessage(`Erreur lors de mise a jour de L'utilisateur ${dataUserUpdate.username} ⚠️`);
+      console.warn("Erreur lors de mise a jour :", error.response?.data || error.message);
+    }finally {
+      setOpenDialog(false);
+    }
+    
   };
 
   useEffect(() => {
     fetchUser();
-  }, []);
+  }, [id]);
 
   return (
     <>
       {/* Modal d'édition */}
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog fullWidth open={open} onClose={() => setOpen(false)}>
         <DialogTitle>Modifier les informations</DialogTitle>
+
+        <Divider sx={{ my: 2 }} />
+
         <DialogContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <FormControl variant="outlined" fullWidth>
-                <InputLabel>Rôle</InputLabel>
-                <Select
-                  name="role"
-                  value={dataUserUpdate.role}
-                  onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, role: e.target.value })}
-                  label="Rôle"
-                >
-                  <MenuItem value="" disabled>Selectionnez un rôle</MenuItem>
-                  <MenuItem value="admin">Admin</MenuItem>
-                  <MenuItem value="editeur">Éditeur</MenuItem>
-                  <MenuItem value="auteur">Auteur</MenuItem>
-                  <MenuItem value="autre">Autre</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+          <Grid container spacing={5}>
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Email"
@@ -953,6 +1096,11 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
                 Photo de profil
                 <input type="file" hidden accept="image/*" onChange={loadProfile}/>
               </Button>
+              {dataUserUpdate.profile && (
+                <>
+                  <img src={dataUserUpdate.profile} alt="Aperçu" style={{ maxWidth: "200px", marginTop: "8px" }} />
+                </>
+              )}
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -961,13 +1109,6 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
                 value={dataUserUpdate.username || ""}
                 onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, username: e.target.value })}
               />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              {dataUserUpdate.profile && (
-                <>
-                  <img src={dataUserUpdate.profile} alt="Aperçu" style={{ maxWidth: "200px", marginTop: "8px" }} />
-                </>
-                )}
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
@@ -999,6 +1140,9 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
             </Grid>
           </Grid>
         </DialogContent>
+
+        <Divider sx={{ my: 2 }} />
+
         <DialogActions>
           <Button onClick={() => setOpen(false)} color="secondary">
             Annuler
@@ -1023,10 +1167,23 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
 
       {/* Dialog de succès */}
       <Dialog fullWidth open={successDialog} onClose={() => setSuccessDialog(false)}>
-        <DialogTitle>Succès ✅</DialogTitle>
+        <DialogTitle>
+        {userUpdateSuccess && (
+          <b>Succès ✅</b>
+        )}
+        {!userUpdateSuccess && (
+          <b>Erreur ⚠️</b>
+        )}
+          
+        </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            L'utilisateur <b>{dataUserUpdate.nom}</b> a été mis à jour avec succès.
+            {userUpdateSuccess && (
+              <b>{processMessage}</b>
+            )}
+            {!userUpdateSuccess && (
+              <b>{processMessage}</b>
+            )}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -1037,3 +1194,176 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
   );
 };
 
+export const UpdateStatus: React.FC<UpdateUserProps> = ({ open, setOpen, id, refreshUser }) => {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [successDialog, setSuccessDialog] = useState(false);
+  const [dataUserUpdate, setDataUserUpdate] = useState({status: false, role: '',});
+  const [processMessage, setProcessMessage] = useState("");
+  const [userUpdateSuccess, setUserUpdateSuccess] = useState<boolean>(false);
+  const roleOptions = [
+    {
+      id: 1,
+      nom: 'admin'
+    },
+    {
+      id: 2,
+      nom: 'editeur'
+    },
+    {
+      id: 3,
+      nom: 'auteur'
+    },
+    {
+      id: 4,
+      nom: 'autre'
+    },
+  ]
+
+  const fetchUser = async() => {
+    try {
+      const res = await UserService.getUserById(Number(id));
+      const data = {
+        status: res.data.is_active,
+        role: res.data.role,
+      };
+      setDataUserUpdate(data);
+    } catch (error) {
+      console.log(`Échec de récupération des détails du club ${error}`);
+    }
+  }
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+    setOpen(false);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setOpen(true);
+  };
+
+  const handleSaveEdit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const data = {
+      role: dataUserUpdate.role,
+      is_active: dataUserUpdate.status
+    }
+
+    try {
+      const response = await UserService.updateUserStatus(Number(id), data)
+      setProcessMessage(`L'utilisateur a été ajoutée avec succès ✅`);
+      await refreshUser();
+      setOpenDialog(false);
+      setSuccessDialog(true);
+      setUserUpdateSuccess(true)
+    } catch (error: any) {
+      setUserUpdateSuccess(false)
+      setProcessMessage(`Erreur lors de mise a jour de L'utilisateur ⚠️`);
+      console.warn("Erreur lors de mise a jour :", error.response?.data || error.message);
+    }finally {
+      setOpenDialog(false);
+    }
+    
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, [id]);
+
+  return (
+    <>
+      {/* Manage user Dialog */}
+      <Dialog fullWidth open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>
+          <Typography variant="h6" gutterBottom>
+            Gestion des accès de l'utilsateur
+          </Typography>
+        </DialogTitle>
+
+        <DialogContent dividers>
+          <DialogContentText>
+              <Grid2
+                container
+                rowSpacing={5}
+                columnSpacing={{ xs: 1, sm: 2, md: 3 }}
+              >
+                <Grid2 size={12}>
+                  Statut du compte
+                  <FormGroup >
+                    <FormControlLabel control=
+                    {
+                      <Switch 
+                        checked={dataUserUpdate.status} 
+                        onChange={(e) => setDataUserUpdate({...dataUserUpdate, status: e.target.checked})} 
+                      />
+                    } label="Activer" />
+                  </FormGroup>
+                </Grid2>
+                <Grid2 size={12}>
+                  <FormGroup>
+                    {roleOptions.map(roles =>(
+                        <FormControlLabel key={roles.id} control={<Checkbox checked={dataUserUpdate.role.includes(roles.nom)}
+                          onChange={(e) => setDataUserUpdate({...dataUserUpdate, role: roles.nom}) }
+                        />} label={roles.nom} />
+                    ))}
+                  </FormGroup>
+                </Grid2>
+              </Grid2>
+          </DialogContentText>
+        </DialogContent>
+
+        <DialogActions>
+          <Button title="Quitter" 
+            onClick={() => setOpen(false)}
+          >
+            Quitter
+          </Button>
+          <Button variant="contained" title="Enregistrer" 
+            onClick={handleOpenDialog}
+          >
+            Vérifier
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de confirmation */}
+      <Dialog fullWidth open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Veuillez vérifier les informations</DialogTitle>
+        <DialogContent dividers>
+          <DialogUpdateStatus userStatus={dataUserUpdate} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">Annuler</Button>
+          <Button onClick={handleSaveEdit} color="primary" variant="contained">Confirmer</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de succès */}
+      <Dialog fullWidth open={successDialog} onClose={() => setSuccessDialog(false)}>
+        <DialogTitle>
+        {userUpdateSuccess && (
+          <b>Succès ✅</b>
+        )}
+        {!userUpdateSuccess && (
+          <b>Erreur ⚠️</b>
+        )}
+          
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {userUpdateSuccess && (
+              <b>{processMessage}</b>
+            )}
+            {!userUpdateSuccess && (
+              <b>{processMessage}</b>
+            )}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSuccessDialog(false)} color="primary">OK</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  )
+}
