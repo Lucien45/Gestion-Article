@@ -1,18 +1,27 @@
 import { useState } from 'react'
 import { AddUser, UserAccount, UserList } from '../../components/admin/ProfileComp';
 import { Box, Tabs, Tab, Typography, Paper } from "@mui/material";
+import { Token } from '../../utils/Token';
 
 const Profile = () => {
   const [selectedTab, setSelectedTab] = useState(0);
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
   
-  const renderContent = () => {
-    switch (selectedTab) {
-      case 0: return <UserAccount />;
-      case 1: return <UserList />;
-      case 2: return <AddUser />;
-      default: return <Typography variant="h6">Bienvenue sur la gestion d'article</Typography>;
+  const getTabs = () => {
+    const tabs = [{ label: "Mon Compte", component: <UserAccount /> }];
+
+    if (userProfile?.role === 'admin') {
+      tabs.push(
+        { label: "Liste Utilisateurs", component: <UserList /> },
+        { label: "Créer un utilisateur", component: <AddUser /> }
+      );
     }
+
+    return tabs;
   };
+
+  const tabs = getTabs();
+
   return (
     <Box
       sx={{
@@ -34,12 +43,14 @@ const Profile = () => {
           onChange={(_, newValue) => setSelectedTab(newValue)} 
           variant="fullWidth"
         >
-          <Tab label="Mon Compte" />
-          <Tab label="Liste Utilisateurs" />
-          <Tab label="Créer un utilisateur" />
+          {tabs.map((tab, index) => (
+            <Tab key={index} label={tab.label} />
+          ))}
         </Tabs>
       </Paper>
-      <Box sx={{ width: "100%"}}>{renderContent()}</Box>
+      <Box sx={{ width: "100%"}}>
+        {tabs[selectedTab]?.component || <Typography variant="h6">Bienvenue sur la gestion d'article</Typography>}
+      </Box>
     </Box>
   )
 }

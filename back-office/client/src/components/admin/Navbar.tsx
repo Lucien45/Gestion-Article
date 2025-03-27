@@ -13,7 +13,6 @@ import {
 } from "@mui/material";
 import { FaCaretDown } from "react-icons/fa";
 import { Search, Menu as MenuIcon, Mail } from "@mui/icons-material";
-import profileDefault from "../../../public/profile-removebg-preview.png";
 import { Token } from "../../utils/Token";
 import { apiUrl } from "../../services/api";
 import { styled } from "@mui/system";
@@ -132,7 +131,7 @@ const Navbar = ({ toggleSidebar, isOpen }: NavbarProps) => {
               {dataUser?.username || "Utilisateur"}
             </Typography>
             <Avatar
-              src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : profileDefault}
+              src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : ''}
               alt={dataUser?.username || "profileDefault"}
               sx={{ width: 40, height: 40, border: "2px solid #ddd" }}
             />

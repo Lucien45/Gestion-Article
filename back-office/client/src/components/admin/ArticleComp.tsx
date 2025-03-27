@@ -115,12 +115,20 @@ export const ListArticle: React.FC = () => {
 
   const [researchMode, setResearchMode] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const userProfile = JSON.parse(Token.GetToken("user") as string);
 
   const fetchArticles = async () => {
     setLoading(true);
     try {
       const response = await ArticleService.getAllArticles();
-      setArticles(response.data);
+      console.log('liste article: ', response.data)
+      if (userProfile.role === 'admin') {
+        setArticles(response.data);
+      } else {
+        const Article_user = response.data.filter((article: Article) => article.auteur?.id === userProfile.id)
+        console.log('liste article user: ', Article_user)
+        setArticles(Article_user? Article_user : []);
+      }
     } catch (error) {
       console.warn(error);
       setOpenError(true);
@@ -659,7 +667,7 @@ export const AddEditArticle: React.FC = () => {
       {/* Dialog de succès */}
       <Dialog fullWidth open={successDialog} onClose={() => setSuccessDialog(false)}>
         <DialogTitle>
-          <b>Catégorie enregistrée avec succès ✅</b>
+          <b>Article enregistrée avec succès ✅</b>
         </DialogTitle>
         <IconButton
           aria-label="close"

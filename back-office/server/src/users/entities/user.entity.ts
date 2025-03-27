@@ -31,6 +31,15 @@ export class Users {
   prenom: string;
 
   @Column({ type: 'varchar', nullable: true })
+  civilite: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  telephone: string;
+
+  @Column({ type: 'date', nullable: true, default: null })
+  date_naissance: Date;
+
+  @Column({ type: 'varchar', nullable: true })
   profile?: string | null;
 
   @Column({

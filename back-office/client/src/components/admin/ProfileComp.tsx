@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { ChangeEvent, useEffect, useState } from 'react'
 import {
   TextField,
   Button,
@@ -23,8 +25,15 @@ import {
   Box,
   Divider,
   Grid,
-  CircularProgress
+  CircularProgress,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { Article, CalendarToday, DeleteForever, Email, ManageAccounts, Badge } from "@mui/icons-material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
@@ -44,9 +53,66 @@ interface User {
   articles: Article;
 }
 
+interface UserData {
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  preview: string;
+  role: string;
+  nom: string;
+  prenom?: string;
+  civilite: string;
+  date_naissance: string;
+  contact?: string
+}
+
 interface Article {
   length: number;
 }
+
+interface DialogUserProps {
+  userData: UserData;
+}
+
+const DialogAddUser: React.FC<DialogUserProps> = ({ userData }) => {
+  return (
+    <Grid2>
+      <Typography mb={1} variant="body1">
+        <b>Role: </b>
+        {userData.role}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Nom: </b>
+        {userData.nom}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Prénom: </b>
+        {userData.prenom}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Email: </b>
+        {userData.email}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Sexe: </b>
+        {userData.civilite}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Numéro de téléphone: </b>
+        {userData.contact}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Date de naissance: </b>
+        {userData.date_naissance}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Mot de passe: </b>
+        {userData.password}
+      </Typography>
+    </Grid2>
+  );
+};
 
 export const UserAccount: React.FC = () => {
   const [dataUser, setDataUser] = useState<User | null>(null);
@@ -294,6 +360,149 @@ export const UserList: React.FC = () => {
 }
 
 export const AddUser: React.FC = () => {
+  const [NewUserData, setNewUserData] = useState({ 
+    username: '', email: '', password: '', confirmPassword: '', preview: '', 
+    role: '', nom: '', prenom: '', civilite: '', date_naissance: '', contact:'',
+  });
+
+  const [error, setError] = useState<boolean>(false);
+  const [emailError, setEmailError] = useState<boolean>(false);
+  const [image, setImage] = useState<File | null>(null);
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [successDialog, setSuccessDialog] = useState(false);
+  const [userCreationSuccess, setUserCreationSuccess] = useState<boolean>(false);
+  const [processMessage, setProcessMessage] = useState("");
+
+  
+  const loadProfile = (e: ChangeEvent<HTMLInputElement>) => {
+    const photo = e.target.files?.[0];
+    if (photo) {
+      setImage(photo);
+      setNewUserData({ ...NewUserData, preview: URL.createObjectURL(photo) });
+      console.log(photo);
+    }
+  };
+
+  const handleChange = (e: { target: { name: string; value: string } }) => {
+    if (e.target.name === "nom") {
+      const value = e.target.value;
+      if (/^[A-Za-z' ]*$/.test(value)) {
+        setNewUserData({ ...NewUserData, nom: value});
+      }
+    }
+    if (e.target.name === "prenom") {
+      const value = e.target.value;
+      if (/^[A-Za-z' ]*$/.test(value)) {
+        setNewUserData({ ...NewUserData, prenom: value});
+      }
+    }
+    if (e.target.name === "civilite") {
+      setNewUserData({ ...NewUserData, prenom: e.target.value});
+    }
+    if (e.target.name === "email") {
+      // Email validation regex pattern
+      const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+      const value = e.target.value;
+      setNewUserData({ ...NewUserData, email: value});
+      if (!emailPattern.test(value)) {
+        setEmailError(true);
+      } else {
+        setEmailError(false);
+      }
+    }
+    if (e.target.name === "password") {
+      setNewUserData({ ...NewUserData, password: e.target.value});
+    }
+    if (e.target.name === "username") {
+      setNewUserData({ ...NewUserData, username: e.target.value});
+    }
+    if (e.target.name === "date_naissance") {
+      setNewUserData({ ...NewUserData, date_naissance: e.target.value});
+    }
+    if (e.target.name === "contact") {
+      const numericValue = e.target.value;
+      setNewUserData({ ...NewUserData, contact: numericValue})
+    }
+  };
+
+  function desableButton() {
+    return (
+      NewUserData.username &&
+      NewUserData.email &&
+      NewUserData.password &&
+      NewUserData.confirmPassword &&
+      NewUserData.role &&
+      NewUserData.nom &&
+      NewUserData.date_naissance &&
+      NewUserData.civilite 
+    );
+  }
+
+  const handleConfirmPasswordChange = (e: { target: { value: string } }) => {
+    const confirmPassword = e.target.value;
+    setNewUserData((prevData) => ({ ...prevData, confirmPassword }));
+  
+    if (NewUserData.password !== confirmPassword) {
+      setError(true);
+    } else {
+      setError(false);
+    }
+  };
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+  };
+
+  const handleConfirmSubmit = async () => {
+    setProcessing(true);
+    const formData = new FormData();
+    formData.append("username", NewUserData.username);
+    formData.append("email", NewUserData.email);
+    formData.append("password", NewUserData.password);
+    formData.append("role", NewUserData.role);
+    formData.append("nom", NewUserData.nom);
+
+    if (NewUserData.prenom) {
+      formData.append("prenom", NewUserData.prenom);
+    }
+    if (NewUserData.contact) {
+      formData.append("contact", NewUserData.contact);
+    }    
+    if (image) {
+     formData.append('profile', image);
+    }
+  
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }    
+  
+    try {
+      const response = await UserService.SignUp(formData);
+      console.log("Réponse serveur :", response);
+      setProcessMessage(`L'utilisateur ${NewUserData.username} a été ajoutée avec succès.`);
+      setNewUserData({ 
+        username: '', email: '', password: '', confirmPassword: '', preview: '', 
+        role: '', nom: '', prenom: '', civilite: '', date_naissance: '', contact:''});
+      setSuccessDialog(true);
+      setUserCreationSuccess(true)
+    } catch (error: any) {
+      setUserCreationSuccess(false)
+      console.warn("Erreur lors de l'ajout :", error.response?.data || error.message);
+      setNewUserData({ 
+        username: '', email: '', password: '', confirmPassword: '', preview: '', 
+        role: '', nom: '', prenom: '', civilite: '', date_naissance: '', contact:''});
+    } finally {
+      setProcessing(false);
+      setOpenDialog(false);
+    }
+  }
+  
   return (
     <Paper elevation={3} style={{ padding: "20px", marginBottom: "20px", margin: "20px auto" }}>
       <Typography variant="h6" mb={5} gutterBottom>
@@ -302,40 +511,45 @@ export const AddUser: React.FC = () => {
       </Typography>
       <Grid2 container rowSpacing={5} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
         <Grid2 size={6}>
-          <TextField
-            label="Matricule"
-            variant="outlined"
-            name="userMatricule"
-            // value={userMatricule}
-            // onChange={handleChange}
-            required
-            fullWidth
-            // error=''
-            // helperText='{imError ? "Vous devez six (06) chiffres" : ""}'
-          />
+        <FormControl variant="outlined" fullWidth required>
+            <InputLabel>role</InputLabel>
+            <Select
+              name="role"
+              value={NewUserData.role}
+              onChange={(e) => setNewUserData({ ...NewUserData, role: e.target.value })} 
+              label="auteur"
+            >
+              <MenuItem value="" disabled>Selectionnez un role</MenuItem>
+              <MenuItem value="admin">admin</MenuItem>
+              <MenuItem value="editeur">editeur</MenuItem>
+              <MenuItem value="auteur">auteur</MenuItem>
+              <MenuItem value="autre">autre</MenuItem>
+            </Select>
+          </FormControl>
         </Grid2>
         <Grid2 size={6}>
           <TextField
             label="Email"
             variant="outlined"
-            name="userEmail"
-            // value={userEmail}
-            // onChange={handleChange}
+            name="email"
+            value={NewUserData.email}
+            onChange={handleChange}
             fullWidth
             inputMode="email"
-            // error={emailError}
-            // helperText={
-            //   emailError ? "L'adresse email n'a pas un format valide" : ""
-            // }
+            error={emailError}
+            helperText={
+              emailError ? "L'adresse email n'a pas un format valide" : ""
+            }
+            required
           />
         </Grid2>
         <Grid2 size={6}>
           <TextField
             label="Nom"
             variant="outlined"
-            name="userName"
-            // value={userName}
-            // onChange={handleChange}
+            name="nom"
+            value={NewUserData.nom}
+            onChange={handleChange}
             required
             fullWidth
           />
@@ -344,9 +558,9 @@ export const AddUser: React.FC = () => {
           <TextField
             label="Prénom"
             variant="outlined"
-            name="userFirstName"
-            // value={userFirstName}
-            // onChange={handleChange}
+            name="prenom"
+            value={NewUserData.prenom}
+            onChange={handleChange}
             fullWidth
           />
         </Grid2>
@@ -354,11 +568,12 @@ export const AddUser: React.FC = () => {
           <FormControl variant="outlined" fullWidth required>
             <InputLabel>Sexe</InputLabel>
             <Select
-              name="userSex"
-              // value={userSex}
-              // onChange={handleChange}
+              name="civilite"
+              value={NewUserData.civilite}
+              onChange={(e) => setNewUserData({ ...NewUserData, civilite: e.target.value })} 
               label="Sexe"
             >
+              <MenuItem value="" disabled>Selectionnez votre civilite</MenuItem>
               <MenuItem value="masculin">Masculin</MenuItem>
               <MenuItem value="féminin">Féminin</MenuItem>
             </Select>
@@ -368,44 +583,46 @@ export const AddUser: React.FC = () => {
           <TextField
             label="Numéro de téléphone"
             variant="outlined"
-            name="userPhoneNumber"
-            // value={userPhoneNumber}
-            // onChange={handleChange}
+            name="contact"
+            value={NewUserData.contact}
+            onChange={handleChange}
             fullWidth
-            inputMode="numeric"
-            // error={phoneNumberError}
-            // helperText={
-            //   phoneNumberError
-            //     ? "Le numéro de téléphone doit avoir une longueur 10"
-            //     : ""
-            // }
           />
         </Grid2>
         <Grid2 size={6}>
           <FormControl variant="outlined" fullWidth required>
-            <InputLabel>Profile</InputLabel>
-            <Select
-              name="userProfileId"
-              // value={userProfileId}
-              // onChange={handleChange}
-              label="Profile"
-            >
-              {/* {profileOptions.map((option) => (
-                <MenuItem value={option.id}>
-                  {format_split(option.name)}
-                </MenuItem>
-              ))} */}
-            </Select>
+            <Button variant="outlined" component="label">
+              Photo de profile
+              <input type="file" hidden accept="image/*" onChange={loadProfile} />
+            </Button>
           </FormControl>
+        </Grid2>
+        <Grid2 size={6}>
+          <TextField
+            label="username"
+            variant="outlined"
+            name="username"
+            value={NewUserData.username}
+            onChange={handleChange}
+            fullWidth
+            required
+          />
+        </Grid2>
+        <Grid2 size={6}>
+          {NewUserData.preview && (
+              <>
+                <img src={NewUserData.preview} alt="Aperçu" style={{ maxWidth: "200px", marginTop: "8px" }} />
+              </>
+            )}
         </Grid2>
         <Grid2 size={6}>
           <TextField
             label="Date de naissance"
             variant="outlined"
             type="date"
-            name="userBirthDate"
-            // value={userBirthDate}
-            // onChange={handleChange}
+            name="date_naissance"
+            value={NewUserData.date_naissance}
+            onChange={handleChange}
             InputLabelProps={{ shrink: true }}
             fullWidth
             required
@@ -416,9 +633,9 @@ export const AddUser: React.FC = () => {
             label="Mot de passe"
             variant="outlined"
             type="password"
-            name="userPassword"
-            // value={userPassword}
-            // onChange={handleChange}
+            name="password"
+            value={NewUserData.password}
+            onChange={handleChange}
             required
             fullWidth
           />
@@ -428,34 +645,95 @@ export const AddUser: React.FC = () => {
             label="Confirmation du mot de passe"
             variant="outlined"
             type="password"
-            name="userConfirmPassword"
-            // value={userConfirmPassword}
-            // onChange={handleConfirmPasswordChange}
+            name="confirmPassword"
+            value={NewUserData.confirmPassword}
+            onChange={handleConfirmPasswordChange}
             required
             fullWidth
           />
         </Grid2>
 
-        {/* {error && (
+        {error && (
           <Grid2 size={12}>
             <Alert severity="error">
               Les deux mots de passe ne sont pas identique
             </Alert>
           </Grid2>
-        )} */}
+        )}
 
         <Grid2 size={6}>
           <Button
             type="submit"
             variant="contained"
             color="primary"
-            // disabled={!desableButton()}
-            // onClick={() => setShowDialogue(true)}
+            disabled={!desableButton()}
+            onClick={handleOpenDialog}
           >
             Créer
           </Button>
         </Grid2>
       </Grid2>
+
+      {/* Dialog de confirmation */}
+      <Dialog fullWidth open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Veuillez vérifier les informations</DialogTitle>
+        <DialogContent dividers>
+          <DialogContentText>
+            {processing ? (
+              <Box display="flex" alignItems="center" justifyContent="center" height="100%">
+                <CircularProgress />
+              </Box>
+            ) : (
+              <DialogAddUser userData={NewUserData} />
+            )}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button disabled={processing} onClick={handleCloseDialog}>
+            Annuler
+          </Button>
+          <Button onClick={handleConfirmSubmit} disabled={processing} color="primary" variant="contained">
+            Confirmer
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de succès */}
+      <Dialog fullWidth open={successDialog} onClose={() => setSuccessDialog(false)}>
+        <DialogTitle>
+          {userCreationSuccess && (
+            <b>L'utilisateur a été créé avec succès ✅</b>
+          )}
+          {!userCreationSuccess && (
+            <b>Le systène n'a pas pu créer l'utilisateur ⚠️</b>
+          )}
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={() => setSuccessDialog(false)}
+          sx={(theme) => ({
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: theme.palette.grey[500],
+          })}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent dividers>
+          <DialogContentText>
+            {/* L'Utilisateur <b>{NewUserData.username}</b> a été ajoutée avec succès. */}
+            <Grid2>
+              <Typography variant="body1">{processMessage}</Typography>
+            </Grid2>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSuccessDialog(false)} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   )
 }
