@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { ChangeEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from 'react'
 import {
   TextField,
   Button,
@@ -42,18 +42,24 @@ import { UserService } from '../../services/user.service';
 import { apiUrl } from '../../services/api';
 
 interface User {
-  id: number;
-  email: string;
-  nom: string;
-  prenom: string;
+  id: number | string;
   username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
   profile?: string;
   role: string;
+  nom: string;
+  prenom?: string;
   lastLogin: string;
+  civilite: string;
+  date_naissance: string;
+  contact?: string
   articles: Article;
 }
 
 interface UserData {
+  id: number;
   username: string;
   email: string;
   password: string;
@@ -74,6 +80,11 @@ interface Article {
 interface DialogUserProps {
   userData: UserData;
 }
+
+interface DialogUserUpdateProps {
+  userData: Partial<User>;
+}
+
 
 const DialogAddUser: React.FC<DialogUserProps> = ({ userData }) => {
   return (
@@ -114,11 +125,51 @@ const DialogAddUser: React.FC<DialogUserProps> = ({ userData }) => {
   );
 };
 
-export const UserAccount: React.FC = () => {
-  const [dataUser, setDataUser] = useState<User | null>(null);
-  const userProfile = JSON.parse(Token.GetToken("user") as string);
+const DialogUpdateUser: React.FC<DialogUserUpdateProps> = ({ userData }) => {
+  return (
+    <Grid2>
+      <Typography mb={1} variant="body1">
+        <b>Role: </b>
+        {userData.role}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Nom: </b>
+        {userData.nom}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Prénom: </b>
+        {userData.prenom}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Email: </b>
+        {userData.email}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Sexe: </b>
+        {userData.civilite}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Numéro de téléphone: </b>
+        {userData.contact}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Date de naissance: </b>
+        {userData.date_naissance}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Mot de passe: </b>
+        {userData.password}
+      </Typography>
+    </Grid2>
+  );
+};
 
-  useEffect(() => {
+export const UserAccount: React.FC = () => {
+  const [dataUser, setDataUser] = useState<Partial<User> | null>(null);
+  const userProfile = JSON.parse(Token.GetToken("user") as string);
+  const [openEditModal, setOpenEditModal] = useState(false);
+
+  const fetchUser = async () => {
     if (userProfile) {
       UserService.getUserById(userProfile.id)
       .then((res) => {
@@ -128,7 +179,15 @@ export const UserAccount: React.FC = () => {
         console.log(err)
       });
     }
+  }
+
+  useEffect(() => {
+    fetchUser();
   }, []);
+
+  const handleEdit = () => {
+    setOpenEditModal(true);
+  };
   
   return (
     <Paper elevation={4} sx={{ padding: "20px", margin: "20px auto", borderRadius: 3, background: "#f9f9f9" }}>
@@ -179,17 +238,26 @@ export const UserAccount: React.FC = () => {
 
         <Divider sx={{ my: 2 }} />
 
-        <Grid container size={6}>
+        <Grid container xs={6}>
           <Button
             type="submit"
             variant="contained"
             color="primary"
-            // onClick={() => setShowDialogue(true)}
+            onClick={() => handleEdit()}
           >
             Modifier
           </Button>
         </Grid>
       </CardContent>
+
+      {/* Composant UpdateUser */}
+      <UpdateUser
+        open={openEditModal}
+        setOpen={setOpenEditModal}
+        id={userProfile.id}
+        refreshUser={fetchUser}
+      />
+
     </Paper>
   )
 }
@@ -511,7 +579,7 @@ export const AddUser: React.FC = () => {
       </Typography>
       <Grid2 container rowSpacing={5} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
         <Grid2 size={6}>
-        <FormControl variant="outlined" fullWidth required>
+          <FormControl variant="outlined" fullWidth required>
             <InputLabel>role</InputLabel>
             <Select
               name="role"
@@ -737,3 +805,235 @@ export const AddUser: React.FC = () => {
     </Paper>
   )
 }
+
+interface UpdateUserProps {
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  id: number | string | undefined;
+  refreshUser: () => Promise<void>;
+}
+
+export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refreshUser }) => {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [successDialog, setSuccessDialog] = useState(false);
+  
+  const [dataUserUpdate, setDataUserUpdate] = useState<Partial<User>>({ 
+    username: '', email: '', password: '', confirmPassword: '', profile: '', 
+    role: '', nom: '', prenom: '', civilite: '', date_naissance: '', contact:'',
+  });
+  const [initialData, setInitialData] = useState<Partial<User> | null>(null);
+  const [image, setImage] = useState<File | null>(null);
+
+  const loadProfile = (e: ChangeEvent<HTMLInputElement>) => {
+    const photo = e.target.files?.[0];
+    if (photo) {
+    setImage(photo);
+    setDataUserUpdate({ ...dataUserUpdate, profile: URL.createObjectURL(photo) });
+    console.log(photo);
+    }
+  };
+
+  const fetchUser = async() => {
+    try {
+        const res = await UserService.getUserById(Number(id));
+        console.log('data update: ', res.data);
+        const data = {
+          username: res.data.username,
+          email: res.data.email,
+          password: res.data.password, 
+          confirme_mdp: "",
+          profile: res.data.profile ? `${apiUrl}/${res.data.profile}` : '',
+          role: res.data.role,
+          nom: res.data.nom,
+          prenom: res.data.prenom,
+          civilite: res.data.civilite,
+          date_naissance: res.data.date_naissance,
+          contact: res.data.contact,
+        };
+        setDataUserUpdate(data);
+        setInitialData(data);
+    } catch (error) {
+        console.log(`Échec de récupération des détails du club ${error}`);
+    }
+  }
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+    setOpen(false);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    await refreshUser();
+    setOpenDialog(false);
+    setSuccessDialog(true);
+  };
+
+  useEffect(() => {
+    fetchUser();
+  }, []);
+
+  return (
+    <>
+      {/* Modal d'édition */}
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Modifier les informations</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6}>
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel>Rôle</InputLabel>
+                <Select
+                  name="role"
+                  value={dataUserUpdate.role}
+                  onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, role: e.target.value })}
+                  label="Rôle"
+                >
+                  <MenuItem value="" disabled>Selectionnez un rôle</MenuItem>
+                  <MenuItem value="admin">Admin</MenuItem>
+                  <MenuItem value="editeur">Éditeur</MenuItem>
+                  <MenuItem value="auteur">Auteur</MenuItem>
+                  <MenuItem value="autre">Autre</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Email"
+                fullWidth
+                value={dataUserUpdate.email}
+                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, email: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Nom"
+                fullWidth
+                value={dataUserUpdate.nom || ""}
+                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, nom: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Prénom"
+                fullWidth
+                value={dataUserUpdate.prenom || ""}
+                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, prenom: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel>Sexe</InputLabel>
+                <Select
+                  name="civilite"
+                  value={dataUserUpdate.civilite}
+                  onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, civilite: e.target.value })}
+                  label="Sexe"
+                >
+                  <MenuItem value="" disabled>Selectionnez votre civilité</MenuItem>
+                  <MenuItem value="masculin">Masculin</MenuItem>
+                  <MenuItem value="féminin">Féminin</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Numéro de téléphone"
+                fullWidth
+                value={dataUserUpdate.contact || ""}
+                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, contact: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Button variant="outlined" component="label" fullWidth>
+                Photo de profil
+                <input type="file" hidden accept="image/*" onChange={loadProfile}/>
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Username"
+                fullWidth
+                value={dataUserUpdate.username || ""}
+                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, username: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              {dataUserUpdate.profile && (
+                <>
+                  <img src={dataUserUpdate.profile} alt="Aperçu" style={{ maxWidth: "200px", marginTop: "8px" }} />
+                </>
+                )}
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Date de naissance"
+                type="date"
+                fullWidth
+                value={dataUserUpdate.date_naissance || ""}
+                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, date_naissance: e.target.value })}
+                InputLabelProps={{ shrink: true }}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Mot de passe"
+                type="password"
+                fullWidth
+                value={dataUserUpdate.password}
+                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, password: e.target.value })}
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Confirmation du mot de passe"
+                type="password"
+                fullWidth
+                value={dataUserUpdate.confirmPassword}
+                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, confirmPassword: e.target.value })}
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpen(false)} color="secondary">
+            Annuler
+          </Button>
+          <Button onClick={handleOpenDialog} color="primary" variant="contained">
+            Vérifier
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de confirmation */}
+      <Dialog fullWidth open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Veuillez vérifier les informations</DialogTitle>
+        <DialogContent dividers>
+          <DialogUpdateUser userData={dataUserUpdate} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">Annuler</Button>
+          <Button onClick={handleSaveEdit} color="primary" variant="contained">Confirmer</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de succès */}
+      <Dialog fullWidth open={successDialog} onClose={() => setSuccessDialog(false)}>
+        <DialogTitle>Succès ✅</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            L'utilisateur <b>{dataUserUpdate.nom}</b> a été mis à jour avec succès.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSuccessDialog(false)} color="primary">OK</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+};
+
