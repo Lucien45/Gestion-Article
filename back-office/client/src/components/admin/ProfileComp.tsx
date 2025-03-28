@@ -38,7 +38,7 @@ import {
   Checkbox
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { Article, CalendarToday, DeleteForever, Email, ManageAccounts, Badge, Edit } from "@mui/icons-material";
+import { Article, CalendarToday, DeleteForever, Email, ManageAccounts, Badge, Edit, AccountCircle, Phone, Work, CheckCircle, Cancel, History } from "@mui/icons-material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 import { Token } from '../../utils/Token';
@@ -59,6 +59,7 @@ interface User {
   civilite: string;
   date_naissance: string;
   contact?: string
+  is_active: boolean;
   articles: Article;
 }
 
@@ -181,6 +182,7 @@ const DialogUpdateStatus: React.FC<DialogUserUpdateStatusProps> = ({ userStatus 
     </Typography>
   );
 };
+
 export const UserAccount: React.FC = () => {
   const [dataUser, setDataUser] = useState<Partial<User> | null>(null);
   const userProfile = JSON.parse(Token.GetToken("user") as string);
@@ -287,6 +289,7 @@ export const UserList: React.FC = () => {
   const [researchMode, setResearchMode] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [openEditModal, setOpenEditModal] = useState(false);
+  const [openDetailModal, setOpenDetailModal] = useState(false);
   const [openEditStatusModal, setOpenEditStatusModal] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openSuccess, setOpenSuccess] = useState(false);
@@ -297,6 +300,8 @@ export const UserList: React.FC = () => {
     try {
       const response = await UserService.getAllUsers();
       setDataUser(response.data);
+      console.log('user all: ', response.data);
+      
     } catch (error) {
       console.warn(error);
       setOpenError(true);
@@ -321,6 +326,11 @@ export const UserList: React.FC = () => {
     setOpenEditModal(true);
     setSelectedId(id);
   };
+
+  const handleDetailOpen = (user: User) => {
+    setSelectedId(user.id);
+    setOpenDetailModal(true);
+  }
 
   const handleManage = (id: number | string) => {
     setOpenEditStatusModal(true);
@@ -395,7 +405,7 @@ export const UserList: React.FC = () => {
               <StyledTableCell>username</StyledTableCell>
               <StyledTableCell>Email</StyledTableCell>
               <StyledTableCell>Rôle</StyledTableCell>
-              <StyledTableCell>Profile</StyledTableCell>
+              <StyledTableCell>status</StyledTableCell>
               <StyledTableCell>Actions</StyledTableCell>
             </StyledTableRow>
           </TableHead>
@@ -429,16 +439,14 @@ export const UserList: React.FC = () => {
                     {user.role}
                   </StyledTableCell>
                   <StyledTableCell align="left">
-                    <Avatar
-                      src={user?.profile ? `${apiUrl}/${user.profile}` : ''}
-                      alt={user.username || "profileDefault"}
-                      sx={{ width: 60, height: 60, border: "2px solid #ddd" }}
-                    />
+                    <span style={{ color: user?.is_active ? "green" : "red", fontWeight: "bold" }}>
+                      {user?.is_active ? "Actif" : "Inactif"}
+                    </span>
                   </StyledTableCell>
                   <StyledTableCell align="left">
                     <IconButton
                       aria-label="Détails sur l'utilisateur"
-                      // onClick={() => handleDetailOpen(user)}
+                      onClick={() => handleDetailOpen(user)}
                     >
                       <VisibilityIcon
                         titleAccess="Détails sur l'utilisateur"
@@ -497,6 +505,13 @@ export const UserList: React.FC = () => {
         setOpen={setOpenEditStatusModal}
         id={selectedId}
         refreshUser={fetchUsers}
+      />
+
+      {/* Composant detail user */}
+      <DetailUser
+        open={openDetailModal}
+        setOpen={setOpenDetailModal}
+        id={selectedId}
       />
 
       {/* Dialogue de suppression */}
@@ -917,6 +932,12 @@ interface UpdateUserProps {
   setOpen: Dispatch<SetStateAction<boolean>>;
   id: number | string | undefined;
   refreshUser: () => Promise<void>;
+}
+
+interface DetalUserProps {
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  id: number | string | undefined;
 }
 
 export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refreshUser }) => {
@@ -1362,6 +1383,89 @@ export const UpdateStatus: React.FC<UpdateUserProps> = ({ open, setOpen, id, ref
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setSuccessDialog(false)} color="primary">OK</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  )
+}
+
+export const DetailUser: React.FC<DetalUserProps> = ({open, setOpen, id}) => {
+  const [dataUserUpdate, setDataUserUpdate] = useState<User | null>();
+
+  const fetchUser = async() => {
+    try {
+      const res = await UserService.getUserById(Number(id));
+      setDataUserUpdate(res.data);
+    } catch (error) {
+      console.log(`Échec de récupération des détails du club ${error}`);
+    }
+  }
+
+  useEffect(() => {
+    fetchUser();
+  }, [id])
+  
+  return(
+    <>
+      <Dialog fullWidth open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Les informations sur l'utilisateur</DialogTitle>
+
+        <Divider sx={{ my: 1 }} />
+
+        <DialogContent>
+          <Box display="flex" justifyContent="center" mb={2}>
+            <Avatar
+              src={dataUserUpdate?.profile ? `${apiUrl}/${dataUserUpdate.profile}` : ''}
+              alt={dataUserUpdate?.username}
+              sx={{ width: 80, height: 80, border: "3px solid #ddd" }}
+            />
+          </Box>
+          <Typography variant="h5" align="center" fontWeight="bold" gutterBottom>
+            {dataUserUpdate?.nom || "Utilisateur"} {dataUserUpdate?.prenom || ""}
+          </Typography>
+
+          <Divider sx={{ my: 1 }} />
+
+          <Grid container spacing={2}>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <AccountCircle sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Nom d'utilisateur :</strong> {dataUserUpdate?.username || "Non spécifié"}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <Email sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Email :</strong> {dataUserUpdate?.email || "Non spécifié"}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <Phone sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Contact :</strong> {dataUserUpdate?.contact || "Non spécifié"}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <CalendarToday sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Date de naissance :</strong> {dataUserUpdate?.date_naissance ? new Date(dataUserUpdate.date_naissance).toLocaleDateString() : "Non spécifié"}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <History sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Dernière connexion :</strong> {dataUserUpdate?.lastLogin ? new Date(dataUserUpdate.lastLogin).toLocaleString() : "Jamais connecté"}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <Article sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Nombre d'articles :</strong> {dataUserUpdate?.articles?.length || 0}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <Work sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Rôle :</strong> {dataUserUpdate?.role || "Utilisateur"}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              {dataUserUpdate?.is_active ? <CheckCircle sx={{ marginRight: 1, color: "green" }} /> : <Cancel sx={{ marginRight: 1, color: "red" }} />}
+              <Typography variant="body1"><strong>Status :</strong> <span style={{ color: dataUserUpdate?.is_active ? "green" : "red", fontWeight: "bold" }}>{dataUserUpdate?.is_active ? "Actif" : "Inactif"}</span></Typography>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <Divider sx={{ my: 1 }} />
+
+        <DialogActions>
+          <Button onClick={() => setOpen(false)} color="secondary">Fermer</Button>
         </DialogActions>
       </Dialog>
     </>
