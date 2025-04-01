@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, Dispatch, FormEvent, SetStateAction, useEffect, useState } from "react";
 import {
   Typography,
   Button,
@@ -29,9 +29,13 @@ import {
   FormControlLabel,
   Radio,
   Grid2,
+  Divider,
+  Grid,
+  FormGroup,
+  Switch,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { Visibility, Edit, DeleteForever } from "@mui/icons-material";
+import { Visibility, Edit, DeleteForever, CalendarToday, Article, Description, Category, ThumbUp, Comment, Star, Timer } from "@mui/icons-material";
 import { ArticleService } from "../../services/article.service";
 import { Token } from "../../utils/Token";
 import { Utils } from "../../utils/Utils";
@@ -50,17 +54,56 @@ interface Article {
   status: string;
   vue: number;
   comments_count: number;
-  readingTime: number;
+  reading_time: number;
+  featured: boolean;
+}
+
+interface ArticleDetail {
+  id: string;
+  titre: string;
+  contenu: string;
+  description: string;
+  couverture: string;
+  date_publication: string;
+  auteur?: User;
+  categorie?: Categorie;
+  status: string;
+  vue: number;
+  commentaires: Commentaire;
+  likes: Like;
+  reading_time: number;
+  featured: boolean;
+}
+
+interface Commentaire {
+  length: number;
+}
+
+interface Like {
+  length: number;
 }
 
 interface ArticleData {
   titre: string;
   description: string;
-  contenu: File | null;
-  couverture: File | null;
+  contenu: string;
+  couverture: string;
   auteur: number;
   categorie: string| number;
   status: string;
+  featured: boolean; 
+  reading_time: number;
+}
+
+interface UpdateArticle {
+  titre: string;
+  contenu: string;
+  description: string;
+  couverture: string;
+  categorie: number; 
+  status: string;
+  featured: boolean; 
+  reading_time: number;
 }
 
 interface User {
@@ -72,13 +115,17 @@ interface User {
 }
 
 interface Categorie {
-  id: string;
+  id: number | string;
   nom: string;
   description: string;
 }
 
 interface DialogArtcileProps {
   articledata: ArticleData;
+}
+
+interface DialogUpdateArtcileProps {
+  articledata: UpdateArticle;
 }
 
 
@@ -101,9 +148,33 @@ const DialogAddArticle: React.FC<DialogArtcileProps> = ({ articledata }) => {
   );
 };
 
+const DialogUpdateArticle: React.FC<DialogUpdateArtcileProps> = ({ articledata }) => {
+  return (
+    <Box>
+      <Typography mb={1} variant="body1">
+        <b>Titre:</b> {articledata.titre}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Description:</b> {articledata.description}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Categorie:</b> {articledata.categorie}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Status:</b> {articledata.status}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Featured:</b> {articledata.featured ? 'oui' : 'non'}
+      </Typography>
+      <Typography mb={1} variant="body1">
+        <b>Temp de lecture:</b> {articledata.reading_time} min
+      </Typography>
+    </Box>
+  );
+};
+
 export const ListArticle: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
-  const [categories, setCategories] = useState<Categorie[]>([]);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openViewModal, setOpenViewModal] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
@@ -117,6 +188,8 @@ export const ListArticle: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const userProfile = JSON.parse(Token.GetToken("user") as string);
 
+  const [selectedId, setSelectedId] = useState<number | string>(0);
+  
   const fetchArticles = async () => {
     setLoading(true);
     try {
@@ -139,37 +212,21 @@ export const ListArticle: React.FC = () => {
 
   useEffect(() => {
     fetchArticles();
-    ArticleService.getAllCategories()
-      .then((response) => setCategories(response.data))
-      .catch(console.warn);
-  }
-  , []);
+  }, []);
 
   const handleView = (article: Article) => {
-    setSelectedArticle(article);
+    setSelectedId(article.id);
     setOpenViewModal(true);
   };
 
   const handleEdit = (article: Article) => {
-    setSelectedArticle(article);
+    setSelectedId(article.id);
     setOpenEditModal(true);
   };
 
   const handleDelete = (article: Article) => {
     setSelectedArticle(article);
     setOpenDeleteDialog(true);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!selectedArticle) return;
-    try {
-      setOpenEditModal(false);
-      setOpenSuccess(true);
-      fetchArticles();
-    } catch (error) {
-      console.warn(error);
-      setOpenError(true);
-    }
   };
 
   const handleConfirmDelete = async () => {
@@ -277,7 +334,7 @@ export const ListArticle: React.FC = () => {
                     <Avatar
                       src={article?.couverture ? `${apiUrl}/${article.couverture}` : ''}
                       alt={article.titre || "profileDefault"}
-                      sx={{ width: 60, height: 60, border: "2px solid #ddd" }}
+                      sx={{ width: 60, height: 60, border: "2px solid #ddd", borderRadius: 0 }}
                     />
                   </StyledTableCell>
                   <StyledTableCell align="left">
@@ -325,102 +382,19 @@ export const ListArticle: React.FC = () => {
       </TableContainer>
 
       {/* Modal de visualisation */}
-      <Dialog open={openViewModal} onClose={() => setOpenViewModal(false)}>
-        <DialogTitle>Détails de l'Article</DialogTitle>
-        <DialogContent>
-          <Box>
-            <Avatar
-              src={selectedArticle?.couverture ? `${apiUrl}/${selectedArticle.couverture}` : ''}
-              alt={selectedArticle?.titre}
-              sx={{ width: 200, height: 200, marginBottom: 2 }}
-            />
-            <Typography variant="body1">Titre: {selectedArticle?.titre}</Typography>
-            <Typography variant="body1">Description: {selectedArticle?.description}</Typography>
-            <Typography variant="body1">Catégorie: {selectedArticle?.categorie?.nom}</Typography>
-            <Typography variant="body1">Vues: {selectedArticle?.vue}</Typography>
-            <Typography variant="body1">Likes: </Typography>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenViewModal(false)}>Fermer</Button>
-        </DialogActions>
-      </Dialog>
+      <DetailArticle
+        open={openViewModal}
+        setOpen={setOpenViewModal}
+        id={selectedId}
+      />
 
       {/* Modal d'édition */}
-      <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
-        <DialogTitle>
-          <Typography variant="h6" gutterBottom>
-            Modifier l'Article
-          </Typography>
-        </DialogTitle>
-        <DialogContent dividers>
-          <DialogContentText>
-            <Grid2
-              container
-              rowSpacing={5}
-              columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-            >
-              <Grid2 size={6}>
-                <TextField
-                  label="Titre"
-                  variant="outlined"
-                  value={selectedArticle?.titre || ""}
-                  onChange={(e) => setSelectedArticle({ ...selectedArticle, titre: e.target.value })}
-                  fullWidth
-                />
-              </Grid2>
-              <Grid2 size={6}>
-                <TextField
-                  label="Description"
-                  variant="outlined"
-                  margin="dense"
-                  multiline
-                  rows={3}
-                  value={selectedArticle?.description || ""}
-                  onChange={(e) => setSelectedArticle({ ...selectedArticle, description: e.target.value })}
-                  fullWidth
-                />
-              </Grid2>
-              <Grid2 size={6}>
-                <FormControl variant="outlined" fullWidth>
-                  <InputLabel>Catégorie</InputLabel>
-                  <Select
-                    value={selectedArticle?.categorie?.id || ""} margin="dense"
-                    onChange={(e) => setSelectedArticle({
-                      ...selectedArticle, categorie: { ...selectedArticle.categorie, id: e.target.value }
-                    })} 
-                    label="Catégorie"
-                  >
-                  {categories.map((categorie) => (
-                    <MenuItem key={categorie.id} value={categorie.id}>{categorie.nom}</MenuItem>
-                  ))}  
-                  </Select>
-                </FormControl>
-              </Grid2>
-              <Grid2 size={6}>
-                <FormControl variant="outlined" fullWidth required>
-                  <InputLabel>Status</InputLabel>
-                  <Select
-                    value={selectedArticle?.status}
-                    onChange={(e) => setSelectedArticle({ ...selectedArticle, status: e.target.value })}
-                    label="Status"
-                  >
-                    <MenuItem value="brouillon">Brouillon</MenuItem>
-                    <MenuItem value="publié">Publié</MenuItem>
-                    <MenuItem value="archivé">Archivé</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid2>
-
-            </Grid2>
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenEditModal(false)} color="secondary">Annuler</Button>
-          <Button onClick={handleSaveEdit} color="primary" variant="contained">Sauvegarder</Button>
-        </DialogActions>
-      </Dialog>
-
+      <UpdateArticle
+        open={openEditModal}
+        setOpen={setOpenEditModal}
+        id={selectedId}
+        refreshArticle={fetchArticles}
+      />
 
       {/* Dialogue de suppression */}
       <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
@@ -449,15 +423,394 @@ export const ListArticle: React.FC = () => {
   );
 };
 
+interface DetalArticleProps {
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  id: number | string | undefined;
+}
+
+interface UpdateArticleProps {
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  id: number | string | undefined;
+  refreshArticle: () => Promise<void>;
+}
+
+export const DetailArticle: React.FC<DetalArticleProps> = ({open, setOpen, id}) => {
+  const [dataArticle, setDataArticle] = useState<ArticleDetail | null>();
+
+  const fetchArticle = async() => {
+    try {
+      const res = await ArticleService.getArticle(Number(id));
+      setDataArticle(res.data);
+      console.log('data detail: ', res.data);
+    } catch (error) {
+      console.log(`Échec de récupération des détails du club ${error}`);
+    }
+  }
+
+  useEffect(() => {
+    fetchArticle();
+  }, [id])
+  
+  return(
+    <>
+      <Dialog fullWidth open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Les informations sur l'Article</DialogTitle>
+
+        <Divider sx={{ my: 1 }} />
+
+        <DialogContent>
+          <Box display="flex" justifyContent="center" mb={2}>
+            <Avatar
+              src={dataArticle?.couverture ? `${apiUrl}/${dataArticle?.couverture}` : ''}
+              alt={dataArticle?.titre}
+              sx={{ width: 100, height: 100, border: "3px solid #ddd", borderRadius: 0 }}
+            />
+          </Box>
+          <Typography variant="h5" align="center" fontWeight="bold" gutterBottom>
+            {dataArticle?.titre || "Article"}
+          </Typography>
+          <Divider sx={{ my: 1 }} />
+          <Grid container spacing={2}>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <Description sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Description :</strong> {dataArticle?.description || "Non spécifié"}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <Category sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Catégorie :</strong> {dataArticle?.categorie?.nom || "Non spécifié"}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <Visibility sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Nombre de Vues :</strong> {dataArticle?.vue || 0}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <ThumbUp sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Nombre de Likes :</strong> {dataArticle?.likes.length} </Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <Comment sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Nombre de Commentaires :</strong> {dataArticle?.commentaires.length} </Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <CalendarToday sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Date de publication :</strong> {dataArticle?.date_publication ? new Date(dataArticle.date_publication).toLocaleDateString() : "Non spécifié"}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <Star sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Featured :</strong> {dataArticle?.featured ? 'Oui' : 'Non'}</Typography>
+            </Grid>
+            <Grid item xs={12} display="flex" alignItems="center">
+              <Timer sx={{ marginRight: 1, color: "gray" }} />
+              <Typography variant="body1"><strong>Temps de lecture :</strong> {dataArticle?.reading_time || "Non spécifié"} Min</Typography>
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <Divider sx={{ my: 1 }} />
+
+        <DialogActions>
+          <Button onClick={() => setOpen(false)} color="secondary">Fermer</Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  )
+}
+
+export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id, refreshArticle }) => {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [successDialog, setSuccessDialog] = useState(false);
+  
+  const [dataArticleUpdate, setDataArticleUpdate] = useState({
+    titre: '', description: '', couverture: '', contenu: '', 
+    categorie: 0, status: '', featured: false, reading_time: 0,
+  });
+  const [categories, setCategories] = useState<Categorie[]>([]);
+  const [image, setImage] = useState<File | null>(null);
+  const [pdf, setPdf] = useState<File | null>(null);
+
+  const [processMessage, setProcessMessage] = useState("");
+  const [userUpdateSuccess, setUserUpdateSuccess] = useState<boolean>(false);
+
+  const loadCouverture = (e: ChangeEvent<HTMLInputElement>) => {
+    const photo = e.target.files?.[0];
+    if (photo) {
+      setImage(photo);
+      setDataArticleUpdate({ ...dataArticleUpdate, couverture: URL.createObjectURL(photo) });
+      console.log("image: ",photo);
+    }
+  };
+
+  const loadContenu = (e: ChangeEvent<HTMLInputElement>) => {
+    const photo = e.target.files?.[0];
+    if (photo) {
+      setPdf(photo);
+      setDataArticleUpdate({ ...dataArticleUpdate, contenu: URL.createObjectURL(photo) });
+      console.log("pdf: ",photo);
+    }
+  };
+
+  const fetchArticle = async() => {
+    try {
+      const res = await ArticleService.getArticle(Number(id));
+      console.log('data update: ', res.data);
+      
+      const data = {
+        titre: res.data.titre,
+        description: res.data.description,
+        categorie: res.data.categorie.id, 
+        contenu: res.data.contenu ? `${apiUrl}/${res.data.contenu}` : '',
+        couverture: res.data.couverture ? `${apiUrl}/${res.data.couverture}` : '',
+        status: res.data.status,
+        featured: res.data.featured,
+        reading_time: res.data.reading_time,
+      };
+      setDataArticleUpdate(data);
+    } catch (error) {
+      console.log(`Échec de récupération des détails du club ${error}`);
+    }
+  }
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+    setOpen(false);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setOpen(true);
+  };
+
+  const handleSaveEdit = async (e: FormEvent) => {
+    e.preventDefault();
+    const formData = new FormData();
+    formData.append("titre", dataArticleUpdate.titre);
+    formData.append("description", dataArticleUpdate.description);
+    formData.append("status", dataArticleUpdate.status);
+    formData.append("categorie_id", dataArticleUpdate.categorie.toString());
+    formData.append("featured", dataArticleUpdate.featured ? "true" : "false");
+    formData.append("reading_time", dataArticleUpdate.reading_time.toString());
+
+    if (pdf) {
+      formData.append("files", pdf);
+    }
+    if (image) {
+      formData.append("files", image);
+    }
+
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}:`, value);
+    }
+
+    try {
+      await ArticleService.updateArticle(Number(id), formData);
+      setProcessMessage(`L'Article ${dataArticleUpdate?.titre} a été ajoutée avec succès ✅`);
+      await refreshArticle();
+      setOpenDialog(false);
+      setSuccessDialog(true);
+      setUserUpdateSuccess(true)
+    } catch (error: any) {
+      setUserUpdateSuccess(false)
+      setProcessMessage(`Erreur lors de mise a jour de L'article ${dataArticleUpdate?.titre} ⚠️`);
+      console.warn("Erreur lors de mise a jour :", error.response?.data || error.message);
+    }finally {
+      setOpenDialog(false);
+    }
+    
+  };
+
+  useEffect(() => {
+    fetchArticle();
+    ArticleService.getAllCategories()
+      .then((response) => setCategories(response.data))
+      .catch(console.warn);
+  }, [id]);
+
+  return (
+    <>
+    {/* Modal d'édition */}
+    <Dialog open={open} onClose={() => setOpen(false)}>
+      <DialogTitle>Modifier les informations</DialogTitle>
+      <Divider sx={{ my: 2 }} />
+
+      <DialogContent>
+        <DialogContentText>
+          <Grid container spacing={5} >
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Titre"
+                variant="outlined"
+                margin="dense"
+                multiline
+                rows={3}
+                value={dataArticleUpdate.titre}
+                onChange={(e) => setDataArticleUpdate({ ...dataArticleUpdate, titre: e.target.value })}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Description"
+                variant="outlined"
+                margin="dense"
+                multiline
+                rows={3}
+                value={dataArticleUpdate.description}
+                onChange={(e) => setDataArticleUpdate({ ...dataArticleUpdate, description: e.target.value })}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl variant="outlined" fullWidth>
+                <Button variant="outlined" component="label">
+                  Couverture
+                  <input type="file" hidden accept="image/*" onChange={loadCouverture} />
+                </Button>
+                {dataArticleUpdate.couverture && (
+                  <>
+                    <img src={dataArticleUpdate?.couverture} alt="Aperçu" style={{ maxWidth: "150px", marginTop: "10px" }} />
+                  </>
+                )}
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl variant="outlined" fullWidth>
+                <Button variant="outlined" component="label">
+                  Contenu
+                  <input type="file" hidden accept="application/pdf" onChange={loadContenu} />
+                </Button>
+                {dataArticleUpdate.contenu && (
+                  <>
+                    <iframe src={dataArticleUpdate?.contenu} style={{ width: "100%", height: "200px", marginTop: "10px" }} />
+                  </>
+                )}
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel>Catégorie</InputLabel>
+                <Select
+                  value={dataArticleUpdate.categorie || ""} margin="dense"
+                  onChange={(e) => setDataArticleUpdate({ ...dataArticleUpdate, categorie: Number(e.target.value) })} 
+                  label="Catégorie"
+                >
+                {categories.map((categorie) => (
+                  <MenuItem key={categorie.id} value={categorie.id}>{categorie.nom}</MenuItem>
+                ))}  
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <FormControl variant="outlined" fullWidth>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={dataArticleUpdate.status}
+                  onChange={(e) => setDataArticleUpdate({ ...dataArticleUpdate, status: e.target.value })}
+                  label="Status"
+                >
+                  <MenuItem value="brouillon">Brouillon</MenuItem>
+                  <MenuItem value="publié">Publié</MenuItem>
+                  <MenuItem value="archivé">Archivé</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              Featured
+              <FormGroup >
+                <FormControlLabel control=
+                {
+                  <Switch 
+                    checked={dataArticleUpdate.featured } 
+                    onChange={(e) => setDataArticleUpdate({...dataArticleUpdate, featured: e.target.checked})} 
+                  />
+                } label={dataArticleUpdate.featured ? 'Activer': 'Desactiver'} />
+              </FormGroup>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <TextField
+                label="Temp de lecture (min)"
+                variant="outlined"
+                margin="dense"
+                type="Number"
+                rows={3}
+                value={dataArticleUpdate.reading_time}
+                onChange={(e) => setDataArticleUpdate({ ...dataArticleUpdate, reading_time: Number(e.target.value) })}
+                fullWidth
+              />
+            </Grid>
+          </Grid>
+        </DialogContentText>
+      </DialogContent>
+
+      <Divider sx={{ my: 2 }} />
+
+      <DialogActions>
+        <Button onClick={() => setOpen(false)} color="secondary">
+          Annuler
+        </Button>
+        <Button onClick={handleOpenDialog} color="primary" variant="contained">
+          Vérifier
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+    {/* Dialog de confirmation */}
+    <Dialog fullWidth open={openDialog} onClose={handleCloseDialog}>
+      <DialogTitle>Veuillez vérifier les informations</DialogTitle>
+      <DialogContent dividers>
+        <DialogUpdateArticle articledata={dataArticleUpdate} />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCloseDialog} color="secondary">Annuler</Button>
+        <Button onClick={handleSaveEdit} color="primary" variant="contained">Ok, Confirmer</Button>
+      </DialogActions>
+    </Dialog>
+
+    {/* Dialog de succès */}
+    <Dialog fullWidth open={successDialog} onClose={() => setSuccessDialog(false)}>
+      <DialogTitle>
+      {userUpdateSuccess && (
+        <b>Succès ✅</b>
+      )}
+      {!userUpdateSuccess && (
+        <b>Erreur ⚠️</b>
+      )}
+        
+      </DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          {userUpdateSuccess && (
+            <b>{processMessage}</b>
+          )}
+          {!userUpdateSuccess && (
+            <b>{processMessage}</b>
+          )}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setSuccessDialog(false)} color="primary">OK</Button>
+      </DialogActions>
+    </Dialog>
+    </>
+  );
+
+}
+
 export const AddEditArticle: React.FC = () => {
   const [Newarticles, setNewArticles] = useState<ArticleData>({
     titre: "",
     description: "",
-    contenu: null,
-    couverture: null,
+    contenu: '',
+    couverture: '',
     auteur: 0,
     categorie: 0,
     status: "",
+    featured: false,
+    reading_time: 0,
   });
   const [categories, setCategories] = useState<Categorie[]>([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -465,21 +818,30 @@ export const AddEditArticle: React.FC = () => {
   const [successDialog, setSuccessDialog] = useState(false);
   const userProfile = JSON.parse(Token.GetToken("user") as string);
 
+  const [image, setImage] = useState<File | null>(null);
+  const [pdf, setPdf] = useState<File | null>(null);
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setNewArticles({ ...Newarticles, [e.target.name]: e.target.value });
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>, type: "couverture" | "contenu") => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const fileUrl = URL.createObjectURL(file);
-      setNewArticles((prevState) => ({
-        ...prevState,
-        [type]: { file, preview: fileUrl }, 
-      }));
+  const loadCouverture = (e: ChangeEvent<HTMLInputElement>) => {
+    const photo = e.target.files?.[0];
+    if (photo) {
+      setImage(photo);
+      setNewArticles({ ...Newarticles, couverture: URL.createObjectURL(photo) });
+      console.log(photo);
     }
   };
-  
+
+  const loadContenu = (e: ChangeEvent<HTMLInputElement>) => {
+    const photo = e.target.files?.[0];
+    if (photo) {
+      setPdf(photo);
+      setNewArticles({ ...Newarticles, contenu: URL.createObjectURL(photo) });
+      console.log(photo);
+    }
+  };
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -498,11 +860,11 @@ export const AddEditArticle: React.FC = () => {
     formData.append("auteur_id", userProfile.id);
     formData.append("categorie_id", Newarticles.categorie.toString());
 
-    if (Newarticles.contenu?.file) {
-      formData.append("files", Newarticles.contenu.file);
+    if (pdf) {
+      formData.append("files", pdf);
     }
-    if (Newarticles.couverture?.file) {
-      formData.append("files", Newarticles.couverture.file);
+    if (image) {
+      formData.append("files", image);
     }    
   
     for (const [key, value] of formData.entries()) {
@@ -512,12 +874,12 @@ export const AddEditArticle: React.FC = () => {
     try {
       const response = await ArticleService.createArticle(formData);
       console.log("Réponse serveur :", response);
-      setNewArticles({ titre: "", description: "", contenu: null, couverture: null, auteur: 0, categorie: "", status: "" });
+      setNewArticles({ titre: "", description: "", contenu: '', couverture: '', auteur: 0, categorie: "", status: "", reading_time:0, featured: false });
       setSuccessDialog(true);
     } catch (error: any) {
       Utils.errorPage(`Erreur lors de l'ajout : ${error.response?.data || error.message}`)
       console.warn("Erreur lors de l'ajout :", error.response?.data || error.message);
-      setNewArticles({ titre: "", description: "", contenu: null, couverture: null, auteur: 0, categorie: "", status: "" });
+      setNewArticles({ titre: "", description: "", contenu: '', couverture: '', auteur: 0, categorie: "", status: "", reading_time:0, featured: false });
     } finally {
       setProcessing(false);
       setOpenDialog(false);
@@ -573,11 +935,11 @@ export const AddEditArticle: React.FC = () => {
           <FormControl variant="outlined" fullWidth>
             <Button variant="outlined" component="label">
               Couverture
-              <input type="file" hidden accept="image/*" onChange={(e) => handleFileUpload(e, "couverture")} />
+              <input type="file" hidden accept="image/*" onChange={loadCouverture} />
             </Button>
-            {Newarticles.couverture?.file && (
+            {Newarticles.couverture && (
               <>
-                <img src={Newarticles.couverture.preview} alt="Aperçu" style={{ maxWidth: "100px", marginTop: "10px" }} />
+                <img src={Newarticles.couverture} alt="Aperçu" style={{ maxWidth: "100px", marginTop: "10px" }} />
               </>
             )}
           </FormControl>
@@ -586,23 +948,24 @@ export const AddEditArticle: React.FC = () => {
           <FormControl variant="outlined" fullWidth>
             <Button variant="outlined" component="label">
               Contenu
-              <input type="file" hidden accept="application/pdf" onChange={(e) => handleFileUpload(e, "contenu")} />
+              <input type="file" hidden accept="application/pdf" onChange={loadContenu} />
             </Button>
-            {Newarticles.contenu?.file && (
+            {Newarticles.contenu && (
               <>
-                <iframe src={Newarticles.contenu.preview} style={{ width: "100%", height: "300px", marginTop: "10px" }} />
+                <iframe src={Newarticles.contenu} style={{ width: "100%", height: "300px", marginTop: "10px" }} />
               </>
             )}
           </FormControl>
         </Grid2>
         <Grid2 size={6}>
           <FormControl variant="outlined" fullWidth required>
-            <InputLabel>Categorie</InputLabel>
+            <InputLabel>categorie</InputLabel>
             <Select
-              name="Categorie"
+              variant="outlined"
+              name="categorie"
               onChange={(e) => setNewArticles({ ...Newarticles, categorie: e.target.value })} 
               value={Newarticles.categorie}
-              label="Categorie"
+              label="categorie"
             >
               <MenuItem value="" disabled>Selectionner un categorie</MenuItem>
               {categories.map((categorie) => (
@@ -626,6 +989,29 @@ export const AddEditArticle: React.FC = () => {
               <MenuItem value="archivé">Archivé</MenuItem>
             </Select>
           </FormControl>
+        </Grid2>
+        <Grid2 size={6}>
+          Featured
+          <FormGroup>
+            <FormControlLabel control=
+            {
+              <Switch 
+                checked={Newarticles.featured } 
+                onChange={(e) => setNewArticles({...Newarticles, featured: e.target.checked})} 
+              />
+            } label={Newarticles.featured ? 'Activer' : 'Desactiver'} />
+          </FormGroup>
+        </Grid2>
+        <Grid2 size={6}>
+          <TextField
+            label="Temp de lecture (min)"
+            variant="outlined"
+            type="Number"
+            rows={3}
+            value={Newarticles.reading_time}
+            onChange={(e) => setNewArticles({ ...Newarticles, reading_time: Number(e.target.value) })}
+            fullWidth
+          />
         </Grid2>
         <Grid2 size={6}>
           <Button

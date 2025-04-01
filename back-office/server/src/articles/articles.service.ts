@@ -114,14 +114,14 @@ export class ArticlesService {
 
   async findAllArticle(): Promise<Articles[]> {
     return this.articleRepository.find({
-      relations: ['auteur', 'categorie'],
+      relations: ['auteur', 'categorie', 'commentaires', 'likes'],
     });
   }
 
   async findArticleById(articleId: number): Promise<Articles> {
     const article = await this.articleRepository.findOne({
       where: { id: articleId },
-      relations: ['auteur', 'categorie'],
+      relations: ['auteur', 'categorie', 'commentaires', 'likes'],
     });
     if (!article) throw new NotFoundException('article non trouvé');
     return article;
@@ -176,8 +176,6 @@ export class ArticlesService {
     commentaire.user = user;
     commentaire.article = article;
     return await this.commentaireRepository.save(commentaire);
-    // const commentaire = this.commentaireRepository.create(commentaireDto);
-    // return await this.commentaireRepository.save(commentaire);
   }
 
   async findAllCommentaire(): Promise<Commentaires[]> {

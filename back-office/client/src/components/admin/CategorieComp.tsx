@@ -209,6 +209,10 @@ export const AddEditCategorie: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [successDialog, setSuccessDialog] = useState(false);
 
+  const [processMessage, setProcessMessage] = useState("");
+  const [CategorieAddSuccess, setCategorieAddSuccess] = useState<boolean>(false);
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewCategorie({ ...newCategorie, [e.target.name]: e.target.value });
   };
@@ -223,22 +227,47 @@ export const AddEditCategorie: React.FC = () => {
 
   const handleConfirmSubmit = async () => {
     setProcessing(true);
-    try {
-      await ArticleService.createCategorie(newCategorie);
+    // try {
+    //   await ArticleService.createCategorie(newCategorie);
+    //   setNewCategorie({ nom: "", description: "" });
+    //   setSuccessDialog(true);
+    //   setProcessMessage(`Le Categorie ${newCategorie.nom} a été ajoutée avec succès ✅`);
+    //   setCategorieAddSuccess(true);
+    // } catch (error) {
+    //   console.warn(error);
+    //   setProcessMessage(`Erreur lors de mise a jour de L'article ${newCategorie.nom} ⚠️`);
+    //   setCategorieAddSuccess(false);
+    // } finally {
+    //   setProcessing(false);
+    //   setOpenDialog(false);
+    //   setCategorieAddSuccess(false);
+    //   setProcessMessage('');
+    // }
+    await ArticleService.createCategorie(newCategorie)
+    .then((response) => {
       setNewCategorie({ nom: "", description: "" });
       setSuccessDialog(true);
-    } catch (error) {
-      console.warn(error);
-    } finally {
+      setProcessMessage(`Le Categorie ${newCategorie.nom} a été ajoutée avec succès ✅`);
+      setCategorieAddSuccess(true);
+      console.log('reponse server: ', response);
+    })
+    .catch((error) => {
+      setSuccessDialog(true);
+      setProcessMessage(`Erreur lors de mise a jour de La categorie ⚠️`);
+      setCategorieAddSuccess(false);
+      console.warn('reponse server: ',error);
+    })
+    .finally(() => {
       setProcessing(false);
       setOpenDialog(false);
-    }
+      setCategorieAddSuccess(false);
+      setProcessMessage('');
+    })
   };
 
   function desableButton() {
     return (
-      newCategorie.nom &&
-      newCategorie.description
+      newCategorie.nom
     );
   }
 
@@ -311,7 +340,12 @@ export const AddEditCategorie: React.FC = () => {
       {/* Dialog de succès */}
       <Dialog fullWidth open={successDialog} onClose={() => setSuccessDialog(false)}>
         <DialogTitle>
-          <b>Catégorie enregistrée avec succès ✅</b>
+          {CategorieAddSuccess && (
+            <b>Succès ✅</b>
+          )}
+          {!CategorieAddSuccess && (
+            <b>Erreur ⚠️</b>
+          )}
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -327,7 +361,7 @@ export const AddEditCategorie: React.FC = () => {
         </IconButton>
         <DialogContent dividers>
           <DialogContentText>
-            La catégorie <b>{newCategorie.nom}</b> a été ajoutée avec succès.
+            <b>{processMessage}</b>
           </DialogContentText>
         </DialogContent>
         <DialogActions>

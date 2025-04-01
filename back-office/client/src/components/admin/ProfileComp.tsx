@@ -213,8 +213,8 @@ export const UserAccount: React.FC = () => {
       <CardContent>
         <Box display="flex" justifyContent="center" mb={2}>
           <Avatar
-            src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : ''}
-            alt={dataUser?.username || "profileDefault"}
+            src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : dataUser?.username}
+            alt={dataUser?.username}
             sx={{ width: 80, height: 80, border: "3px solid #ddd" }}
           />
         </Box>

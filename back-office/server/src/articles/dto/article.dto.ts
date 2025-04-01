@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 import { PartialType } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -36,6 +37,14 @@ export class CreateArticleDto {
   @IsEnum(['brouillon', 'publié', 'archivé'])
   @IsNotEmpty()
   status: string;
+
+  @IsOptional()
+  @IsNumber()
+  reading_time: number;
+
+  @IsOptional()
+  @IsBoolean()
+  featured: boolean;
 }
 
 export class UpdateArticleDto extends PartialType(CreateArticleDto) {}

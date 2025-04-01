@@ -11,7 +11,7 @@ import {
   ParseIntPipe,
   UploadedFiles,
 } from '@nestjs/common';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { ArticlesService } from './articles.service';
 import { CreateArticleDto, UpdateArticleDto } from './dto/article.dto';
 import { CreateCategorieDto, UpdateCategorieDto } from './dto/categorie.dto';
@@ -130,16 +130,40 @@ export class ArticlesController {
 
   @Put(':id')
   @UseInterceptors(
-    FileInterceptor('couverture', ArticlesController.uploadConfig('articles')),
-    FileInterceptor('livre', ArticlesController.uploadConfig('livre')),
+    FilesInterceptor('files', 2, {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          if (file.mimetype.includes('image')) {
+            cb(null, './media/couverture');
+          } else if (file.mimetype.includes('pdf')) {
+            cb(null, './media/livre');
+          } else {
+            cb(new Error('Type de fichier non pris en charge'), '');
+          }
+        },
+        filename: (_, file, callback) => {
+          const uniqueSuffix =
+            Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(
+            null,
+            `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`,
+          );
+        },
+      }),
+    }),
   )
   updateArticle(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateArticleDto,
-    @UploadedFile() file?: Express.Multer.File,
-    @UploadedFile() pdf?: Express.Multer.File,
+    @UploadedFile() files?: Express.Multer.File[],
   ) {
-    return this.articlesService.updateArticle(id, dto, file, pdf);
+    const couverture = files?.find((file) => file.mimetype.includes('image'));
+    const pdf = files?.find((file) => file.mimetype.includes('pdf'));
+
+    console.log('Photo update recu:', couverture);
+    console.log('pdf update recu:', pdf);
+    console.log('Données a jour recu:', dto);
+    return this.articlesService.updateArticle(id, dto, couverture, pdf);
   }
 
   @Delete(':id')

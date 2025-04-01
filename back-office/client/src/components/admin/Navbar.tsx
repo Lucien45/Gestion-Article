@@ -131,7 +131,7 @@ const Navbar = ({ toggleSidebar, isOpen }: NavbarProps) => {
               {dataUser?.username || "Utilisateur"}
             </Typography>
             <Avatar
-              src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : ''}
+              src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : dataUser?.username}
               alt={dataUser?.username || "profileDefault"}
               sx={{ width: 40, height: 40, border: "2px solid #ddd" }}
             />

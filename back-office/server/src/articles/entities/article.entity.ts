@@ -5,9 +5,12 @@ import {
   ManyToOne,
   JoinColumn,
   PrimaryGeneratedColumn,
+  OneToMany,
 } from 'typeorm';
 import { Categories } from './categorie.entity';
 import { Users } from 'src/users/entities/user.entity';
+import { Commentaires } from './commentaire.entity';
+import { Likes } from './like.entity';
 
 @Entity('article')
 export class Articles {
@@ -52,4 +55,17 @@ export class Articles {
 
   @Column({ type: 'int', default: 0 })
   vue: number;
+
+  @Column({ type: 'boolean', default: false })
+  featured: boolean;
+
+  // temp de lecture en Minute
+  @Column({ type: 'int', default: 0 })
+  reading_time: number;
+
+  @OneToMany(() => Commentaires, (commentaire) => commentaire.article)
+  commentaires: Commentaires[];
+
+  @OneToMany(() => Likes, (like) => like.article)
+  likes: Likes[];
 }

@@ -5,15 +5,15 @@ interface Categorie {
     description: string;
 }
 
-interface ArticleData {
-    titre: string;
-    description: string;
-    contenu: File | null;
-    couverture: File | null;
-    auteur_id: number | string;
-    categorie_id: number | string;
-    status: string;
-}  
+// interface ArticleData {
+//     titre: string;
+//     description: string;
+//     contenu: File | null;
+//     couverture: File | null;
+//     auteur_id: number | string;
+//     categorie_id: number | string;
+//     status: string;
+// }  
   
 
 /**
@@ -62,8 +62,12 @@ const createArticle = (data: FormData): Promise<FormData> => {
     });
 }
 
-const updateArticle = (id: number | string, data: Partial<ArticleData>): Promise<ArticleData> => {
-    return Axios.put(`/articles/${id}`, data);
+const updateArticle = (id: number | string, data: Partial<FormData>): Promise<FormData> => {
+    return Axios.put(`/articles/${id}`, data,{
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        }
+    });
 }
 
 /**
