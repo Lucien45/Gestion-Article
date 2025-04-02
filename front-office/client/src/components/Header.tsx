@@ -39,7 +39,7 @@ export function Header() {
     }else {
       setUser(null);
     }
-  }, []);
+  }, [userProfile]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -85,13 +85,13 @@ export function Header() {
               ) : (
                 <div className="space-x-4">
                   <Link
-                    to="/login"
+                    to="auth/login"
                     className="text-gray-700 hover:text-gray-900"
                   >
                     Login
                   </Link>
                   <Link
-                    to="/register"
+                    to="auth/register"
                     className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
                   >
                     Register
@@ -152,13 +152,13 @@ export function Header() {
               ) : (
                 <>
                   <Link
-                    to="/login"
+                    to="auth/login"
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
                   >
                     Login
                   </Link>
                   <Link
-                    to="/register"
+                    to="auth/register"
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
                   >
                     Register

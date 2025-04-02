@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
 import { UserService } from '../../services/user.service';
+import { Token } from '../../utils/Token';
 
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
@@ -19,7 +20,9 @@ export const LoginForm: React.FC = () => {
       password: password
     }
     try {
-      await UserService.SignIn(data);
+      const res = await UserService.SignIn(data);
+      Token.AddToken('authUser', res.data.token);
+      Token.AddToken('profile', JSON.stringify(res.data.user));
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
