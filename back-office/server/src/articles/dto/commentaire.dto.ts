@@ -1,17 +1,20 @@
 import { PartialType } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsEnum, IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateCommentaireDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   contenu: string;
 
   @IsNotEmpty()
-  @IsNumber()
+  @IsInt()
+  @Type(() => Number)
   user_id: number;
 
   @IsNotEmpty()
-  @IsNumber()
+  @IsInt()
+  @Type(() => Number)
   article_id: number;
 
   @IsEnum(['approuve', 'en attente', 'rejete'])

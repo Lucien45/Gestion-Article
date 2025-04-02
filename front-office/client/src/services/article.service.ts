@@ -5,6 +5,12 @@ interface Categorie {
     description: string;
 }
 
+interface DataComment {
+    contenu: string;
+    user_id: number;
+    article_id: number;
+}
+
 /**
  * service for categories
  */
@@ -74,7 +80,7 @@ const deleteCommentaire = (id: number | string) => {
     return Axios.delete(`/articles/commentaires/${id}`);
 }
 
-const createCommentaire = (data: FormData): Promise<FormData> => {
+const createCommentaire = (data: DataComment): Promise<DataComment> => {
     return Axios.post("/articles/commentaires", data);
 }
 

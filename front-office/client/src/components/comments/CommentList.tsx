@@ -27,10 +27,6 @@ export const CommentList: React.FC<CommentListProps> = ({ articleId }) => {
   }
 
   useEffect(() => {
-    // const fetchCommentById: Commentaire[] = StaticComments.filter((comment) => comment.article_id === articleId);
-    // if (fetchCommentById) {
-    //   setComments(fetchCommentById)
-    // }
     fetchCommetaires();
   }, [articleId]);
 

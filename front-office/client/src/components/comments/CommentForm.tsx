@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Send } from 'lucide-react';
 import { Token } from '../../utils/Token';
 import { UserService } from '../../services/user.service';
+import { ArticleService } from '../../services/article.service';
+import { Utils } from '../../utils/Utils';
 
 interface CommentFormProps {
   articleId: string;
@@ -19,14 +21,31 @@ interface User {
 export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
   const [user, setUser]  = useState<User | null>(null);
   const userProfile = JSON.parse(Token.GetToken("profile") as string);
-  const [content, setContent] = useState('');
+  const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!content.trim()) return;
+    if (!comment.trim()) return;
 
     setIsSubmitting(true);
+    const data = {
+      contenu: comment,
+      user_id: Number(userProfile.id),
+      article_id: Number(articleId),
+    }
+
+    try{
+      await ArticleService.createCommentaire(data);
+      setComment('')
+      Utils.success('commentaire ajouter');
+    }catch{
+      setComment('')
+      Utils.errorPage('Il y a un erreur')
+      setIsSubmitting(false);
+    }finally {
+      setIsSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -62,8 +81,8 @@ export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
         <textarea
           id="comment"
           rows={3}
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+          value={comment}
+          onChange={(e) => setComment(e.target.value)}
           placeholder="Partagez votre avis..."
           className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
         />
@@ -71,7 +90,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
       <div className="flex justify-end">
         <button
           type="submit"
-          disabled={isSubmitting || !content.trim()}
+          disabled={isSubmitting || !comment.trim()}
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Send className="h-4 w-4 mr-2" />
