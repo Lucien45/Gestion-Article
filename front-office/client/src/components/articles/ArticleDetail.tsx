@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useParams } from 'react-router-dom';
 import { Calendar, Clock, Eye, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Article } from '../../types';
-import { StaticArticles } from '../../data/metadata';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { CommentForm } from '../comments/CommentForm';
 import { CommentList } from '../comments/CommentList';
+import { ArticleService } from '../../services/article.service';
+import { apiUrl } from '../../services/api';
 
 export const ArticleDetail:  React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -14,19 +16,36 @@ export const ArticleDetail:  React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (StaticArticles.length === 0) {
-      setLoading(true);
-      setError("Aucun article disponible");
-    } else {
-      setLoading(false);
+  const fetchDetailArticles = async () => {
+    setLoading(true);
+    try {
+      const response = await ArticleService.getArticle(Number(id));
+      console.log('detail article: ', response.data);
+      setCurrentArticle(response.data);
       setError(null);
-      const fetchArticleById: Article | undefined = StaticArticles.find((article) => article.id === id);
-      if (fetchArticleById) {
-        setCurrentArticle(fetchArticleById);
-      }
+    } catch (error: any) {
+      console.warn(error);
+      setError("Aucun article disponible");
+    } finally {
+      setLoading(false);
     }
-  }, [id, StaticArticles]);
+  }
+  
+  useEffect(() => {
+    // if (StaticArticles.length === 0) {
+    //   setLoading(true);
+    //   setError("Aucun article disponible");
+    // } else {
+    //   setLoading(false);
+    //   setError(null);
+    //   const fetchArticleById: Article | undefined = StaticArticles.find((article) => article.id === id);
+    //   if (fetchArticleById) {
+    //     setCurrentArticle(fetchArticleById);
+    //   }
+    // }
+
+    fetchDetailArticles();
+  }, [id]);
 
   if (loading) {
     return (
@@ -50,31 +69,31 @@ export const ArticleDetail:  React.FC = () => {
       <header className="mb-8">
         <div className="relative aspect-[21/9] mb-6">
           <img
-            src={currentArticle.cover_url || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643'}
-            alt={currentArticle.title}
+            src={currentArticle.couverture ? `${apiUrl}/${currentArticle.couverture}` : currentArticle.titre || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643'}
+            alt={currentArticle.titre}
             className="rounded-lg object-cover w-full h-full"
           />
           {currentArticle.categorie && (
             <span className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
-              {currentArticle.categorie}
+              {currentArticle.categorie.nom}
             </span>
           )}
         </div>
 
         <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          {currentArticle.title}
+          {currentArticle.titre}
         </h1>
 
         <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 mb-4">
           <div className="flex items-center gap-1">
             <User className="h-4 w-4" />
-            <span>{currentArticle.user?.username}</span>
+            <span>{currentArticle.auteur?.username}</span>
           </div>
           <div className="flex items-center gap-1">
             <Calendar className="h-4 w-4" />
             <span>
-            {currentArticle.published_at || currentArticle.createdAt ? (
-              format(new Date(currentArticle.published_at || currentArticle.createdAt), 'dd MMMM yyyy', { locale: fr })
+            {currentArticle.date_publication ? (
+              format(new Date(currentArticle.date_publication), 'dd MMMM yyyy', { locale: fr })
             ) : (
               'Date inconnue'
             )}
@@ -83,11 +102,11 @@ export const ArticleDetail:  React.FC = () => {
           </div>
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4" />
-            <span>{currentArticle.readingTime} min de lecture</span>
+            <span>{currentArticle.reading_time} min de lecture</span>
           </div>
           <div className="flex items-center gap-1">
             <Eye className="h-4 w-4" />
-            <span>{currentArticle.views} vues</span>
+            <span>{currentArticle.vue} vues</span>
           </div>
         </div>
 

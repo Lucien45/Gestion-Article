@@ -13,7 +13,7 @@ function App() {
     <>
       {loading && <LoadingSpinner />}
       <Routes>
-      <Route path="/" element={<Header />}>
+        <Route path="/" element={<Header />}>
           <Route index element={<Navigate to="/home" replace />} />
           {/* Routes principales */}
           <Route path="/*" element={<AppRoute setLoading={setLoading} />} />

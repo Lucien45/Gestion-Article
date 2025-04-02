@@ -2,7 +2,7 @@ export interface User {
   id: string;
   email: string;
   username: string;
-  photoUrl: string | null;
+  profile?: string | null;
   role: 'author' | 'editor' | 'admin';
   createdAt: string;
   updatedAt: string;
@@ -10,7 +10,7 @@ export interface User {
 
 export interface Category {
   id: string;
-  name: string;
+  nom: string;
   description: string | null;
   slug: string;
   createdAt: string;
@@ -19,36 +19,39 @@ export interface Category {
 
 export interface Article {
   id: string;
-  title: string;
+  titre: string;
   description: string;
-  cover_url: string;
-  published_at: string;
-  createdAt: string;
-  views: number;
-  user?: User;
-  likes_count: number;
-  comments_count: number;
-  categorie?: string;
-  readingTime: number;
+  couverture: string;
+  contenu: string;
+  date_publication: string;
+  auteur?: User;
+  categorie?: Category;
+  vue: number;
+  commentaires: Commentaire;
+  likes: Like;
+  reading_time: number;
   featured: boolean;
+  status: string;
 }
 
-export interface Comment {
+export interface Commentaire {
   id: string;
-  content: string;
-  userId: string;
-  articleId: string;
+  contenu: string;
+  user_id: string;
+  article_id: string;
   status: 'pending' | 'approved' | 'rejected';
-  createdAt: string;
+  date_commantaire: string;
   updatedAt: string;
   user?: User;
+  length: number;
 }
 
-export interface ArticleLike {
+export interface Like {
   id: string;
   userId: string;
   articleId: string;
   createdAt: string;
+  length: number;
 }
 
 export interface UserActivityLog {

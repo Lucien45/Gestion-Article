@@ -2,10 +2,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock } from 'lucide-react';
+import { UserService } from '../../services/user.service';
 
 export const LoginForm: React.FC = () => {
   const navigate = useNavigate();
-  // const { signIn, error } = useAuthStore();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
@@ -14,8 +14,12 @@ export const LoginForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    const data = {
+      identification: email,
+      password: password
+    }
     try {
-      // await signIn(email, password);
+      await UserService.SignIn(data);
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);

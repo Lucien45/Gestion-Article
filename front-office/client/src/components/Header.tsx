@@ -1,17 +1,45 @@
 import { BookOpen, LogOut, Menu, X } from 'lucide-react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { StaticUsers } from '../data/metadata';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Token } from '../utils/Token';
+import { UserService } from '../services/user.service';
+import { logout } from '../context/AuthContext';
+import { apiUrl } from '../services/api';
+
+interface User {
+  id: number;
+  email: string;
+  username: string;
+  profile?: string;
+  role: string;
+}
 
 export function Header() {
 
-  const user  = StaticUsers[2];
+  const [user, setUser]  = useState<User | null>(null);
+  const userProfile = JSON.parse(Token.GetToken("profile") as string);
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
-    navigate('/login');
+    logout();
+    navigate('/');
   };
+
+  useEffect(() => {
+    if (userProfile) {
+      UserService.getUserById(userProfile.id)
+      .then((res) => {
+        setUser(res.data);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    }else {
+      setUser(null);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -32,7 +60,7 @@ export function Header() {
                   <Link to="/" className="text-gray-700 hover:text-gray-900">
                     Articles
                   </Link>
-                  {(user.role === 'admin' || user.role === 'editor') && (
+                  {(user.role === 'admin' || user.role === 'editeur' || user.role === 'auteur') && (
                     <Link to="/dashboard" className="text-gray-700 hover:text-gray-900">
                       Dashboard
                     </Link>
@@ -40,7 +68,7 @@ export function Header() {
                   <div className="flex items-center space-x-4">
                     <Link to="/profile" className="flex items-center space-x-2">
                       <img
-                        src={user.photoUrl || `https://ui-avatars.com/api/?name=${user.username}`}
+                        src={user?.profile ? `${apiUrl}/${user.profile}` : user?.username || `https://ui-avatars.com/api/?name=${user.username}`}
                         alt={user.username}
                         className="h-8 w-8 rounded-full"
                       />
@@ -100,7 +128,7 @@ export function Header() {
                   >
                     Articles
                   </Link>
-                  {(user.role === 'admin' || user.role === 'editor') && (
+                  {(user.role === 'admin' || user.role === 'editeur' || user.role === 'auteur') && (
                     <Link
                       to="/dashboard"
                       className="block px-4 py-2 text-gray-700 hover:bg-gray-50"

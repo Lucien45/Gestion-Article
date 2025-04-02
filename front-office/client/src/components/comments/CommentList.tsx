@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Comment } from '../../types';
+import { Commentaire } from '../../types';
 import { StaticComments } from '../../data/metadata';
+import { ArticleService } from '../../services/article.service';
+import { apiUrl } from '../../services/api';
 
 interface CommentListProps {
   articleId: string;
@@ -10,13 +12,26 @@ interface CommentListProps {
 
 
 export const CommentList: React.FC<CommentListProps> = ({ articleId }) => {
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Commentaire[]>([]);
+
+  const fetchCommetaires = async () => {
+    try {
+      const response = await ArticleService.getAllCommentaires();
+      console.log('all comment: ', response.data);
+      const fetchCommentById: Commentaire[] = StaticComments.filter((comment) => comment.article_id === articleId);
+      console.log('all comment article: ', fetchCommentById);
+      setComments(fetchCommentById);
+    } catch (error) {
+      console.warn(error);
+    }
+  }
 
   useEffect(() => {
-    const fetchCommentById: Comment[] = StaticComments.filter((comment) => comment.articleId === articleId);
-    if (fetchCommentById) {
-      setComments(fetchCommentById)
-    }
+    // const fetchCommentById: Commentaire[] = StaticComments.filter((comment) => comment.article_id === articleId);
+    // if (fetchCommentById) {
+    //   setComments(fetchCommentById)
+    // }
+    fetchCommetaires();
   }, [articleId]);
 
   if (comments.length === 0) {
@@ -33,7 +48,7 @@ export const CommentList: React.FC<CommentListProps> = ({ articleId }) => {
         <div key={comment.id} className="bg-white rounded-lg shadow p-4">
           <div className="flex items-start space-x-3">
             <img
-              src={comment.user?.photoUrl || `https://ui-avatars.com/api/?name=${comment.user?.username}`}
+              src={comment.user?.profile ? `${apiUrl}/${comment.user.profile}` : comment.user?.username || `https://ui-avatars.com/api/?name=${comment.user?.username}`}
               alt={comment.user?.username}
               className="h-10 w-10 rounded-full"
             />
@@ -43,13 +58,13 @@ export const CommentList: React.FC<CommentListProps> = ({ articleId }) => {
                   {comment.user?.username}
                 </p>
                 <p className="text-sm text-gray-500">
-                  {formatDistanceToNow(new Date(comment.createdAt), {
+                  {formatDistanceToNow(new Date(comment.date_commantaire), {
                     addSuffix: true,
                     locale: fr,
                   })}
                 </p>
               </div>
-              <p className="text-gray-700 mt-1">{comment.content}</p>
+              <p className="text-gray-700 mt-1">{comment.contenu}</p>
             </div>
           </div>
         </div>

@@ -1,14 +1,24 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Send } from 'lucide-react';
-import { StaticUsers } from '../../data/metadata';
+import { Token } from '../../utils/Token';
+import { UserService } from '../../services/user.service';
 
 interface CommentFormProps {
   articleId: string;
 }
 
+interface User {
+  id: number;
+  email: string;
+  username: string;
+  profile?: string;
+  role: string;
+}
+
 export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
-  const user  = StaticUsers[0];
+  const [user, setUser]  = useState<User | null>(null);
+  const userProfile = JSON.parse(Token.GetToken("profile") as string);
   const [content, setContent] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -19,6 +29,21 @@ export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
     setIsSubmitting(true);
   };
 
+  useEffect(() => {
+    if (userProfile) {
+      UserService.getUserById(userProfile.id)
+      .then((res) => {
+        setUser(res.data);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err)
+      })
+    }else {
+      setUser(null);
+    }
+  }, []);
+
   if (!user) {
     return (
       <div className="text-center py-4 text-gray-600">
@@ -26,6 +51,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
       </div>
     );
   }
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">

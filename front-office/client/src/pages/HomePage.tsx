@@ -1,24 +1,34 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from 'react';
 import { ArticleCard } from '../components/articles/ArticleCard';
 import { Article } from '../types';
-import { StaticArticles } from '../data/metadata';
 import { Loader2 } from 'lucide-react';
 import { FeaturedArticles } from '../components/articles/FeaturedArticles';
+import { ArticleService } from '../services/article.service';
 
 export const HomePage: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (StaticArticles.length === 0) {
-      setLoading(true);
-      setError('Auccun article disponible');
-    }else {
+  const fetchArticles = async () => {
+    setLoading(true);
+    try {
+      const response = await ArticleService.getAllArticles();
+      console.log('liste article: ', response.data);
+      const Article_user = response.data.filter((article: Article) => article.status === 'publié')
+      console.log('liste article filtred: ', Article_user)
+      setArticles(Article_user? Article_user : []);
+    } catch (error: any) {
+      console.warn(error);
+      setError('auccun liset dispo')
+    } finally {
       setLoading(false);
-      setError(null);
-      setArticles(StaticArticles)
     }
+  }
+
+  useEffect(() => {
+    fetchArticles();
   }, []);
 
   if (loading) {
