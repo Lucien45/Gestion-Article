@@ -32,18 +32,6 @@ export const ArticleDetail:  React.FC = () => {
   }
   
   useEffect(() => {
-    // if (StaticArticles.length === 0) {
-    //   setLoading(true);
-    //   setError("Aucun article disponible");
-    // } else {
-    //   setLoading(false);
-    //   setError(null);
-    //   const fetchArticleById: Article | undefined = StaticArticles.find((article) => article.id === id);
-    //   if (fetchArticleById) {
-    //     setCurrentArticle(fetchArticleById);
-    //   }
-    // }
-
     fetchDetailArticles();
   }, [id]);
 

@@ -189,7 +189,7 @@ export class ArticlesService {
       where: { id: commentaireId },
       relations: ['user', 'article'],
     });
-    if (!commentaire) throw new NotFoundException('categorie non trouvé');
+    if (!commentaire) throw new NotFoundException('commentaire non trouvé');
     return commentaire;
   }
 
