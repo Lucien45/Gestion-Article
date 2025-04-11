@@ -58,6 +58,10 @@ export const ListCategorie: React.FC = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [selectedCategorie, setSelectedCategorie] = useState<Categorie | null>(null);
 
+  const [successDialog, setSuccessDialog] = useState(false);
+  const [ErrorDialog, setErrorDialog] = useState(false);
+  const [message, setMessage] = useState('');
+
   const fetchCategories = async () => {
     await ArticleService.getAllCategories()
     .then((response) => {
@@ -101,8 +105,12 @@ export const ListCategorie: React.FC = () => {
       await ArticleService.deleteCategorie(selectedCategorie.id);
       setOpenDeleteDialog(false);
       fetchCategories();
+      setSuccessDialog(true);
+      setMessage('suppression reussie avec succès ✅');
     } catch (error) {
       console.warn(error);
+      setErrorDialog(true);
+      setMessage('Erreur lors de suppression de categorie ⚠️');
     }
   };
 
@@ -199,6 +207,64 @@ export const ListCategorie: React.FC = () => {
           <Button onClick={handleConfirmDelete} color="error" variant="contained">Supprimer</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Dialog de succès */}
+      <Dialog fullWidth open={successDialog} onClose={() => setSuccessDialog(false)}>
+        <DialogTitle>
+          <b>Succès ✅</b>
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={() => setSuccessDialog(false)}
+          sx={(theme) => ({
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: theme.palette.grey[500],
+          })}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent dividers>
+          <DialogContentText>
+            <b>{message}</b>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSuccessDialog(false)} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de error */}
+      <Dialog fullWidth open={ErrorDialog} onClose={() => setErrorDialog(false)}>
+        <DialogTitle>
+          <b>Error ⚠️</b>
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={() => setSuccessDialog(false)}
+          sx={(theme) => ({
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: theme.palette.grey[500],
+          })}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent dividers>
+          <DialogContentText>
+            <b>{message}</b>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setErrorDialog(false)} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 };
@@ -208,9 +274,7 @@ export const AddEditCategorie: React.FC = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [successDialog, setSuccessDialog] = useState(false);
-
-  const [processMessage, setProcessMessage] = useState("");
-  const [CategorieAddSuccess, setCategorieAddSuccess] = useState<boolean>(false);
+  const [ErrorDialog, setErrorDialog] = useState(false);
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -227,41 +291,20 @@ export const AddEditCategorie: React.FC = () => {
 
   const handleConfirmSubmit = async () => {
     setProcessing(true);
-    // try {
-    //   await ArticleService.createCategorie(newCategorie);
-    //   setNewCategorie({ nom: "", description: "" });
-    //   setSuccessDialog(true);
-    //   setProcessMessage(`Le Categorie ${newCategorie.nom} a été ajoutée avec succès ✅`);
-    //   setCategorieAddSuccess(true);
-    // } catch (error) {
-    //   console.warn(error);
-    //   setProcessMessage(`Erreur lors de mise a jour de L'article ${newCategorie.nom} ⚠️`);
-    //   setCategorieAddSuccess(false);
-    // } finally {
-    //   setProcessing(false);
-    //   setOpenDialog(false);
-    //   setCategorieAddSuccess(false);
-    //   setProcessMessage('');
-    // }
     await ArticleService.createCategorie(newCategorie)
     .then((response) => {
       setNewCategorie({ nom: "", description: "" });
       setSuccessDialog(true);
-      setProcessMessage(`Le Categorie ${newCategorie.nom} a été ajoutée avec succès ✅`);
-      setCategorieAddSuccess(true);
       console.log('reponse server: ', response);
     })
     .catch((error) => {
-      setSuccessDialog(true);
-      setProcessMessage(`Erreur lors de mise a jour de La categorie ⚠️`);
-      setCategorieAddSuccess(false);
+      setErrorDialog(true);
       console.warn('reponse server: ',error);
     })
     .finally(() => {
       setProcessing(false);
       setOpenDialog(false);
-      setCategorieAddSuccess(false);
-      setProcessMessage('');
+      setErrorDialog(false);
     })
   };
 
@@ -340,12 +383,7 @@ export const AddEditCategorie: React.FC = () => {
       {/* Dialog de succès */}
       <Dialog fullWidth open={successDialog} onClose={() => setSuccessDialog(false)}>
         <DialogTitle>
-          {CategorieAddSuccess && (
-            <b>Succès ✅</b>
-          )}
-          {!CategorieAddSuccess && (
-            <b>Erreur ⚠️</b>
-          )}
+          <b>Succès ✅</b>
         </DialogTitle>
         <IconButton
           aria-label="close"
@@ -361,11 +399,40 @@ export const AddEditCategorie: React.FC = () => {
         </IconButton>
         <DialogContent dividers>
           <DialogContentText>
-            <b>{processMessage}</b>
+            <b>Le Categorie {newCategorie.nom} a été ajoutée avec succès ✅</b>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setSuccessDialog(false)} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de error */}
+      <Dialog fullWidth open={ErrorDialog} onClose={() => setErrorDialog(false)}>
+        <DialogTitle>
+          <b>Error ⚠️</b>
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={() => setSuccessDialog(false)}
+          sx={(theme) => ({
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: theme.palette.grey[500],
+          })}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent dividers>
+          <DialogContentText>
+            <b>Erreur lors de la creation du categorie ⚠️</b>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setErrorDialog(false)} color="primary">
             OK
           </Button>
         </DialogActions>

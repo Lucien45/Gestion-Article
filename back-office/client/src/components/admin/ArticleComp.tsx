@@ -445,7 +445,7 @@ export const DetailArticle: React.FC<DetalArticleProps> = ({open, setOpen, id}) 
       setDataArticle(res.data);
       console.log('data detail: ', res.data);
     } catch (error) {
-      console.log(`Échec de récupération des détails du club ${error}`);
+      console.warn(`Échec de récupération des détails de l'article ${error}`);
     }
   }
 

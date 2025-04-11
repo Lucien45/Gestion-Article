@@ -39,7 +39,7 @@ export function Header() {
     }else {
       setUser(null);
     }
-  }, [userProfile]);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">

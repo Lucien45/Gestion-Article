@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import { Token } from "../utils/Token";
 import Axios from "./axios"
 
@@ -11,6 +12,11 @@ export interface LoginResponse {
 interface UserStatus {
     role: string;
     is_active: boolean;
+}
+
+export interface LoginSuccessResponse {
+    token: string;
+    user: string;
 }
 
 /**
@@ -65,7 +71,7 @@ const SignUp = (data: FormData): Promise<FormData> => {
     });
 }
 
-const SignIn = (data: LoginResponse): Promise<LoginResponse> => {
+const SignIn = (data: LoginResponse): Promise<AxiosResponse<LoginSuccessResponse>> => {
     return Axios.post("/users/login", data);
 }
 

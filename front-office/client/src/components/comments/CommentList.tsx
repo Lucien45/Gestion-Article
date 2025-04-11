@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Commentaire } from '../../types';
-import { StaticComments } from '../../data/metadata';
+import { Article, Commentaire } from '../../types';
 import { ArticleService } from '../../services/article.service';
 import { apiUrl } from '../../services/api';
 
@@ -13,14 +12,18 @@ interface CommentListProps {
 
 export const CommentList: React.FC<CommentListProps> = ({ articleId }) => {
   const [comments, setComments] = useState<Commentaire[]>([]);
+  const [currentArticle, setCurrentArticle] = useState<Article>();
 
   const fetchCommetaires = async () => {
     try {
-      const response = await ArticleService.getAllCommentaires();
-      console.log('all comment: ', response.data);
-      const fetchCommentById: Commentaire[] = StaticComments.filter((comment) => comment.article_id === articleId);
-      console.log('all comment article: ', fetchCommentById);
-      setComments(fetchCommentById);
+      // const response = await ArticleService.getAllCommentaires();
+      // console.log('all comment: ', response.data);
+      // const fetchCommentById: Commentaire[] = response.data.filter((comment) => comment.article_id === articleId);
+      // console.log('all comment article: ', fetchCommentById);
+      // setComments(fetchCommentById);
+      const response = await ArticleService.getArticle(Number(articleId));
+      console.log('detail article comment: ', response.data);
+    
     } catch (error) {
       console.warn(error);
     }

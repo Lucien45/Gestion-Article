@@ -145,10 +145,10 @@ const Navbar = ({ toggleSidebar, isOpen }: NavbarProps) => {
             onClose={handleMenuClose}
             PaperProps={{ style: { width: 200 } }} 
           >
-            <MenuItem disabled>
+            <MenuItem >
               <Box sx={{ display: "flex", flexDirection: "column" }}>
                 <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-                  {dataUser?.username || "Utilisateur"}
+                  {dataUser?.username || "Utilisateur"} 👋
                 </Typography>
                 <Typography variant="body2" sx={{ color: "gray" }}>
                   {dataUser?.email || "email inconnu"}

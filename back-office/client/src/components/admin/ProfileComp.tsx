@@ -581,7 +581,7 @@ export const AddUser: React.FC = () => {
       }
     }
     if (e.target.name === "civilite") {
-      setNewUserData({ ...NewUserData, prenom: e.target.value});
+      setNewUserData({ ...NewUserData, civilite: e.target.value});
     }
     if (e.target.name === "email") {
       // Email validation regex pattern
@@ -780,7 +780,7 @@ export const AddUser: React.FC = () => {
           />
         </Grid2>
         <Grid2 size={6}>
-          <FormControl variant="outlined" fullWidth required>
+          <FormControl variant="outlined" fullWidth>
             <Button variant="outlined" component="label">
               Photo de profile
               <input type="file" hidden accept="image/*" onChange={loadProfile} />
@@ -1318,7 +1318,7 @@ export const UpdateStatus: React.FC<UpdateUserProps> = ({ open, setOpen, id, ref
                         checked={dataUserUpdate.status} 
                         onChange={(e) => setDataUserUpdate({...dataUserUpdate, status: e.target.checked})} 
                       />
-                    } label="Activer" />
+                    } label={dataUserUpdate.status ? 'Activer': 'Desactiver'} />
                   </FormGroup>
                 </Grid2>
                 <Grid2 size={12}>

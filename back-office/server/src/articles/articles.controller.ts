@@ -23,6 +23,7 @@ import { CreateHistoriqueDto, UpdateHistoriqueDto } from './dto/historique.dto';
 import { CreateLikeDto, UpdateLikeDto } from './dto/like.dto';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
+import { Commentaires } from './entities/commentaire.entity';
 
 @Controller('articles')
 export class ArticlesController {
@@ -180,7 +181,7 @@ export class ArticlesController {
   }
 
   @Get('commentaires')
-  findAllCommentaires() {
+  async getAllCommentaires(): Promise<Commentaires[]> {
     return this.articlesService.findAllCommentaire();
   }
 

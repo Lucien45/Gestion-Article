@@ -179,6 +179,7 @@ export class ArticlesService {
   }
 
   async findAllCommentaire(): Promise<Commentaires[]> {
+    console.log('Fetching all comments...');
     return await this.commentaireRepository.find({
       relations: ['user', 'article'],
     });

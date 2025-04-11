@@ -1,9 +1,7 @@
-import { useEffect, useRef } from 'react'
-import { Outlet } from 'react-router';
-import log from '../../../public/log.svg'
-import register from '../../../public/register.svg'
+import { useRef, useEffect } from 'react';
+import { Box, Button, Typography } from '@mui/material';
 import '../../assets/css/auth.css'
-import '../../assets/css/auth_responsive.css'
+import { Outlet } from 'react-router-dom';
 
 const AuthLayout = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -24,43 +22,36 @@ const AuthLayout = () => {
       signInBtn?.removeEventListener('click', handleSignInClick);
     };
   }, []);
-  return (
-    <div className="container" ref={containerRef}>
-      <div className="forms-container">
-        <div className="signin-signup">
-          <Outlet />
-        </div>
-      </div>
-      <div className="panels-container">
-        <div className="panel left-panel">
-          <div className="content">
-            <h3>New here ?</h3>
-            <p>
-              Lorem ipsum, dolor sit amet consectetur adipisicing elit. Debitis,
-              ex ratione. Aliquid!
-            </p>
-            <button className="btn transparent" id="sign-up-btn">
-              Sign up
-            </button>
-          </div>
-          <img src={log} className="image" alt="Sign up illustration" />
-        </div>
-        <div className="panel right-panel">
-          <div className="content">
-            <h3>Already a member?</h3>
-            <p>
-              Lorem ipsum dolor sit amet consectetur adipisicing elit. Nostrum
-              laboriosam ad deleniti.
-            </p>
-            <button className="btn transparent" id="sign-in-btn">
-              Sign in
-            </button>
-          </div>
-          <img src={register} className="image" alt="Sign in illustration" />
-        </div>
-      </div>
-    </div>
-  )
-}
 
-export default AuthLayout
+  return (
+    <Box className="container" ref={containerRef}>
+      <Box className="forms-container">
+        <Box className="signin-signup">
+          <Outlet/>
+        </Box>
+      </Box>
+
+      <Box className="panels-container">
+        {/* LEFT PANEL */}
+        <Box className="panel left-panel">
+          <Box className="content">
+            <Typography variant="h5">Nouveau ici ?</Typography>
+            <Typography variant="body1" mb={2}>Créez un compte dès maintenant.</Typography>
+            <Button id="sign-up-btn" variant="outlined">S'inscrire</Button>
+          </Box>
+        </Box>
+
+        {/* RIGHT PANEL */}
+        <Box className="panel right-panel">
+          <Box className="content">
+            <Typography variant="h5">Déjà inscrit ?</Typography>
+            <Typography variant="body1" mb={2}>Connectez-vous pour continuer.</Typography>
+            <Button id="sign-in-btn" variant="outlined">Se connecter</Button>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+export default AuthLayout;
