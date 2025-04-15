@@ -19,7 +19,7 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article, featured }) =
         <div className="relative overflow-hidden rounded-lg aspect-[16/9]">
           <img
             src={article?.couverture ? `${apiUrl}/${article.couverture}` : "https://images.unsplash.com/photo-1499750310107-5fef28a66643"}
-            alt=''
+            alt=""
             className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
           />
           {article.categorie && (
@@ -29,11 +29,11 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article, featured }) =
           )}
         </div>
         <div className="mt-4 space-y-2">
-          <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
             {article.titre}
           </h3>
-          <p className="text-gray-600 line-clamp-2">{article.description}</p>
-          <div className="flex items-center space-x-4 text-sm text-gray-500">
+          <p className="text-gray-600 dark:text-gray-300 line-clamp-2">{article.description}</p>
+          <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
             <div className="flex items-center space-x-1">
               <User className="h-4 w-4" />
               <span>{article.auteur?.username}</span>

@@ -6,7 +6,7 @@ import { ArticleService } from '../../services/article.service';
 import { apiUrl } from '../../services/api';
 
 interface CommentListProps {
-  articleId: string;
+  articleId: number | string;
 }
 
 

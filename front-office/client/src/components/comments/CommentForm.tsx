@@ -7,7 +7,7 @@ import { ArticleService } from '../../services/article.service';
 import { Utils } from '../../utils/Utils';
 
 interface CommentFormProps {
-  articleId: string;
+  articleId: number | string;
 }
 
 interface User {
@@ -66,7 +66,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
   if (!user) {
     return (
       <div className="text-center py-4 text-gray-600">
-        Connectez-vous pour laisser un commentaire
+        vous devez vous inscrire ou vous connecter pour poster un commentaire.
       </div>
     );
   }

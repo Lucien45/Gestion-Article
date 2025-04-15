@@ -6,6 +6,7 @@ import { UserService } from '../services/user.service';
 import { logout } from '../context/AuthContext';
 import { apiUrl } from '../services/api';
 import { Footer } from './Footer';
+import { ThemeToggle } from './ThemeToggle';
 
 interface User {
   id: number;
@@ -42,26 +43,27 @@ export function Header() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+      <nav className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex">
               <Link to="/" className="flex items-center">
                 <BookOpen className="h-8 w-8 text-indigo-600" />
-                <span className="text-xl font-bold text-gray-900">BlogApp</span>
+                <span className="text-xl font-bold text-gray-900 dark:text-white">BlogApp</span>
               </Link>
             </div>
 
             {/* Desktop Navigation */}
             <div className="hidden sm:flex sm:items-center sm:space-x-8">
+              <ThemeToggle />
               {user ? (
                 <>
-                  <Link to="/articles" className="text-gray-700 hover:text-gray-900">
+                  <Link to="/articles" className="text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white">
                     Articles
                   </Link>
                   {(user.role === 'admin' || user.role === 'editeur' || user.role === 'auteur') && (
-                    <Link to="/dashboard" className="text-gray-700 hover:text-gray-900">
+                    <Link to="/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white">
                       Dashboard
                     </Link>
                   )}
@@ -72,11 +74,11 @@ export function Header() {
                         alt={user.username}
                         className="h-8 w-8 rounded-full"
                       />
-                      <span className="text-gray-700">{user.username}</span>
+                      <span className="text-gray-700 dark:text-gray-200">{user.username}</span>
                     </Link>
                     <button
                       onClick={handleSignOut}
-                      className="text-gray-700 hover:text-gray-900"
+                      className="text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white"
                     >
                       <LogOut className="h-5 w-5" />
                     </button>
@@ -86,7 +88,7 @@ export function Header() {
                 <div className="flex items-center space-x-4">
                   <Link
                     to="auth/login"
-                    className="text-gray-700 hover:text-gray-900"
+                    className="text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white"
                   >
                     Login
                   </Link>
@@ -102,10 +104,11 @@ export function Header() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="sm:hidden flex items-center">
+            <div className="sm:hidden flex items-center space-x-2">
+              <ThemeToggle />
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="text-gray-700"
+                className="text-gray-700 dark:text-gray-200"
               >
                 {isMenuOpen ? (
                   <X className="h-6 w-6" />
@@ -125,27 +128,27 @@ export function Header() {
                 <>
                   <Link
                     to="/articles"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Articles
                   </Link>
                   {(user.role === 'admin' || user.role === 'editeur' || user.role === 'auteur') && (
                     <Link
                       to="/dashboard"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                      className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                     >
                       Dashboard
                     </Link>
                   )}
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Profile
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    className="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Sign Out
                   </button>
@@ -154,13 +157,13 @@ export function Header() {
                 <>
                   <Link
                     to="auth/login"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Login
                   </Link>
                   <Link
                     to="auth/register"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"
                   >
                     Register
                   </Link>
@@ -170,9 +173,11 @@ export function Header() {
           </div>
         )}
       </nav>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-100">
-        <Outlet />
+      
+      <main className="flex-1">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Outlet />
+        </div>
       </main>
 
       <Footer />
