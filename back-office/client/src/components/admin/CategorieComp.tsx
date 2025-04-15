@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { Dispatch, FormEvent, SetStateAction, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -17,6 +18,7 @@ import {
   TableHead,
   TableBody,
   Grid2,
+  Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { ArticleService } from "../../services/article.service";
@@ -62,6 +64,8 @@ export const ListCategorie: React.FC = () => {
   const [ErrorDialog, setErrorDialog] = useState(false);
   const [message, setMessage] = useState('');
 
+  const [selectedId, setSelectedId] = useState<number | string>(0);
+
   const fetchCategories = async () => {
     await ArticleService.getAllCategories()
     .then((response) => {
@@ -80,23 +84,13 @@ export const ListCategorie: React.FC = () => {
 
   const handleEdit = (categorie: Categorie) => {
     setSelectedCategorie(categorie);
+    setSelectedId(categorie.id);
     setOpenEditModal(true);
   };
 
   const handleDelete = (categorie: Categorie) => {
     setSelectedCategorie(categorie);
     setOpenDeleteDialog(true);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!selectedCategorie) return;
-    try {
-      await ArticleService.updateCategorie(selectedCategorie.id, selectedCategorie);
-      setOpenEditModal(false);
-      fetchCategories();
-    } catch (error) {
-      console.warn(error);
-    }
   };
 
   const handleConfirmDelete = async () => {
@@ -172,29 +166,12 @@ export const ListCategorie: React.FC = () => {
       </TableContainer>
       
       {/* Modal d'édition */}
-      <Dialog open={openEditModal} onClose={() => setOpenEditModal(false)}>
-        <DialogTitle>Modifier la Catégorie</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Nom"
-            value={selectedCategorie?.nom || ""}
-            onChange={(e) => setSelectedCategorie({ ...selectedCategorie!, nom: e.target.value })}
-            margin="dense"
-          />
-          <TextField
-            fullWidth
-            label="Description"
-            value={selectedCategorie?.description || ""}
-            onChange={(e) => setSelectedCategorie({ ...selectedCategorie!, description: e.target.value })}
-            margin="dense"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenEditModal(false)} color="secondary">Annuler</Button>
-          <Button onClick={handleSaveEdit} color="primary" variant="contained">Enregistrer</Button>
-        </DialogActions>
-      </Dialog>
+      <UpdateCategorie
+        open={openEditModal}
+        setOpen={setOpenEditModal}
+        id={selectedId}
+        refreshCategorie={fetchCategories}
+      />
 
       {/* Dialogue de suppression */}
       <Dialog open={openDeleteDialog} onClose={() => setOpenDeleteDialog(false)}>
@@ -351,7 +328,7 @@ export const AddEditCategorie: React.FC = () => {
             disabled={!desableButton()}
             onClick={handleOpenDialog}
           >
-            Sauvegarder
+            Créer
           </Button>
         </Grid2>
       </Grid2>
@@ -375,7 +352,7 @@ export const AddEditCategorie: React.FC = () => {
             Annuler
           </Button>
           <Button onClick={handleConfirmSubmit} disabled={processing} color="primary" variant="contained">
-            Confirmer
+            Ok, Confirmer
           </Button>
         </DialogActions>
       </Dialog>
@@ -438,5 +415,138 @@ export const AddEditCategorie: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Paper>
+  );
+};
+
+interface UpdateCategorieProps {
+  open: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+  id: number | string | undefined;
+  refreshCategorie: () => Promise<void>;
+}
+
+export const UpdateCategorie: React.FC<UpdateCategorieProps> = ({open, setOpen, id, refreshCategorie}) => {
+  const [openDialog, setOpenDialog] = useState(false);
+  const [successDialog, setSuccessDialog] = useState(false);
+  const [dataCategorie, setDataCategorie] = useState({ 
+    nom: "", description: "" 
+  });
+
+  const [processMessage, setProcessMessage] = useState("");
+  const [userUpdateSuccess, setUserUpdateSuccess] = useState<boolean>(false);
+
+  const fetchCategorie = async () => {
+    if (!id) return;
+    try {
+      const response = await ArticleService.getCategorie(Number(id));
+      setDataCategorie({
+        nom: response.data.nom,
+        description: response.data.description,
+      });
+    } catch (error) {
+      console.warn("Erreur lors de la récupération de la catégorie :", error);
+    }
+  };
+
+  const handleOpenDialog = () => {
+    setOpenDialog(true);
+    setOpen(false);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setOpen(true);
+  };
+
+  const handleSaveEdit = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+    if (!dataCategorie) return;
+    try {
+      await ArticleService.updateCategorie(Number(id), dataCategorie);
+      setProcessMessage(`Le categorie ${dataCategorie?.nom} a été ajoutée avec succès ✅`);
+      await refreshCategorie();
+      setOpenDialog(false);
+      setSuccessDialog(true);
+      setUserUpdateSuccess(true)
+    } catch (error: any) {
+      setUserUpdateSuccess(false)
+      setProcessMessage(`Erreur lors de mise a jour de la categorie ${dataCategorie?.nom} ⚠️`);
+      console.warn("Erreur lors de mise a jour :", error.response?.data || error.message);
+    }finally {
+      setOpenDialog(false);
+    }
+    
+  };
+
+  useEffect(() => {
+    fetchCategorie();
+  }, [id]);
+
+  return(
+    <>
+      {/* Modal d'édition */}
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle>Modifier les informations</DialogTitle>
+
+        <Divider sx={{ my: 2 }} />
+
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Nom"
+            value={dataCategorie?.nom || ""}
+            onChange={(e) => setDataCategorie({ ...dataCategorie, nom: e.target.value })}
+            margin="dense"
+          />
+          <TextField
+            fullWidth
+            label="Description"
+            value={dataCategorie?.description || ""}
+            onChange={(e) => setDataCategorie({ ...dataCategorie, description: e.target.value })}
+            margin="dense"
+          />
+        </DialogContent>
+
+        <Divider sx={{ my: 2 }} />
+
+        <DialogActions>
+          <Button onClick={() => setOpen(false)} color="secondary">Annuler</Button>
+          <Button onClick={handleOpenDialog} color="primary" variant="contained">Vérifier</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog de confirmation */}
+      <Dialog fullWidth open={openDialog} onClose={handleCloseDialog}>
+        <DialogTitle>Veuillez vérifier les informations</DialogTitle>
+        <DialogContent dividers>
+          <DialogCategorie categorieData={dataCategorie} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog} color="secondary">Annuler</Button>
+          <Button onClick={handleSaveEdit} color="primary" variant="contained">Ok, Confirmer</Button>
+        </DialogActions>
+      </Dialog>
+  
+      {/* Dialog de succès */}
+      <Dialog fullWidth open={successDialog} onClose={() => setSuccessDialog(false)}>
+        <DialogTitle>
+        {userUpdateSuccess && (
+          <b>Succès ✅</b>
+        )}
+        {!userUpdateSuccess && (
+          <b>Erreur ⚠️</b>
+        )}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+          <b>{processMessage}</b>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSuccessDialog(false)} color="primary">OK</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };

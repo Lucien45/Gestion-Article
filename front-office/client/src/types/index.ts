@@ -1,5 +1,5 @@
 export interface User {
-  id: string;
+  id: number | string;
   email: string;
   username: string;
   profile?: string | null;
@@ -9,16 +9,16 @@ export interface User {
 }
 
 export interface Category {
-  id: string;
+  id: number | string;
   nom: string;
   description: string | null;
-  slug: string;
   createdAt: string;
   updatedAt: string;
+  articles?: Article[];
 }
 
 export interface Article {
-  id: string;
+  id: number | string;
   titre: string;
   description: string;
   couverture: string;
@@ -32,10 +32,11 @@ export interface Article {
   reading_time: number;
   featured: boolean;
   status: string;
+  length: number;
 }
 
 export interface Commentaire {
-  id: string;
+  id: number | string;
   contenu: string;
   user_id: string;
   article_id: string;
@@ -47,7 +48,7 @@ export interface Commentaire {
 }
 
 export interface Like {
-  id: string;
+  id: number | string;
   userId: string;
   articleId: string;
   createdAt: string;
@@ -55,7 +56,7 @@ export interface Like {
 }
 
 export interface UserActivityLog {
-  id: string;
+  id: number | string;
   userId: string;
   action: string;
   entityType: string;

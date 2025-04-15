@@ -1,3 +1,4 @@
+import { AxiosResponse } from "axios";
 import { Token } from "../utils/Token";
 import Axios from "./axios"
 
@@ -6,6 +7,11 @@ const token = Token.GetToken('authUser');
 export interface LoginResponse {
     identification: string;
     password: string;
+}
+
+export interface LoginSuccessResponse {
+    token: string;
+    user: string;
 }
 
 interface UserStatus {
@@ -65,12 +71,13 @@ const SignUp = (data: FormData): Promise<FormData> => {
     });
 }
 
-const SignIn = (data: LoginResponse): Promise<LoginResponse> => {
+const SignIn = (data: LoginResponse): Promise<AxiosResponse<LoginSuccessResponse>> => {
     return Axios.post("/users/login", data);
 }
 
 const SignOut = () => {
     Token.RemoveToken('authUser')
+    Token.RemoveToken('profile')
     window.location.href = '/';
 };
 export const UserService = {

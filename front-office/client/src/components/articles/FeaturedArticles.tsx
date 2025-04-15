@@ -5,9 +5,11 @@ import { ArticleService } from '../../services/article.service';
 
 export const FeaturedArticles: React.FC = () => {
   const [featuredArticles, setFeaturedArticles] = useState<Article[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchFeatureArticles = async () => {
     try {
+      setLoading(true);
       const response = await ArticleService.getAllArticles();
       console.log('liste article: ', response.data);
       const fetchArticleById: Article[] = response.data.filter((article: Article) => article.featured === true);
@@ -15,13 +17,30 @@ export const FeaturedArticles: React.FC = () => {
       setFeaturedArticles(fetchArticleById? fetchArticleById : []);
     } catch (error) {
       console.warn(error);
+    }finally {
+      setLoading(false);
     }
   }
+
+  
   
   useEffect(() => {
     fetchFeatureArticles();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="flex flex-col bg-neutral-300 w-56 h-64 animate-pulse rounded-xl p-4 gap-4">
+        <div className="bg-neutral-400/50 w-full h-32 animate-pulse rounded-md" />
+        <div className="flex flex-col gap-2">
+          <div className="bg-neutral-400/50 w-full h-4 animate-pulse rounded-md" />
+          <div className="bg-neutral-400/50 w-4/5 h-4 animate-pulse rounded-md" />
+          <div className="bg-neutral-400/50 w-full h-4 animate-pulse rounded-md" />
+          <div className="bg-neutral-400/50 w-2/4 h-4 animate-pulse rounded-md" />
+        </div>
+      </div>
+    );
+  }
 
   if (featuredArticles.length === 0) return null;
 
@@ -34,5 +53,6 @@ export const FeaturedArticles: React.FC = () => {
         ))}
       </div>
     </section>
+    
   );
 };

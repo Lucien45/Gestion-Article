@@ -2,9 +2,11 @@
 import { useEffect, useState } from 'react';
 import { ArticleCard } from '../components/articles/ArticleCard';
 import { Article } from '../types';
-import { Loader2 } from 'lucide-react';
 import { FeaturedArticles } from '../components/articles/FeaturedArticles';
 import { ArticleService } from '../services/article.service';
+import { PopularArticles } from '../components/articles/PopularArticles';
+import { CategoryList } from '../components/categories/CategoryList';
+import { NewsletterSignup } from '../components/Newsletter/NewsletterSignup';
 
 export const HomePage: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -12,16 +14,14 @@ export const HomePage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
 
   const fetchArticles = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
       const response = await ArticleService.getAllArticles();
-      console.log('liste article: ', response.data);
       const Article_user = response.data.filter((article: Article) => article.status === 'publié')
-      console.log('liste article filtred: ', Article_user)
       setArticles(Article_user? Article_user : []);
     } catch (error: any) {
       console.warn(error);
-      setError('auccun liset dispo')
+      setError('auccun liset disponnible')
     } finally {
       setLoading(false);
     }
@@ -33,8 +33,14 @@ export const HomePage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="flex flex-col bg-neutral-300 w-56 h-64 animate-pulse rounded-xl p-4 gap-4">
+        <div className="bg-neutral-400/50 w-full h-32 animate-pulse rounded-md" />
+        <div className="flex flex-col gap-2">
+          <div className="bg-neutral-400/50 w-full h-4 animate-pulse rounded-md" />
+          <div className="bg-neutral-400/50 w-4/5 h-4 animate-pulse rounded-md" />
+          <div className="bg-neutral-400/50 w-full h-4 animate-pulse rounded-md" />
+          <div className="bg-neutral-400/50 w-2/4 h-4 animate-pulse rounded-md" />
+        </div>
       </div>
     );
   }
@@ -49,16 +55,51 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className="space-y-12">
-      <FeaturedArticles />
+      {/* Hero Section */}
+      <section className="relative bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl overflow-hidden">
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="relative max-w-4xl mx-auto px-6 py-24 text-center text-white">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            Découvrez des articles passionnants
+          </h1>
+          <p className="text-xl md:text-2xl mb-8 text-white/90">
+            Explorez notre collection d'articles sur divers sujets rédigés par des experts
+          </p>
+          <a
+            href="#articles"
+            className="inline-block bg-white text-blue-600 px-8 py-3 rounded-full font-semibold hover:bg-blue-50 transition-colors"
+          >
+            Commencer la lecture
+          </a>
+        </div>
+      </section>
+
+      {/* Featured Articles */}
+      <FeaturedArticles />   
+
+      {/* Categories */}
+      <CategoryList />
+
+      {/* Popular Articles */}
+      <PopularArticles /> 
       
-      <section>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Derniers articles</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      {/* Latest Articles */}
+      <section id="articles">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Derniers articles</h2>
+          <a href="/articles" className="text-blue-600 hover:text-blue-700 font-medium">
+            Voir tous les articles →
+          </a>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {articles.map((article) => (
             <ArticleCard key={article.id} article={article} />
           ))}
         </div>
       </section>
+
+      {/* Newsletter Section */}
+      <NewsletterSignup />
     </div>
   );
 };

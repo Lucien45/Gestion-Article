@@ -5,6 +5,7 @@ import { Token } from '../utils/Token';
 import { UserService } from '../services/user.service';
 import { logout } from '../context/AuthContext';
 import { apiUrl } from '../services/api';
+import { Footer } from './Footer';
 
 interface User {
   id: number;
@@ -15,7 +16,6 @@ interface User {
 }
 
 export function Header() {
-
   const [user, setUser]  = useState<User | null>(null);
   const userProfile = JSON.parse(Token.GetToken("profile") as string);
   const navigate = useNavigate();
@@ -57,7 +57,7 @@ export function Header() {
             <div className="hidden sm:flex sm:items-center sm:space-x-8">
               {user ? (
                 <>
-                  <Link to="/" className="text-gray-700 hover:text-gray-900">
+                  <Link to="/articles" className="text-gray-700 hover:text-gray-900">
                     Articles
                   </Link>
                   {(user.role === 'admin' || user.role === 'editeur' || user.role === 'auteur') && (
@@ -83,7 +83,7 @@ export function Header() {
                   </div>
                 </>
               ) : (
-                <div className="space-x-4">
+                <div className="flex items-center space-x-4">
                   <Link
                     to="auth/login"
                     className="text-gray-700 hover:text-gray-900"
@@ -92,11 +92,12 @@ export function Header() {
                   </Link>
                   <Link
                     to="auth/register"
-                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                    className="w-[100px] bg-black h-[35px] flex items-center justify-center rounded-xl cursor-pointer relative overflow-hidden transition-all duration-500 ease-in-out shadow-md hover:scale-105 hover:shadow-lg before:absolute before:top-0 before:-left-full before:w-full before:h-full before:bg-gradient-to-r before:from-[#009b49] before:to-[rgb(105,184,141)] before:transition-all before:duration-500 before:ease-in-out before:z-[-1] before:rounded-xl hover:before:left-0 text-white"
                   >
                     Register
                   </Link>
                 </div>
+
               )}
             </div>
 
@@ -170,9 +171,11 @@ export function Header() {
         )}
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 bg-gray-100">
         <Outlet />
       </main>
+
+      <Footer />
     </div>
   );
 }

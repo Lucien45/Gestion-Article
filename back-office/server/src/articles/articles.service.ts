@@ -40,12 +40,15 @@ export class ArticlesService {
   }
 
   async findAllCategorie(): Promise<Categories[]> {
-    return await this.categorieRepository.find();
+    return await this.categorieRepository.find({
+      relations: ['articles'],
+    });
   }
 
   async findCategorieById(categorieId: number): Promise<Categories> {
     const categorie = await this.categorieRepository.findOne({
       where: { id: categorieId },
+      relations: ['articles'],
     });
     if (!categorie) throw new NotFoundException('categorie non trouvé');
     return categorie;

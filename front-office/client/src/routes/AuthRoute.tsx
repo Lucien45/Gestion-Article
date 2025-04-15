@@ -14,7 +14,7 @@ const AuthRoute = ({ setLoading }: AdminRouteProps) => {
   useEffect(() => {
     setLoading(true);
     const handleComplete = () => setLoading(false);
-    const timeout = setTimeout(handleComplete, 500);
+    const timeout = setTimeout(handleComplete, 1000);
 
     return () => clearTimeout(timeout);
   }, [location, setLoading]);

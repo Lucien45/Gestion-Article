@@ -1,6 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { useState } from 'react';
-import LoadingSpinner from './components/LoadingSpinner';
+import { LoadingSPinner2 } from './components/LoadingSpinner';
 import { Header } from './components/Header';
 import Page404 from './pages/Page404';
 import AuthRoute from './routes/AuthRoute';
@@ -11,7 +11,7 @@ function App() {
 
   return (
     <>
-      {loading && <LoadingSpinner />}
+      {loading && <LoadingSPinner2 />}
       <Routes>
         <Route path="/" element={<Header />}>
           <Route index element={<Navigate to="/home" replace />} />
