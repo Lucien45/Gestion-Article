@@ -865,7 +865,15 @@ export const AddEditArticle: React.FC = () => {
     }
     if (image) {
       formData.append("files", image);
-    }    
+    }   
+    
+    if (Newarticles.featured) {
+      formData.append("featured", Newarticles.featured ? "true" : "false");
+    }
+
+    if (Newarticles.reading_time) {
+      formData.append("reading_time", Newarticles.reading_time.toString());
+    }
   
     for (const [key, value] of formData.entries()) {
       console.log(`${key}:`, value);

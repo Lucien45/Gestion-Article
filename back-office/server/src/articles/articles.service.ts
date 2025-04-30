@@ -110,6 +110,8 @@ export class ArticlesService {
       couverture: file ? `media/couverture/${file.filename}` : null,
       auteur,
       categorie,
+      featured: articleDto.featured || false,
+      reading_time: articleDto.reading_time || 0,
     });
 
     return await this.articleRepository.save(article);

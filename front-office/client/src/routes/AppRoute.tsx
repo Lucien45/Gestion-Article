@@ -6,6 +6,7 @@ import { ArticlePages } from '../pages/ArticlePage';
 import { CategorieArticlesPage } from '../pages/CategorieArticlesPage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { ProfilePage } from '../pages/ProfilePage';
+import Page404 from '../pages/Page404';
 
 
 interface AdminRouteProps {
@@ -33,6 +34,8 @@ const AppRoute = ({ setLoading }: AdminRouteProps) => {
             <Route path="categories/:nom" element={<CategorieArticlesPage/>} />
             <Route path="profile" element={<ProfilePage/>} />
             <Route path="dashboard" element={<DashboardPage/>} />
+            {/* Page 404 pour les routes inexistantes */}
+            <Route path="*" element={<Page404 />} />
         </Routes>
     )
 }

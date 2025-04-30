@@ -29,6 +29,14 @@ import { UsersModule } from './users/users.module';
           extra: {
             uuidExtension: 'uuid-ossp',
           },
+          // connect to render db for production
+          ssl: true,
+          dialectOptions: {
+            ssl: {
+              require: true,
+              rejectUnauthorized: false,
+            },
+          },
         };
       },
     }),
