@@ -1,0 +1,10 @@
+{
+    "name": "back-office",
+    "scripts": {
+      "build": "npm run build --workspace=client && npm run build --workspace=server",
+      "start": "node server/dist/main.js",
+      "postinstall": "npm install --workspace=client && npm install --workspace=server"
+    },
+    "workspaces": ["client", "server"]
+  }
+  
