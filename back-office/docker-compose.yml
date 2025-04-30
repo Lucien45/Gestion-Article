@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  bo-server:
+    container_name: bo-server
+    build:
+      context: ./server/
+    ports:
+      - "3000:3000"
+    volumes:
+    - ./server:/app
+    - ./server/media:/app/media 
+    - /app/node_modules
+    env_file:
+      - ./server/.env
+
+  bo-client:
+    container_name: bo-client
+    build:
+      context: ./client/
+      args:
+        VITE_API_URL: "http://localhost:3000"
+    ports:
+      - "8080:80"
+    depends_on:
+      - bo-server

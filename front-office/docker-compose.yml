@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  fo-client:
+    container_name: fo-client
+    build:
+      context: ./client/
+      args:
+        VITE_API_URL: "http://localhost:3000"
+    ports:
+      - "5000:80"  # NGINX écoute sur 80 en interne
+    # depends_on:
+    #   - bo-server
