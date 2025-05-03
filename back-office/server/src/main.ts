@@ -13,6 +13,7 @@ async function bootstrap() {
     methods: 'GET,HEAD,POST,PATCH,PUT,DELETE',
     credentials: true,
   });
+
   const port = parseInt(process.env.PORT || '3000', 10);
   await app.listen(port);
 }
