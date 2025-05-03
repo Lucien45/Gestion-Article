@@ -16,7 +16,7 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY package.json ./
-COPY media/ /app/media
+COPY ./media/ /app/media
 
 EXPOSE 3000
 
