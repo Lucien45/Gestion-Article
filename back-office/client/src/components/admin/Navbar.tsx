@@ -10,12 +10,13 @@ import {
   Avatar,
   InputBase,
   Divider,
+  Badge,
 } from "@mui/material";
 import { FaCaretDown } from "react-icons/fa";
 import { Search, Menu as MenuIcon, Mail } from "@mui/icons-material";
 import { Token } from "../../utils/Token";
 import { apiUrl } from "../../services/api";
-import { styled } from "@mui/system";
+import { styled } from '@mui/material/styles';
 import { UserService } from "../../services/user.service";
 import { useNavigate } from "react-router";
 import { Utils } from "../../utils/Utils";
@@ -33,6 +34,35 @@ interface User {
   profile?: string;
   role: string;
 }
+
+const StyledBadge = styled(Badge)(({ theme }) => ({
+  '& .MuiBadge-badge': {
+    backgroundColor: '#44b700',
+    color: '#44b700',
+    boxShadow: `0 0 0 2px ${theme.palette.background.paper}`,
+    '&::after': {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      width: '100%',
+      height: '100%',
+      borderRadius: '50%',
+      animation: 'ripple 1.2s infinite ease-in-out',
+      border: '1px solid currentColor',
+      content: '""',
+    },
+  },
+  '@keyframes ripple': {
+    '0%': {
+      transform: 'scale(.8)',
+      opacity: 1,
+    },
+    '100%': {
+      transform: 'scale(2.4)',
+      opacity: 0,
+    },
+  },
+}));
 
 const SearchBar = styled("div")({
   display: "flex",
@@ -130,11 +160,18 @@ const Navbar = ({ toggleSidebar, isOpen }: NavbarProps) => {
             <Typography variant="body1" sx={{ fontWeight: "500", color: "#333", marginRight: 1 }}>
               {dataUser?.username || "Utilisateur"}
             </Typography>
-            <Avatar
-              src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : dataUser?.username}
-              alt={dataUser?.username || "profileDefault"}
-              sx={{ width: 40, height: 40, border: "2px solid #ddd" }}
-            />
+
+            <StyledBadge
+              overlap="circular"
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              variant="dot"
+            >
+              <Avatar
+                src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : dataUser?.username}
+                alt={dataUser?.username || "profileDefault"}
+                sx={{ width: 40, height: 40, border: "2px solid #ddd" }}
+              />
+            </StyledBadge>
             <FaCaretDown style={{ marginLeft: "5px", color: "#333" }} />
           </Box>
 

@@ -4,6 +4,8 @@ import {
   Box, Button, TextField, Typography, Avatar, Select, MenuItem, InputLabel, FormControl,
   Alert,
 } from "@mui/material";
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import { Utils } from "../../utils/Utils";
 import { UserService } from "../../services/user.service";
 import { Token } from "../../utils/Token";
@@ -142,6 +144,7 @@ const AuthPage: React.FC = () => {
           variant="contained"
           type="submit"
           disabled={!signInData.identification || !signInData.password}
+          startIcon={<VpnKeyIcon />}
         >
           Connexion
         </Button>
@@ -232,6 +235,7 @@ const AuthPage: React.FC = () => {
           type="submit"
           variant="contained"
           disabled={!desableButtonRegister()}
+          startIcon={<AppRegistrationIcon />}
         >
           Créer un compte
         </Button>

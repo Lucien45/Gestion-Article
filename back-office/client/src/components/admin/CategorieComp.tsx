@@ -21,9 +21,12 @@ import {
   Divider,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from '@mui/icons-material/Save';
+import DomainVerificationIcon from '@mui/icons-material/DomainVerification';
 import { ArticleService } from "../../services/article.service";
 import { DeleteForever, Edit } from "@mui/icons-material";
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
+import { Token } from "../../utils/Token";
 
 interface Categorie {
   id: number;
@@ -65,6 +68,7 @@ export const ListCategorie: React.FC = () => {
   const [message, setMessage] = useState('');
 
   const [selectedId, setSelectedId] = useState<number | string>(0);
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
 
   const fetchCategories = async () => {
     await ArticleService.getAllCategories()
@@ -149,15 +153,18 @@ export const ListCategorie: React.FC = () => {
                       color="primary"
                     ></Edit>
                   </IconButton>
-                  <IconButton 
-                    onClick={() => handleDelete(categorie)}
-                  >
-                    <DeleteForever
-                      titleAccess="Supprimer le categorie"
-                      fontSize="medium"
-                      color="error"
-                    ></DeleteForever>
-                  </IconButton>
+                  {userProfile?.role === 'admin' && (
+
+                    <IconButton 
+                      onClick={() => handleDelete(categorie)}
+                    >
+                      <DeleteForever
+                        titleAccess="Supprimer le categorie"
+                        fontSize="medium"
+                        color="error"
+                      ></DeleteForever>
+                    </IconButton>
+                  )}
                 </StyledTableCell>
               </StyledTableRow>
             ))}
@@ -327,6 +334,7 @@ export const AddEditCategorie: React.FC = () => {
             color="primary"
             disabled={!desableButton()}
             onClick={handleOpenDialog}
+            startIcon={<SaveIcon />}
           >
             Créer
           </Button>
@@ -512,7 +520,7 @@ export const UpdateCategorie: React.FC<UpdateCategorieProps> = ({open, setOpen, 
 
         <DialogActions>
           <Button onClick={() => setOpen(false)} color="secondary">Annuler</Button>
-          <Button onClick={handleOpenDialog} color="primary" variant="contained">Vérifier</Button>
+          <Button onClick={handleOpenDialog} color="primary" variant="contained" startIcon={<DomainVerificationIcon />}>Vérifier</Button>
         </DialogActions>
       </Dialog>
 

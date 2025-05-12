@@ -13,7 +13,8 @@ const Profile = () => {
     if (userProfile?.role === 'admin') {
       tabs.push(
         { label: "Liste Utilisateurs", component: <UserList /> },
-        { label: "Créer un utilisateur", component: <AddUser /> }
+        { label: "Créer un utilisateur", component: <AddUser /> },
+        { label: "Logs", component: <Typography variant="h6">En cours...</Typography> }
       );
     }
 

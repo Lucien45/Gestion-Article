@@ -33,8 +33,11 @@ import {
   Grid,
   FormGroup,
   Switch,
+  Autocomplete,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from '@mui/icons-material/Save';
+import DomainVerificationIcon from '@mui/icons-material/DomainVerification';
 import { Visibility, Edit, DeleteForever, CalendarToday, Article, Description, Category, ThumbUp, Comment, Star, Timer } from "@mui/icons-material";
 import { ArticleService } from "../../services/article.service";
 import { Token } from "../../utils/Token";
@@ -690,18 +693,25 @@ export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id,
             </Grid>
 
             <Grid item xs={12} sm={6}>
-              <FormControl variant="outlined" fullWidth>
-                <InputLabel>Catégorie</InputLabel>
-                <Select
-                  value={dataArticleUpdate.categorie || ""} margin="dense"
-                  onChange={(e) => setDataArticleUpdate({ ...dataArticleUpdate, categorie: Number(e.target.value) })} 
-                  label="Catégorie"
-                >
-                {categories.map((categorie) => (
-                  <MenuItem key={categorie.id} value={categorie.id}>{categorie.nom}</MenuItem>
-                ))}  
-                </Select>
-              </FormControl>
+              <Autocomplete
+                disablePortal
+                options={categories}
+                getOptionLabel={(option) => option.nom}
+                sx={{ width: '100%' }}
+                value={categories.find((cat) => cat.id === dataArticleUpdate.categorie) || null}
+                onChange={(event, newValue) => {
+                  setDataArticleUpdate({ ...dataArticleUpdate, categorie: newValue ? Number(newValue.id) : dataArticleUpdate.categorie });
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Catégorie"
+                    variant="outlined"
+                    margin="dense"
+                    fullWidth
+                  />
+                )}
+              />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl variant="outlined" fullWidth>
@@ -752,7 +762,7 @@ export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id,
         <Button onClick={() => setOpen(false)} color="secondary">
           Annuler
         </Button>
-        <Button onClick={handleOpenDialog} color="primary" variant="contained">
+        <Button onClick={handleOpenDialog} color="primary" variant="contained" startIcon={<DomainVerificationIcon />}>
           Vérifier
         </Button>
       </DialogActions>
@@ -966,22 +976,25 @@ export const AddEditArticle: React.FC = () => {
           </FormControl>
         </Grid2>
         <Grid2 size={6}>
-          <FormControl variant="outlined" fullWidth required>
-            <InputLabel>categorie</InputLabel>
-            <Select
-              variant="outlined"
-              name="categorie"
-              onChange={(e) => setNewArticles({ ...Newarticles, categorie: e.target.value })} 
-              value={Newarticles.categorie}
-              label="categorie"
-            >
-              <MenuItem value="" disabled>Selectionner un categorie</MenuItem>
-              {categories.map((categorie) => (
-                <MenuItem key={categorie.id} value={categorie.id}>{categorie.nom}</MenuItem>
-              ))} 
-            </Select>
-          </FormControl>
+          <Autocomplete
+            disablePortal
+            options={categories}
+            getOptionLabel={(option) => option.nom}
+            sx={{ width: '100%' }}
+            value={categories.find((cat) => cat.id === Newarticles.categorie) || null}
+            onChange={(event, newValue) => {
+              setNewArticles({ ...Newarticles, categorie: newValue ? newValue.id : '' });
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Catégorie"
+                required
+              />
+            )}
+          />
         </Grid2>
+
         <Grid2 size={6}>
           <FormControl variant="outlined" fullWidth required>
             <InputLabel>Status</InputLabel>
@@ -1028,6 +1041,7 @@ export const AddEditArticle: React.FC = () => {
             color="primary"
             disabled={!desableButton()}
             onClick={handleOpenDialog}
+            startIcon={<SaveIcon />}
           >
             Créer
           </Button>

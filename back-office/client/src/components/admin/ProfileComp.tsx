@@ -38,6 +38,8 @@ import {
   Checkbox
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import SaveIcon from '@mui/icons-material/Save';
+import DomainVerificationIcon from '@mui/icons-material/DomainVerification';
 import { Article, CalendarToday, DeleteForever, Email, ManageAccounts, Badge, Edit, AccountCircle, Phone, Work, CheckCircle, Cancel, History } from "@mui/icons-material";
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
@@ -183,6 +185,9 @@ const DialogUpdateStatus: React.FC<DialogUserUpdateStatusProps> = ({ userStatus 
   );
 };
 
+
+
+
 export const UserAccount: React.FC = () => {
   const [dataUser, setDataUser] = useState<Partial<User> | null>(null);
   const userProfile = JSON.parse(Token.GetToken("user") as string);
@@ -263,6 +268,7 @@ export const UserAccount: React.FC = () => {
             variant="contained"
             color="primary"
             onClick={() => handleEdit()}
+            startIcon={<Edit />}
           >
             Modifier
           </Button>
@@ -858,6 +864,7 @@ export const AddUser: React.FC = () => {
             color="primary"
             disabled={!desableButton()}
             onClick={handleOpenDialog}
+            startIcon={<SaveIcon />}
           >
             Créer
           </Button>
@@ -1168,7 +1175,7 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
           <Button onClick={() => setOpen(false)} color="secondary">
             Annuler
           </Button>
-          <Button onClick={handleOpenDialog} color="primary" variant="contained">
+          <Button onClick={handleOpenDialog} color="primary" variant="contained" startIcon={<DomainVerificationIcon />}>
             Vérifier
           </Button>
         </DialogActions>
@@ -1342,6 +1349,7 @@ export const UpdateStatus: React.FC<UpdateUserProps> = ({ open, setOpen, id, ref
           </Button>
           <Button variant="contained" title="Enregistrer" 
             onClick={handleOpenDialog}
+            startIcon={<DomainVerificationIcon />}
           >
             Vérifier
           </Button>
