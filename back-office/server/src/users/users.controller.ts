@@ -113,6 +113,8 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
+    console.log('Photo recu:', file);
+    console.log('Données mise a jour recu:', updateUserDto);
     return this.usersService.update(id, updateUserDto, file);
   }
 

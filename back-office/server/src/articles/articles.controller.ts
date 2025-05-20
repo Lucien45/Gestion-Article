@@ -6,10 +6,10 @@ import {
   Delete,
   Param,
   Body,
-  UploadedFile,
   UseInterceptors,
   ParseIntPipe,
   UploadedFiles,
+  Patch,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { ArticlesService } from './articles.service';
@@ -129,7 +129,7 @@ export class ArticlesController {
     return this.articlesService.findArticleById(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @UseInterceptors(
     FilesInterceptor('files', 2, {
       storage: diskStorage({
@@ -156,7 +156,7 @@ export class ArticlesController {
   updateArticle(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateArticleDto,
-    @UploadedFile() files?: Express.Multer.File[],
+    @UploadedFiles() files: Express.Multer.File[],
   ) {
     const couverture = files?.find((file) => file.mimetype.includes('image'));
     const pdf = files?.find((file) => file.mimetype.includes('pdf'));

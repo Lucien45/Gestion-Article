@@ -185,9 +185,6 @@ const DialogUpdateStatus: React.FC<DialogUserUpdateStatusProps> = ({ userStatus 
   );
 };
 
-
-
-
 export const UserAccount: React.FC = () => {
   const [dataUser, setDataUser] = useState<Partial<User> | null>(null);
   const userProfile = JSON.parse(Token.GetToken("user") as string);
@@ -406,9 +403,8 @@ export const UserList: React.FC = () => {
         <Table>
           <TableHead>
             <StyledTableRow>
-              <StyledTableCell>Nom</StyledTableCell>
-              <StyledTableCell>Prénom</StyledTableCell>
-              <StyledTableCell>username</StyledTableCell>
+              <StyledTableCell>Nom d'utilisateur</StyledTableCell>
+              <StyledTableCell>Profile</StyledTableCell>
               <StyledTableCell>Email</StyledTableCell>
               <StyledTableCell>Rôle</StyledTableCell>
               <StyledTableCell>status</StyledTableCell>
@@ -429,14 +425,15 @@ export const UserList: React.FC = () => {
             <TableBody>
               {dataUser.map((user) => (
                 <StyledTableRow key={user.id}>
-                  <StyledTableCell component="th" scope="row">
-                    {user.nom}
-                  </StyledTableCell>
-                  <StyledTableCell align="left">
-                    {user.prenom}
-                  </StyledTableCell>
                   <StyledTableCell align="left">
                     {user.username}
+                  </StyledTableCell>
+                  <StyledTableCell align="left">
+                    <Avatar
+                      src={user?.profile ? `${apiUrl}/${user.profile}` : ''}
+                      alt={user.username || "profileDefault"}
+                      sx={{ width: 60, height: 60, border: "2px solid #ddd", borderRadius: "10px" }}
+                    />
                   </StyledTableCell>
                   <StyledTableCell align="left">
                     {user.email}
@@ -881,7 +878,16 @@ export const AddUser: React.FC = () => {
                 <CircularProgress />
               </Box>
             ) : (
-              <DialogAddUser userData={NewUserData} />
+              <>
+                <Box display="flex" justifyContent="center" mb={2}>
+                  <Avatar
+                    src={NewUserData.preview}
+                    alt={NewUserData.username}
+                    sx={{ width: 180, height: 180, border: "1px solid #ddd" }}
+                  />
+                </Box>
+                <DialogAddUser userData={NewUserData} />
+              </>
             )}
           </DialogContentText>
         </DialogContent>
@@ -957,6 +963,8 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
   });
   const [initialData, setInitialData] = useState<Partial<User> | null>(null);
   const [image, setImage] = useState<File | null>(null);
+  const [emailError, setEmailError] = useState<boolean>(false);
+  const [error, setError] = useState<boolean>(false);
 
   const [processMessage, setProcessMessage] = useState("");
   const [userUpdateSuccess, setUserUpdateSuccess] = useState<boolean>(false);
@@ -991,6 +999,59 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
       console.log(`Échec de récupération des détails du club ${error}`);
     }
   }
+
+  const handleChange = (e: { target: { name: string; value: string } }) => {
+    if (e.target.name === "nom") {
+      const value = e.target.value;
+      if (/^[A-Za-z' ]*$/.test(value)) {
+        setDataUserUpdate({ ...dataUserUpdate, nom: value});
+      }
+    }
+    if (e.target.name === "prenom") {
+      const value = e.target.value;
+      if (/^[A-Za-z' ]*$/.test(value)) {
+        setDataUserUpdate({ ...dataUserUpdate, prenom: value});
+      }
+    }
+    if (e.target.name === "civilite") {
+      setDataUserUpdate({ ...dataUserUpdate, civilite: e.target.value});
+    }
+    if (e.target.name === "email") {
+      // Email validation regex pattern
+      const emailPattern = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+      const value = e.target.value;
+      setDataUserUpdate({ ...dataUserUpdate, email: value});
+      if (!emailPattern.test(value)) {
+        setEmailError(true);
+      } else {
+        setEmailError(false);
+      }
+    }
+    if (e.target.name === "password") {
+      setDataUserUpdate({ ...dataUserUpdate, password: e.target.value});
+    }
+    if (e.target.name === "username") {
+      setDataUserUpdate({ ...dataUserUpdate, username: e.target.value});
+    }
+    if (e.target.name === "date_naissance") {
+      setDataUserUpdate({ ...dataUserUpdate, date_naissance: e.target.value});
+    }
+    if (e.target.name === "contact") {
+      const numericValue = e.target.value;
+      setDataUserUpdate({ ...dataUserUpdate, contact: numericValue})
+    }
+  };
+
+  const handleConfirmPasswordChange = (e: { target: { value: string } }) => {
+    const confirmPassword = e.target.value;
+    setDataUserUpdate((prevData) => ({ ...prevData, confirmPassword }));
+  
+    if (dataUserUpdate.password !== confirmPassword) {
+      setError(true);
+    } else {
+      setError(false);
+    }
+  };
 
   const handleOpenDialog = () => {
     setOpenDialog(true);
@@ -1075,17 +1136,24 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Email"
+                name="email"
+                inputMode="email"
+                error={emailError}
+                helperText={
+                  emailError ? "L'adresse email n'a pas un format valide" : ""
+                }
                 fullWidth
                 value={dataUserUpdate.email}
-                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, email: e.target.value })}
+                onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField
                 label="Nom"
+                name="nom"
                 fullWidth
                 value={dataUserUpdate.nom || ""}
-                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, nom: e.target.value })}
+                onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1093,8 +1161,9 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
                 label="Prénom"
                 fullWidth
                 value={dataUserUpdate.prenom || ""}
-                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, prenom: e.target.value })}
-              />
+                name="prenom"
+                onChange={handleChange}
+                />
             </Grid>
             <Grid item xs={12} sm={6}>
               <FormControl variant="outlined" fullWidth>
@@ -1116,7 +1185,8 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
                 label="Numéro de téléphone"
                 fullWidth
                 value={dataUserUpdate.contact || ""}
-                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, contact: e.target.value })}
+                name="contact"
+                onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1135,7 +1205,8 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
                 label="Username"
                 fullWidth
                 value={dataUserUpdate.username || ""}
-                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, username: e.target.value })}
+                name="username"
+                onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1144,8 +1215,9 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
                 type="date"
                 fullWidth
                 value={dataUserUpdate.date_naissance || ""}
-                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, date_naissance: e.target.value })}
                 InputLabelProps={{ shrink: true }}
+                name="date_naissance"
+                onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1154,7 +1226,8 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
                 type="password"
                 fullWidth
                 value={dataUserUpdate.password}
-                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, password: e.target.value })}
+                name="password"
+                onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -1163,9 +1236,17 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
                 type="password"
                 fullWidth
                 value={dataUserUpdate.confirmPassword}
-                onChange={(e) => setDataUserUpdate({ ...dataUserUpdate, confirmPassword: e.target.value })}
+                name="confirmPassword"
+                onChange={handleConfirmPasswordChange}
               />
             </Grid>
+            {error && (
+              <Grid item xs={12} sm={12}>
+               <Alert severity="error">
+                  Les deux mots de passe ne sont pas identique
+                </Alert>
+            </Grid>
+            )}
           </Grid>
         </DialogContent>
 
@@ -1185,6 +1266,13 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
       <Dialog fullWidth open={openDialog} onClose={handleCloseDialog}>
         <DialogTitle>Veuillez vérifier les informations</DialogTitle>
         <DialogContent dividers>
+          <Box display="flex" justifyContent="center" mb={2}>
+            <Avatar
+              src={dataUserUpdate?.profile ? `${dataUserUpdate.profile}` : dataUserUpdate?.username}
+              alt={dataUserUpdate?.username}
+              sx={{ width: 80, height: 80, border: "3px solid #ddd" }}
+            />
+          </Box>
           <DialogUpdateUser userData={dataUserUpdate} />
         </DialogContent>
         <DialogActions>

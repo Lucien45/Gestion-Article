@@ -34,6 +34,8 @@ import {
   FormGroup,
   Switch,
   Autocomplete,
+  Stack,
+  Pagination,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from '@mui/icons-material/Save';
@@ -314,14 +316,16 @@ export const ListArticle: React.FC = () => {
             </StyledTableRow>
           </TableHead>
           {loading && (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              height="100%"
-            >
-              <CircularProgress />
-            </Box>
+            <>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="center"
+                height="100%"
+              >
+                <CircularProgress />
+              </Box>
+            </>
           )}
           {!loading && (
             <TableBody>
@@ -383,6 +387,14 @@ export const ListArticle: React.FC = () => {
           )}
         </Table>
       </TableContainer>
+      <Stack 
+        spacing={2}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <Pagination count={articles.length} />
+      </Stack>
 
       {/* Modal de visualisation */}
       <DetailArticle
@@ -608,7 +620,7 @@ export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id,
 
     try {
       await ArticleService.updateArticle(Number(id), formData);
-      setProcessMessage(`L'Article ${dataArticleUpdate?.titre} a été ajoutée avec succès ✅`);
+      setProcessMessage(`L'Article ${dataArticleUpdate?.titre} a été mis a jour avec succès ✅`);
       await refreshArticle();
       setOpenDialog(false);
       setSuccessDialog(true);
@@ -772,6 +784,13 @@ export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id,
     <Dialog fullWidth open={openDialog} onClose={handleCloseDialog}>
       <DialogTitle>Veuillez vérifier les informations</DialogTitle>
       <DialogContent dividers>
+        <Box display="flex" justifyContent="center" mb={2}>
+          <Avatar
+            src={dataArticleUpdate?.couverture ? `${dataArticleUpdate.couverture}` : dataArticleUpdate?.titre}
+            alt={dataArticleUpdate?.titre}
+            sx={{ width: 80, height: 80, border: "3px solid #ddd", borderRadius: 0 }}
+          />
+        </Box>
         <DialogUpdateArticle articledata={dataArticleUpdate} />
       </DialogContent>
       <DialogActions>
@@ -1058,7 +1077,16 @@ export const AddEditArticle: React.FC = () => {
                 <CircularProgress />
               </Box>
             ) : (
-              <DialogAddArticle articledata={Newarticles} />
+              <>
+                <Box display="flex" justifyContent="center" mb={2}>
+                  <Avatar
+                    src={Newarticles.couverture}
+                    alt={Newarticles.titre}
+                    sx={{ width: 160, height: 160, border: "1px solid #ddd", borderRadius: 0 }}
+                  />
+                </Box>
+                <DialogAddArticle articledata={Newarticles} />
+              </>
             )}
           </DialogContentText>
         </DialogContent>

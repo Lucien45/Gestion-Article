@@ -63,7 +63,7 @@ const createArticle = (data: FormData): Promise<FormData> => {
 }
 
 const updateArticle = (id: number | string, data: Partial<FormData>): Promise<FormData> => {
-    return Axios.put(`/articles/${id}`, data,{
+    return Axios.patch(`/articles/${id}`, data,{
         headers: {
             'Content-Type': 'multipart/form-data',
         }

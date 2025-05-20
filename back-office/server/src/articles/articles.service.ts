@@ -140,6 +140,10 @@ export class ArticlesService {
   ): Promise<Articles> {
     const article = await this.findArticleById(articleId);
 
+    if (!article) {
+      throw new Error('Article non trouvé');
+    }
+
     if (file) {
       articleDto.couverture = `media/couverture/${file.filename}`;
     }
