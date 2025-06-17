@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "createuser": "bash _create_user.sh",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
