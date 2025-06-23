@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { Dispatch, FormEvent, SetStateAction, useEffect, useState } from "react";
+import React, { ChangeEvent, Dispatch, FormEvent, SetStateAction, useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -19,14 +20,18 @@ import {
   TableBody,
   Grid2,
   Divider,
+  TableRow,
+  TableCell,
+  Checkbox,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from '@mui/icons-material/Save';
 import DomainVerificationIcon from '@mui/icons-material/DomainVerification';
 import { ArticleService } from "../../services/article.service";
-import { DeleteForever, Edit } from "@mui/icons-material";
+import { Add, DeleteForever, Edit, UploadFile } from "@mui/icons-material";
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 import { Token } from "../../utils/Token";
+import Papa from "papaparse";
 
 interface Categorie {
   id: number;
@@ -61,6 +66,7 @@ export const ListCategorie: React.FC = () => {
   const [categories, setCategories] = useState<Categorie[]>([]);
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openImportModal, setOpenImportModal] = useState(false);
   const [selectedCategorie, setSelectedCategorie] = useState<Categorie | null>(null);
 
   const [successDialog, setSuccessDialog] = useState(false);
@@ -97,6 +103,10 @@ export const ListCategorie: React.FC = () => {
     setOpenDeleteDialog(true);
   };
 
+  const handleImportModal = () => {
+    setOpenImportModal(true);
+  }
+
   const handleConfirmDelete = async () => {
     if (!selectedCategorie) return;
     try {
@@ -114,11 +124,22 @@ export const ListCategorie: React.FC = () => {
 
   return (
     <Paper elevation={3} style={{ padding: "20px", margin: "20px auto" }}>
-      <Typography variant="h6" mb={4} gutterBottom>
-        Informations sur les categories
-        {}
-        <hr />
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h6" mb={4} gutterBottom>
+          Informations sur les categories
+          {}
+        </Typography>
+        <Button 
+          type="submit" 
+          variant="contained" 
+          color="primary" 
+          startIcon={<Add />}
+          onClick={() => handleImportModal()}
+        >
+          Importer
+        </Button>
+      </Box>
+      <hr />
       <TextField
         label="Rechercher une categorie"
         variant="outlined"
@@ -177,6 +198,15 @@ export const ListCategorie: React.FC = () => {
         open={openEditModal}
         setOpen={setOpenEditModal}
         id={selectedId}
+        refreshCategorie={fetchCategories}
+      />
+
+      {/* Modal Import */}
+      <ImportCategorieCSVDialog
+        open={openImportModal}
+        onClose={() => setOpenImportModal(false)}
+        onSuccess={(msg) => { setSuccessDialog(true); setMessage(msg); }}
+        onError={(msg) => { setErrorDialog(true); setMessage(msg); }}
         refreshCategorie={fetchCategories}
       />
 
@@ -558,3 +588,184 @@ export const UpdateCategorie: React.FC<UpdateCategorieProps> = ({open, setOpen, 
     </>
   );
 };
+
+interface ImportCategorieProps {
+  open: boolean;
+  onClose: () => void;
+  onSuccess?: (message: string) => void;
+  onError?: (message: string) => void;
+  refreshCategorie: () => Promise<void>;
+}
+
+interface CategorieCSV {
+  nom: string;
+  description: string;
+  [key: string]: string;
+}
+
+export const ImportCategorieCSVDialog: React.FC<ImportCategorieProps> = ({ open, onClose, onSuccess, onError, refreshCategorie }) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [csvData, setCsvData] = useState<CategorieCSV[]>([]);
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+
+  const handleFileChange = (e:ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+    setCsvData([]);
+    setSelectedRows([]);
+    if (file) {
+      Papa.parse(file, {
+        header: false,
+        skipEmptyLines: true,
+        complete: (results) => {
+          const data = results.data.map((row) => {
+            const arr = row as string[];
+            return {
+              nom: arr[1],
+              description: arr[2],
+            };
+          });
+          setCsvData(data);
+          setSelectedRows(data.map((_, idx) => idx));
+        },
+      });
+    }
+  };
+
+  const handleRowSelect = (idx: number) => {
+    setSelectedRows((prev) =>
+      prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
+    );
+  };
+
+  const handleImport = async () => {
+    if (!csvData.length || !selectedRows.length) return;
+    setLoading(true);
+
+    const selectedCategories = selectedRows.map((idx) => ({
+      nom: csvData[idx].nom,
+      description: csvData[idx].description,
+    }));
+    try {
+      const response = await ArticleService.ImportcreateCategorie(selectedCategories)
+      console.log('reponse server: ', response);
+      setLoading(false);
+      setSelectedFile(null);
+      setCsvData([]);
+      setSelectedRows([]);
+      onSuccess && onSuccess("Importation réussie ✅");
+      refreshCategorie && refreshCategorie();
+      onClose();
+    } catch (err) {
+      console.warn('reponse server: ',err);
+      setLoading(false);
+      onError && onError("Erreur lors de l'importation ⚠️");
+    }
+  };
+
+  const handleClose = () => {
+    setSelectedFile(null);
+    setCsvData([]);
+    setSelectedRows([]);
+    onClose();
+  };
+
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+      <DialogTitle>Importer des catégories (CSV)</DialogTitle>
+      <DialogContent>
+        <Box display="flex" flexDirection="column" alignItems="center" gap={2} mt={2}>
+          <Button
+            variant="outlined"
+            component="label"
+            startIcon={<UploadFile />}
+            disabled={loading}
+          >
+            Sélectionner un fichier CSV
+            <input
+              type="file"
+              accept=".csv"
+              hidden
+              onChange={handleFileChange}
+            />
+          </Button>
+          {selectedFile && (
+            <Typography variant="body2" color="textSecondary">
+              Fichier sélectionné : <b>{selectedFile.name}</b>
+            </Typography>
+          )}
+        </Box>
+        {csvData.length > 0 && (
+          <Box mt={3}>
+            <Typography variant="subtitle1" gutterBottom>
+              Aperçu des données importées :
+            </Typography>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell />
+                  <TableCell>Nom</TableCell>
+                  <TableCell>Description</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {csvData.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedRows.includes(idx)}
+                        onChange={() => handleRowSelect(idx)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        label="Nom"
+                        value={row.nom}
+                        onChange={e => {
+                          const newData = [...csvData];
+                          newData[idx] = { ...newData[idx], nom: e.target.value };
+                          setCsvData(newData);
+                        }}
+                        size="small"
+                        variant="outlined"
+                        fullWidth
+                        disabled={!selectedRows.includes(idx)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        label="Description"
+                        value={row.description}
+                        onChange={e => {
+                          const newData = [...csvData];
+                          newData[idx] = { ...newData[idx], description: e.target.value };
+                          setCsvData(newData);
+                        }}
+                        size="small"
+                        variant="outlined"
+                        fullWidth
+                        disabled={!selectedRows.includes(idx)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} color="secondary" disabled={loading}>Annuler</Button>
+        <Button
+          onClick={handleImport}
+          color="primary"
+          variant="contained"
+          disabled={!csvData.length || !selectedRows.length || loading}
+        >
+          {loading ? <CircularProgress size={20} /> : "Importer la sélection"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}

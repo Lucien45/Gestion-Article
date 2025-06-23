@@ -119,6 +119,11 @@ export class ArticlesController {
     return this.articlesService.createArticle(dto, couverture, pdf);
   }
 
+  @Post('import')
+  importArticles(@Body() articles: CreateArticleDto[]) {
+    return this.articlesService.createMany(articles);
+  }
+
   @Get()
   findAllArticles() {
     return this.articlesService.findAllArticle();

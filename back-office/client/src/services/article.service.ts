@@ -5,15 +5,17 @@ interface Categorie {
     description: string;
 }
 
-// interface ArticleData {
-//     titre: string;
-//     description: string;
-//     contenu: File | null;
-//     couverture: File | null;
-//     auteur_id: number | string;
-//     categorie_id: number | string;
-//     status: string;
-// }  
+interface ArticleData {
+  titre: string;
+  description: string;
+  contenu: string;
+  couverture: string;
+  auteur_id: number | string;
+  categorie_id: number | string;
+  status: string;
+  featured: boolean;
+  reading_time: number | string;
+}
   
 
 /**
@@ -32,6 +34,10 @@ const deleteCategorie = (id: number | string) => {
 }
 
 const createCategorie = (data: Categorie): Promise<Categorie> => {
+    return Axios.post("/articles/categories", data);
+}
+
+const ImportcreateCategorie = (data: Categorie[]): Promise<Categorie> => {
     return Axios.post("/articles/categories", data);
 }
 
@@ -60,6 +66,10 @@ const createArticle = (data: FormData): Promise<FormData> => {
             'Content-Type': 'multipart/form-data',
         }
     });
+}
+
+const ImportcreateArticle = (data: ArticleData[]): Promise<ArticleData> => {
+    return Axios.post("/articles/import", data);
 }
 
 const updateArticle = (id: number | string, data: Partial<FormData>): Promise<FormData> => {
@@ -140,8 +150,8 @@ const updateLike = (id: number | string, data: Partial<FormData>): Promise<FormD
 }
 
 export const ArticleService = {
-    getAllCategories, getCategorie, deleteCategorie, createCategorie, updateCategorie,
-    getAllArticles, getArticle, deleteArticle, createArticle, updateArticle,
+    getAllCategories, getCategorie, deleteCategorie, createCategorie, updateCategorie, ImportcreateCategorie,
+    getAllArticles, getArticle, deleteArticle, createArticle, updateArticle, ImportcreateArticle,
     getAllCommentaires, getCommentaire, deleteCommentaire, createCommentaire, updateCommentaire,
     getAllHistoriques, getHistorique, deleteHistorique, createHistorique, updateHistorique,
     getAlLikes, geLike, deletLike, createLike, updateLike

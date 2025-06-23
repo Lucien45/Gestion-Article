@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-expressions */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { ChangeEvent, Dispatch, FormEvent, SetStateAction, useEffect, useState } from "react";
 import {
@@ -36,16 +38,21 @@ import {
   Autocomplete,
   Stack,
   Pagination,
+  TableRow,
+  TableCell,
+  Checkbox,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from '@mui/icons-material/Save';
 import DomainVerificationIcon from '@mui/icons-material/DomainVerification';
-import { Visibility, Edit, DeleteForever, CalendarToday, Article, Description, Category, ThumbUp, Comment, Star, Timer } from "@mui/icons-material";
+import { Visibility, Edit, DeleteForever, CalendarToday, Article, Description, Category, ThumbUp, Comment, Star, Timer, ImportExport, UploadFile } from "@mui/icons-material";
 import { ArticleService } from "../../services/article.service";
 import { Token } from "../../utils/Token";
 import { Utils } from "../../utils/Utils";
 import { apiUrl } from "../../services/api";
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
+import Papa from "papaparse";
+import { UserService } from "../../services/user.service";
 
 interface Article {
   id: string;
@@ -183,8 +190,13 @@ export const ListArticle: React.FC = () => {
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openViewModal, setOpenViewModal] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openImportModal, setOpenImportModal] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
 
+  const [successDialog, setSuccessDialog] = useState(false);
+  const [ErrorDialog, setErrorDialog] = useState(false);
+  const [message, setMessage] = useState('');
+  
   const [openSuccess, setOpenSuccess] = useState(false);
   const [openError, setOpenError] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -234,6 +246,10 @@ export const ListArticle: React.FC = () => {
     setOpenDeleteDialog(true);
   };
 
+  const handleImportModal = () => {
+    setOpenImportModal(true);
+  }
+
   const handleConfirmDelete = async () => {
     if (!selectedArticle) return;
     try {
@@ -256,11 +272,22 @@ export const ListArticle: React.FC = () => {
 
   return (
     <Paper elevation={3} style={{ padding: "20px", margin: "20px auto" }}>
-      <Typography variant="h6" mb={4} gutterBottom>
-        Informations sur les Articles
-        {}
-        <hr />
-      </Typography>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Typography variant="h6" mb={4} gutterBottom>
+          Informations sur les Articles
+          {}
+        </Typography>
+        <Button 
+          type="submit" 
+          variant="contained" 
+          color="primary" 
+          startIcon={<ImportExport />}
+          onClick={() => handleImportModal()}
+        >
+          Importer
+        </Button>
+      </Box>
+      <hr />
       <FormControl component="fieldset">
         <FormLabel component="legend" sx={{ fontSize: "0.8em" }}>
           Choisissez une méthode de recherche
@@ -409,6 +436,15 @@ export const ListArticle: React.FC = () => {
         setOpen={setOpenEditModal}
         id={selectedId}
         refreshArticle={fetchArticles}
+      />
+
+      {/* Modal Import */}
+      <ImportArtcileCSVDialog
+        open={openImportModal}
+        onClose={() => setOpenImportModal(false)}
+        onSuccess={(msg) => { setSuccessDialog(true); setMessage(msg); }}
+        onError={(msg) => { setErrorDialog(true); setMessage(msg); }}
+        refreshArticles={fetchArticles}
       />
 
       {/* Dialogue de suppression */}
@@ -1131,3 +1167,404 @@ export const AddEditArticle: React.FC = () => {
     </Paper>
   );
 };
+
+interface ImportArticlesProps {
+  open: boolean;
+  onClose: () => void;
+  onSuccess?: (message: string) => void;
+  onError?: (message: string) => void;
+  refreshArticles: () => Promise<void>;
+}
+
+interface ArticlesCSV {
+  titre: string;
+  description: string;
+  contenu: string;
+  couverture: string;
+  auteur_id: number | string;
+  categorie_id: number | string;
+  status: string;
+  featured: boolean;
+  reading_time: number | string;
+}
+
+export const ImportArtcileCSVDialog: React.FC<ImportArticlesProps> = ({ open, onClose, onSuccess, onError, refreshArticles }) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [csvData, setCsvData] = useState<ArticlesCSV[]>([]);
+  const [selectedRows, setSelectedRows] = useState<number[]>([]);
+
+  const [categories, setCategories] = useState<Categorie[]>([]);
+  const [auteurs, setAuteurs] = useState<User[]>([]);
+  const [image, setImage] = useState<File | null>(null);
+  const [pdf, setPdf] = useState<File | null>(null);
+
+  const loadCouverture = (idx: number) => (e: ChangeEvent<HTMLInputElement>) => {
+    const photo = e.target.files?.[0];
+    if (photo) {
+      setImage(photo);
+      const newData = [...csvData];
+      newData[idx] = { ...newData[idx], couverture: URL.createObjectURL(photo) };
+      setCsvData(newData);
+      console.log("image: ", photo);
+    }
+  };
+
+  const loadContenu = (idx: number) => (e: ChangeEvent<HTMLInputElement>) => {
+    const photo = e.target.files?.[0];
+    if (photo) {
+      setPdf(photo);
+      const newData = [...csvData];
+      newData[idx] = { ...newData[idx], contenu: URL.createObjectURL(photo) };
+      setCsvData(newData);
+      console.log("pdf: ", photo);
+    }
+  };
+  const handleFileChange = (e:ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+    setCsvData([]);
+    setSelectedRows([]);
+    if (file) {
+      Papa.parse<ArticlesCSV>(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: (results) => {
+          const data = (results.data as any[]).map((row) => ({
+            titre: row.titre || "",
+            description: row.description || "",
+            contenu: row.contenu || "",
+            couverture: row.couverture || "",
+            status: row.status || "",
+            auteur_id: row.auteur_id ? Number(row.auteur_id) : 0,
+            categorie_id: row.categorie_id ? Number(row.categorie_id) : 0,
+            featured: row.featured === "true" || row.featured === true || row.featured === "t" || row.featured === "1",
+            reading_time: row.reading_time ? Number(row.reading_time) : 0,
+          }));
+          setCsvData(data);
+          setSelectedRows(data.map((_, idx) => idx));
+        },
+      });
+    }
+  };
+
+  const handleRowSelect = (idx: number) => {
+    setSelectedRows((prev) =>
+      prev.includes(idx) ? prev.filter((i) => i !== idx) : [...prev, idx]
+    );
+  };
+
+  const handleImport = async () => {
+    if (!csvData.length || !selectedRows.length) return;
+    setLoading(true);
+
+    const selectedArticles: ArticlesCSV[] = selectedRows.map((idx) => csvData[idx]);
+    try {
+      console.log('selected: ',selectedArticles)
+      const response = await ArticleService.ImportcreateArticle(selectedArticles);
+      console.log("Réponse serveur :", response);
+      setLoading(false);
+      setSelectedFile(null);
+      setCsvData([]);
+      setSelectedRows([]);
+      onSuccess && onSuccess("Importation réussie ✅");
+      refreshArticles && refreshArticles();
+      onClose();
+    } catch (err) {
+      console.warn('reponse server: ',err);
+      setLoading(false);
+      onError && onError("Erreur lors de l'importation ⚠️");
+    }
+  };
+
+  const handleClose = () => {
+    setSelectedFile(null);
+    setCsvData([]);
+    setSelectedRows([]);
+    onClose();
+  };
+
+  const fetchData = async () => {
+    await ArticleService.getAllCategories()
+      .then((response) => setCategories(response.data))
+      .catch(console.warn);
+
+    await UserService.getAllUsers()
+      .then((res) => setAuteurs(res.data))
+      .catch(console.warn)
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, []);
+
+  return (
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
+      <DialogTitle>Importer des catégories (CSV)</DialogTitle>
+      <DialogContent dividers>
+        <Box display="flex" flexDirection="column" alignItems="center" gap={2} mt={2}>
+          <Button
+            variant="outlined"
+            component="label"
+            startIcon={<UploadFile />}
+            disabled={loading}
+          >
+            Sélectionner un fichier CSV
+            <input
+              type="file"
+              accept=".csv"
+              hidden
+              onChange={handleFileChange}
+            />
+          </Button>
+          {selectedFile && (
+            <Typography variant="body2" color="textSecondary">
+              Fichier sélectionné : <b>{selectedFile.name}</b>
+            </Typography>
+          )}
+        </Box>
+        {csvData.length > 0 && (
+          <Box mt={3}>
+            <Typography variant="subtitle1" gutterBottom>
+              Aperçu des données importées :
+            </Typography>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell />
+                  <TableCell>Titre</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell>Contenu</TableCell>
+                  <TableCell>Couverture</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Auteur</TableCell>
+                  <TableCell>Catégorie</TableCell>
+                  <TableCell>Featured</TableCell>
+                  <TableCell>Temps lecture</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {csvData.map((row, idx) => (
+                  <TableRow key={idx}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selectedRows.includes(idx)}
+                        onChange={() => handleRowSelect(idx)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        label="Titre"
+                        value={row.titre}
+                        onChange={e => {
+                          const newData = [...csvData];
+                          newData[idx] = { ...newData[idx], titre: e.target.value };
+                          setCsvData(newData);
+                        }}
+                        size="small"
+                        variant="outlined"
+                        fullWidth
+                        multiline
+                        rows={2}
+                        sx={{ minWidth: 250 }}
+                        disabled={!selectedRows.includes(idx)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        label="Description"
+                        value={row.description}
+                        onChange={e => {
+                          const newData = [...csvData];
+                          newData[idx] = { ...newData[idx], description: e.target.value };
+                          setCsvData(newData);
+                        }}
+                        size="small"
+                        variant="outlined"
+                        fullWidth
+                        multiline
+                        rows={2}
+                        sx={{ minWidth: 250 }}
+                        disabled={!selectedRows.includes(idx)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormControl variant="outlined" fullWidth sx={{ minWidth: 200 }} disabled={!selectedRows.includes(idx)}>
+                        <Button variant="outlined" component="label" disabled={!selectedRows.includes(idx)}>
+                          Contenu
+                          <input type="file" hidden accept="application/pdf" onChange={loadContenu(idx)} />
+                        </Button>
+                        {row.contenu && (
+                          <>
+                            <iframe 
+                              src={
+                                row?.contenu
+                                ?`${apiUrl}/${row?.contenu}` 
+                                : row?.contenu
+                              } 
+                              style={{ width: "100%", height: "200px", marginTop: "10px" }} 
+                              
+                            />
+                          </>
+                        )}
+                      </FormControl>
+                    </TableCell>
+                    <TableCell>
+                      <FormControl 
+                        variant="outlined" 
+                        size="small"
+                        fullWidth
+                        sx={{ minWidth: 200 }}
+                        disabled={!selectedRows.includes(idx)}
+                      >
+                        <Button variant="outlined" component="label" disabled={!selectedRows.includes(idx)}>
+                          Contenu
+                          <input type="file" hidden accept="image/*" onChange={loadCouverture(idx)} />
+                        </Button>
+                        {row.couverture && (
+                          <>
+                            <img 
+                              src={
+                                row?.couverture
+                                ?`${apiUrl}/${row?.couverture}` 
+                                : row?.couverture
+                              } 
+                              alt="Aperçu" 
+                              style={{ maxWidth: "150px", marginTop: "10px" }} 
+                            />
+                          </>
+                        )}
+                      </FormControl>
+                    </TableCell>
+                    <TableCell>
+                      <FormControl 
+                        size="small"
+                        variant="outlined"
+                        fullWidth
+                        sx={{ minWidth: 120 }}
+                        disabled={!selectedRows.includes(idx)}
+                      >
+                        <InputLabel>Status</InputLabel>
+                        <Select
+                          value={row.status}
+                          onChange={e => {
+                            const newData = [...csvData];
+                            newData[idx] = { ...newData[idx], status: e.target.value };
+                            setCsvData(newData);
+                          }}
+                          label="Status"
+                        >
+                          <MenuItem value="brouillon">Brouillon</MenuItem>
+                          <MenuItem value="publié">Publié</MenuItem>
+                          <MenuItem value="archivé">Archivé</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </TableCell>
+                    <TableCell>
+                      <Autocomplete
+                        disablePortal
+                        options={auteurs}
+                        getOptionLabel={(option) => option.username}
+                        sx={{ minWidth: 180 }}
+                        fullWidth
+                        size="small"
+                        disabled={!selectedRows.includes(idx)}
+                        value={auteurs.find((usr) => Number(usr.id) === Number(row.auteur_id)) || null}
+                        onChange={(_, newValue) => {
+                          const newData = [...csvData];
+                          newData[idx] = { ...newData[idx], auteur_id: newValue ? newValue.id : "" };
+                          setCsvData(newData);
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Auteur"
+                            variant="outlined"
+                            margin="dense"
+                            fullWidth
+                          />
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Autocomplete
+                        disablePortal
+                        options={categories}
+                        getOptionLabel={(option) => option.nom}
+                        sx={{ minWidth: 180 }}
+                        fullWidth
+                        size="small"
+                        disabled={!selectedRows.includes(idx)}
+                        value={categories.find((cat) => cat.id === Number(row.categorie_id)) || null}
+                        onChange={(_, newValue) => {
+                          const newData = [...csvData];
+                          newData[idx] = { ...newData[idx], categorie_id: newValue ? newValue.id : "" };
+                          setCsvData(newData);
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            label="Catégorie"
+                            variant="outlined"
+                            margin="dense"
+                            fullWidth
+                          />
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <FormGroup>
+                        <FormControlLabel 
+                          disabled={!selectedRows.includes(idx)}
+                          control={
+                            <Switch
+                              checked={!!row.featured}
+                              onChange={e => {
+                                const newData = [...csvData];
+                                newData[idx] = { ...newData[idx], featured: e.target.checked };
+                                setCsvData(newData);
+                              }}
+                            />
+                          }
+                          label={row.featured ? 'Activer' : 'Desactiver'}
+                        />
+                      </FormGroup>
+                    </TableCell>
+                    <TableCell>
+                      <TextField
+                        label="Temp de lecture (min)"
+                        value={row.reading_time}
+                        type="Number"
+                        onChange={e => {
+                          const newData = [...csvData];
+                          newData[idx] = { ...newData[idx], reading_time: e.target.value };
+                          setCsvData(newData);
+                        }}
+                        size="small"
+                        variant="outlined"
+                        fullWidth
+                        sx={{ minWidth: 100 }}
+                        disabled={!selectedRows.includes(idx)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Box>
+        )}
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose} color="secondary" disabled={loading}>Annuler</Button>
+        <Button
+          onClick={handleImport}
+          color="primary"
+          variant="contained"
+          disabled={!csvData.length || !selectedRows.length || loading}
+        >
+          {loading ? <CircularProgress size={20} /> : "Importer la sélection"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}

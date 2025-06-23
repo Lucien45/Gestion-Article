@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Articles } from './entities/article.entity';
@@ -115,6 +116,10 @@ export class ArticlesService {
     });
 
     return await this.articleRepository.save(article);
+  }
+
+  async createMany(articles: CreateArticleDto[]) {
+    return Promise.all(articles.map((article) => this.createArticle(article)));
   }
 
   async findAllArticle(): Promise<Articles[]> {
