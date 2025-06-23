@@ -1,8 +1,17 @@
-import { Box, Paper, Tab, Tabs } from "@mui/material"
+import { Box, Paper, Tab, Tabs, Typography } from "@mui/material"
 import { useState } from "react";
+import { SettingsApp, SettingsGeneral, SettingsSite } from "../../components/admin/SettingComp";
 
 const Settings = () => {
   const [selectedTab, setSelectedTab] = useState(0);
+  const renderContent = () => {
+    switch (selectedTab) {
+      case 0: return <SettingsGeneral />;
+      case 1: return <SettingsSite />;
+      case 2: return <SettingsApp />;
+      default: return <Typography variant="h6">Bienvenue sur la page settings</Typography>;
+    }
+  };
   return (
     <Box 
       sx={{
@@ -19,20 +28,18 @@ const Settings = () => {
           maxWidth: "1500px",
         }}
       >
-        <Tabs>
-          <Tabs 
-            value={selectedTab} 
-            onChange={(_, newValue) => setSelectedTab(newValue)} 
-            variant="fullWidth"
-          >
-            <Tab label="Parametre General" />
-          </Tabs>
+        <Tabs 
+          value={selectedTab} 
+          onChange={(_, newValue) => setSelectedTab(newValue)} 
+          variant="fullWidth"
+        >
+          <Tab label="Parametre General" />
+          <Tab label="Parametre Site web" />
+          <Tab label="Parametre Application web" />
         </Tabs>
       </Paper>
       <Box sx={{ width: "100%"}}>
-        <Paper elevation={3} style={{ padding: "20px", margin: "20px auto" }}>
-          settings content
-        </Paper>
+        {renderContent()}
       </Box>
     </Box>
   )
