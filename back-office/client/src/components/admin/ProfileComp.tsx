@@ -46,6 +46,7 @@ import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 import { Token } from '../../utils/Token';
 import { UserService } from '../../services/user.service';
 import { apiUrl } from '../../services/api';
+import { SearchService } from '../../services/search.service';
 
 interface User {
   id: number | string;
@@ -185,6 +186,12 @@ const DialogUpdateStatus: React.FC<DialogUserUpdateStatusProps> = ({ userStatus 
   );
 };
 
+interface Suggestion {
+  type: string,
+  label: string,
+  id: number,
+}
+
 export const UserAccount: React.FC = () => {
   const [dataUser, setDataUser] = useState<Partial<User> | null>(null);
   const userProfile = JSON.parse(Token.GetToken("user") as string);
@@ -291,6 +298,12 @@ export const UserList: React.FC = () => {
 
   const [researchMode, setResearchMode] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState<number>(0);
+  const [openSuggestionDetail, setOpenSuggestionDetail] = useState(false);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
+
   const [openEditModal, setOpenEditModal] = useState(false);
   const [openDetailModal, setOpenDetailModal] = useState(false);
   const [openEditStatusModal, setOpenEditStatusModal] = useState(false);
@@ -357,6 +370,37 @@ export const UserList: React.FC = () => {
     }
   };
 
+  const fetchSuggestions = async (value: string) => {
+    if (!value || !researchMode) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    setSuggestionLoading(true);
+    try {
+      const res = await SearchService.searchUser(value, researchMode);
+      console.log("Suggestions:", res.data);
+      setSuggestions(res.data || []);
+      setShowSuggestions(true);
+    } catch (err) {
+      console.log("Erreur lors de la récupération des suggestions:", err);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    } finally {
+      setSuggestionLoading(false);
+    }
+  };
+
+  const handleOpenDialogSuggestion = (id: number) => {
+    setSelectedSuggestionId(id);
+    setOpenSuggestionDetail(true);
+    setShowSuggestions(false);
+
+    setSearchTerm('');
+    setSuggestions([]);
+    setResearchMode('');
+  }
+
   return (
     <Paper elevation={3} style={{ padding: "20px", margin: "20px auto" }}>
       <Typography variant="h6" mb={4} gutterBottom>
@@ -389,16 +433,76 @@ export const UserList: React.FC = () => {
             }
             label={<span style={{ fontSize: "0.8em" }}>username</span>}
           />
+          <FormControlLabel
+            value="email"
+            control={
+              <Radio sx={{ "& .MuiSvgIcon-root": { fontSize: "1em" } }} />
+            }
+            label={<span style={{ fontSize: "0.8em" }}>email</span>}
+          />
         </RadioGroup>
       </FormControl>
-      <TextField
-        label="Rechercher un utilisateur"
-        variant="outlined"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ marginBottom: "20px", marginTop: "10px", width: "100%" }}
-        disabled={!enableResearch()}
-      />
+      <Box position="relative">
+        <TextField
+          label="Rechercher un utilisateur"
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => {
+          setSearchTerm(e.target.value);
+            fetchSuggestions(e.target.value);
+          }}
+          onFocus={() => {
+            if (suggestions.length > 0) setShowSuggestions(true);
+          }}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 150)} 
+          style={{ marginBottom: "20px", marginTop: "10px", width: "100%" }}
+          disabled={!enableResearch()}
+        />
+        {showSuggestions && (
+          <Paper
+            elevation={4}
+            style={{
+              position: "absolute",
+              zIndex: 10,
+              left: 0,
+              right: 0,
+              margin: "0 auto",
+              maxWidth: 600,
+              width: "100%",
+              top: 60,
+            }}
+          >
+            {suggestionLoading ? (
+              <Box p={2} textAlign="center">
+                <CircularProgress size={20} />
+              </Box>
+            ) : suggestions.length > 0 ? (
+              <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                {suggestions.map((item, idx) => (
+                  <li
+                    key={item.label + idx}
+                    style={{
+                      padding: "10px 16px",
+                      cursor: "pointer",
+                      borderBottom: idx !== suggestions.length - 1 ? "1px solid #eee" : "none",
+                      background: "#fff",
+                    }}
+                    onMouseDown={() => {
+                      handleOpenDialogSuggestion(item.id)
+                    }}
+                  >
+                    <span style={{ color: "#ff9800", fontWeight: 600 }}>{item.type} :</span> {item.label}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <Box p={2} textAlign="center" color="text.secondary">
+                Aucune suggestion
+              </Box>
+            )}
+          </Paper>
+        )}
+      </Box>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -509,6 +613,15 @@ export const UserList: React.FC = () => {
         id={selectedId}
         refreshUser={fetchUsers}
       />
+
+      {/* Modal detail suggestion */}
+      {openSuggestionDetail && (
+        <DetailUser
+          open={openSuggestionDetail}
+          setOpen={setOpenSuggestionDetail}
+          id={selectedSuggestionId}
+        />
+      )}
 
       {/* Composant detail user */}
       <DetailUser

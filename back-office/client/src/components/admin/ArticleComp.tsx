@@ -53,6 +53,7 @@ import { apiUrl } from "../../services/api";
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 import Papa from "papaparse";
 import { UserService } from "../../services/user.service";
+import { SearchService } from "../../services/search.service";
 
 interface Article {
   id: string;
@@ -185,6 +186,12 @@ const DialogUpdateArticle: React.FC<DialogUpdateArtcileProps> = ({ articledata }
   );
 };
 
+interface Suggestion {
+  type: string,
+  label: string,
+  id: number,
+}
+
 export const ListArticle: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [openEditModal, setOpenEditModal] = useState(false);
@@ -203,6 +210,12 @@ export const ListArticle: React.FC = () => {
 
   const [researchMode, setResearchMode] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSuggestionId, setSelectedSuggestionId] = useState<number>(0);
+  const [openSuggestionDetail, setOpenSuggestionDetail] = useState(false);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestionLoading, setSuggestionLoading] = useState(false);
+
   const userProfile = JSON.parse(Token.GetToken("user") as string);
 
   const [selectedId, setSelectedId] = useState<number | string>(0);
@@ -270,6 +283,37 @@ export const ListArticle: React.FC = () => {
     return researchMode;
   }
 
+  const fetchSuggestions = async (value: string) => {
+    if (!value || !researchMode) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    setSuggestionLoading(true);
+    try {
+      const res = await SearchService.searchArticle(value, researchMode);
+      console.log("Suggestions:", res.data);
+      setSuggestions(res.data || []);
+      setShowSuggestions(true);
+    } catch (err) {
+      console.log("Erreur lors de la récupération des suggestions:", err);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    } finally {
+      setSuggestionLoading(false);
+    }
+  };
+
+  const handleOpenDialogSuggestion = (id: number) => {
+    setSelectedSuggestionId(id);
+    setOpenSuggestionDetail(true);
+    setShowSuggestions(false);
+
+    setSearchTerm('');
+    setSuggestions([]);
+    setResearchMode('');
+  }
+
   return (
     <Paper elevation={3} style={{ padding: "20px", margin: "20px auto" }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
@@ -322,14 +366,67 @@ export const ListArticle: React.FC = () => {
           />
         </RadioGroup>
       </FormControl>
-      <TextField
-        label="Rechercher une article"
-        variant="outlined"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ marginBottom: "20px", marginTop: "10px", width: "100%" }}
-        disabled={!enableResearch()}
-      />
+      <Box position="relative">
+        <TextField
+          label="Rechercher une article"
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => {
+          setSearchTerm(e.target.value);
+            fetchSuggestions(e.target.value);
+          }}
+          onFocus={() => {
+            if (suggestions.length > 0) setShowSuggestions(true);
+          }}
+          onBlur={() => setTimeout(() => setShowSuggestions(false), 150)} 
+          style={{ marginBottom: "20px", marginTop: "10px", width: "100%" }}
+          disabled={!enableResearch()}
+        />
+        {showSuggestions && (
+          <Paper
+            elevation={4}
+            style={{
+              position: "absolute",
+              zIndex: 10,
+              left: 0,
+              right: 0,
+              margin: "0 auto",
+              maxWidth: 600,
+              width: "100%",
+              top: 60,
+            }}
+          >
+            {suggestionLoading ? (
+              <Box p={2} textAlign="center">
+                <CircularProgress size={20} />
+              </Box>
+            ) : suggestions.length > 0 ? (
+              <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                {suggestions.map((item, idx) => (
+                  <li
+                    key={item.label + idx}
+                    style={{
+                      padding: "10px 16px",
+                      cursor: "pointer",
+                      borderBottom: idx !== suggestions.length - 1 ? "1px solid #eee" : "none",
+                      background: "#fff",
+                    }}
+                    onMouseDown={() => {
+                      handleOpenDialogSuggestion(item.id)
+                    }}
+                  >
+                    <span style={{ color: "#ff9800", fontWeight: 600 }}>{item.type} :</span> {item.label}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <Box p={2} textAlign="center" color="text.secondary">
+                Aucune suggestion
+              </Box>
+            )}
+          </Paper>
+        )}
+      </Box>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -423,6 +520,15 @@ export const ListArticle: React.FC = () => {
         <Pagination count={articles.length} />
       </Stack>
 
+      {/* Modal detail suggestion */}
+      {openSuggestionDetail && (
+        <DetailArticle
+          open={openSuggestionDetail}
+          setOpen={setOpenSuggestionDetail}
+          id={selectedSuggestionId}
+        />
+      )}
+
       {/* Modal de visualisation */}
       <DetailArticle
         open={openViewModal}
@@ -508,6 +614,18 @@ export const DetailArticle: React.FC<DetalArticleProps> = ({open, setOpen, id}) 
     <>
       <Dialog fullWidth open={open} onClose={() => setOpen(false)}>
         <DialogTitle>Les informations sur l'Article</DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={() => setOpen(false)}
+          sx={{
+            position: "absolute",
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
 
         <Divider sx={{ my: 1 }} />
 
