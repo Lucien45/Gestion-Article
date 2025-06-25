@@ -7,6 +7,7 @@ import { ArticleService } from '../services/article.service';
 import { PopularArticles } from '../components/articles/PopularArticles';
 import { CategoryList } from '../components/categories/CategoryList';
 import { NewsletterSignup } from '../components/Newsletter/NewsletterSignup';
+import { LoadingArtcile } from '../components/LoadingSpinner';
 
 export const HomePage: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -21,7 +22,7 @@ export const HomePage: React.FC = () => {
       setArticles(Article_user? Article_user : []);
     } catch (error: any) {
       console.warn(error);
-      setError('auccun liset disponnible')
+      setError('auccun article disponnible')
     } finally {
       setLoading(false);
     }
@@ -30,28 +31,6 @@ export const HomePage: React.FC = () => {
   useEffect(() => {
     fetchArticles();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="flex flex-col bg-neutral-300 w-56 h-64 animate-pulse rounded-xl p-4 gap-4">
-        <div className="bg-neutral-400/50 w-full h-32 animate-pulse rounded-md" />
-        <div className="flex flex-col gap-2">
-          <div className="bg-neutral-400/50 w-full h-4 animate-pulse rounded-md" />
-          <div className="bg-neutral-400/50 w-4/5 h-4 animate-pulse rounded-md" />
-          <div className="bg-neutral-400/50 w-full h-4 animate-pulse rounded-md" />
-          <div className="bg-neutral-400/50 w-2/4 h-4 animate-pulse rounded-md" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center text-red-600 py-8">
-        {error}
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-12">
@@ -97,9 +76,24 @@ export const HomePage: React.FC = () => {
           </a>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {articles.map((article) => (
-            <ArticleCard key={article.id} article={article} />
-          ))}
+          {loading ? (
+            (articles.length > 0
+              ? articles
+              : Array.from({ length: 4 })
+            ).map((_, idx) => (
+              <LoadingArtcile idx={idx} />
+            ))
+          ) : (
+            articles.length > 0 ? (
+              articles.map((article) => (
+                <ArticleCard key={article.id} article={article} />
+              ))
+            ) : (
+              <div className="text-center text-red-600 py-8">
+                {error}
+              </div>
+            )
+          )}
         </div>
       </section>
 

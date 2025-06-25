@@ -4,56 +4,35 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { ArticleService } from '../services/article.service';
 import { Article } from '../types';
 import { ArticleCard } from '../components/articles/ArticleCard';
+import { LoadingArtcile } from '../components/LoadingSpinner';
 
 const ITEMS_PER_PAGE = 9;
 
 export const ArticlePages: React.FC = () => {
-    const [articles, setArticles] = useState<Article[]>([]);
-    const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState<boolean>(false);
-    const [currentPage, setCurrentPage] = React.useState(1);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = React.useState(1);
 
-    const fetchArticles = async () => {
-        try {
-          setLoading(true);
-          const response = await ArticleService.getAllArticles();
-          console.log('liste article: ', response.data);
-          const Article_user = response.data.filter((article: Article) => article.status === 'publié')
-          console.log('liste article filtred: ', Article_user)
-          setArticles(Article_user? Article_user : []);
-        } catch (error: any) {
-          console.warn(error);
-          setError('auccun liset dispo')
-        } finally {
-          setLoading(false);
-        }
+  const fetchArticles = async () => {
+    try {
+      setLoading(true);
+      const response = await ArticleService.getAllArticles();
+      console.log('liste article: ', response.data);
+      const Article_user = response.data.filter((article: Article) => article.status === 'publié')
+      console.log('liste article filtred: ', Article_user)
+      setArticles(Article_user? Article_user : []);
+    } catch (error: any) {
+      console.warn(error);
+      setError('auccun liset dispo')
+    } finally {
+      setLoading(false);
     }
-
-    useEffect(() => {
-        fetchArticles();
-    }, []);
-
-    if (loading) {
-        return (
-          <div className="flex flex-col bg-neutral-300 w-56 h-64 animate-pulse rounded-xl p-4 gap-4">
-            <div className="bg-neutral-400/50 w-full h-32 animate-pulse rounded-md" />
-            <div className="flex flex-col gap-2">
-              <div className="bg-neutral-400/50 w-full h-4 animate-pulse rounded-md" />
-              <div className="bg-neutral-400/50 w-4/5 h-4 animate-pulse rounded-md" />
-              <div className="bg-neutral-400/50 w-full h-4 animate-pulse rounded-md" />
-              <div className="bg-neutral-400/50 w-2/4 h-4 animate-pulse rounded-md" />
-            </div>
-          </div>
-        );
-    }
-
-  if (error) {
-    return (
-      <div className="text-center text-red-600 py-8">
-        {error}
-      </div>
-    );
   }
+
+  useEffect(() => {
+    fetchArticles();
+  }, []);
 
   const totalPages = Math.ceil(articles.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -62,9 +41,24 @@ export const ArticlePages: React.FC = () => {
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {paginatedArticles.map((article) => (
-          <ArticleCard key={article.id} article={article} />
-        ))}
+        {loading ? (
+          (paginatedArticles.length > 0
+            ? paginatedArticles
+            : Array.from({ length: 4 })
+          ).map((_, idx) => (
+            <LoadingArtcile idx={idx} />
+          ))
+        ) : (
+          paginatedArticles.length > 0 ? (
+            paginatedArticles.map((article) => (
+              <ArticleCard key={article.id} article={article} />
+            ))
+          ) : (
+            <div className="text-center text-red-600 py-8">
+              {error}
+            </div>
+          )
+        )}
       </div>
 
       {totalPages > 1 && (
