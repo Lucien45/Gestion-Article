@@ -23,7 +23,6 @@ import { CreateHistoriqueDto, UpdateHistoriqueDto } from './dto/historique.dto';
 import { CreateLikeDto, UpdateLikeDto } from './dto/like.dto';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { Commentaires } from './entities/commentaire.entity';
 
 @Controller('articles')
 export class ArticlesController {
@@ -129,12 +128,12 @@ export class ArticlesController {
     return this.articlesService.findAllArticle();
   }
 
-  @Get(':id')
+  @Get('article/:id')
   findArticleById(@Param('id', ParseIntPipe) id: number) {
     return this.articlesService.findArticleById(id);
   }
 
-  @Patch(':id')
+  @Patch('article/:id')
   @UseInterceptors(
     FilesInterceptor('files', 2, {
       storage: diskStorage({
@@ -172,7 +171,7 @@ export class ArticlesController {
     return this.articlesService.updateArticle(id, dto, couverture, pdf);
   }
 
-  @Delete(':id')
+  @Delete('article/:id')
   removeArticle(@Param('id', ParseIntPipe) id: number) {
     return this.articlesService.removeArticle(id);
   }
@@ -186,7 +185,7 @@ export class ArticlesController {
   }
 
   @Get('commentaires')
-  async getAllCommentaires(): Promise<Commentaires[]> {
+  async getAllCommentaires() {
     return this.articlesService.findAllCommentaire();
   }
 
