@@ -6,7 +6,6 @@ import { UserService } from '../../services/user.service';
 import { Token } from '../../utils/Token';
 
 export const LoginForm: React.FC = () => {
-  const navigate = useNavigate();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
@@ -23,7 +22,7 @@ export const LoginForm: React.FC = () => {
       const res = await UserService.SignIn(data);
       Token.AddToken('authUser', res.data.token);
       Token.AddToken('profile', JSON.stringify(res.data.user));
-      navigate('/');
+      window.location.href = "/";
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.response?.data?.message || 'Une erreur est survenue. Veuillez réessayer.');

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { Article, Commentaire } from '../../types';
+import { Article, User } from '../../types';
 import { ArticleService } from '../../services/article.service';
 import { apiUrl } from '../../services/api';
 
@@ -9,20 +9,29 @@ interface CommentListProps {
   articleId: number | string;
 }
 
+export interface CommentaireData {
+  id: number | string;
+  contenu: string;
+  user_id: string;
+  article: Article;
+  status: 'pending' | 'approved' | 'rejected';
+  date_commantaire: string;
+  updatedAt: string;
+  user?: User;
+  length: number;
+}
+
 
 export const CommentList: React.FC<CommentListProps> = ({ articleId }) => {
-  const [comments, setComments] = useState<Commentaire[]>([]);
-  const [currentArticle, setCurrentArticle] = useState<Article>();
+  const [comments, setComments] = useState<CommentaireData[]>([]);
 
   const fetchCommetaires = async () => {
     try {
-      // const response = await ArticleService.getAllCommentaires();
-      // console.log('all comment: ', response.data);
-      // const fetchCommentById: Commentaire[] = response.data.filter((comment) => comment.article_id === articleId);
-      // console.log('all comment article: ', fetchCommentById);
-      // setComments(fetchCommentById);
-      const response = await ArticleService.getArticle(Number(articleId));
-      console.log('detail article comment: ', response.data);
+      const response = await ArticleService.getAllCommentaires();
+      console.log('all comment: ', response.data);
+      const fetchCommentById: CommentaireData[] = response.data.filter((comment: CommentaireData) => comment.article.id === articleId);
+      console.log('all comment article: ', fetchCommentById);
+      setComments(fetchCommentById);
     
     } catch (error) {
       console.warn(error);

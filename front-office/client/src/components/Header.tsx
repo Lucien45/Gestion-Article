@@ -3,7 +3,7 @@ import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { Token } from '../utils/Token';
 import { UserService } from '../services/user.service';
-import { logout } from '../context/AuthContext';
+import { isAuthenticated, logout } from '../context/AuthContext';
 import { apiUrl } from '../services/api';
 import { Footer } from './Footer';
 import { ThemeToggle } from './ThemeToggle';
@@ -18,7 +18,7 @@ interface User {
 
 export function Header() {
   const [user, setUser]  = useState<User | null>(null);
-  const userProfile = JSON.parse(Token.GetToken("profile") as string);
+  const userProfile = Token.GetToken('profile') ? JSON.parse(Token.GetToken("profile") as string) : null;
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -57,12 +57,12 @@ export function Header() {
             {/* Desktop Navigation */}
             <div className="hidden sm:flex sm:items-center sm:space-x-8">
               <ThemeToggle />
-              {user ? (
+              {isAuthenticated() ? (
                 <>
                   <Link to="/articles" className="text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white">
                     Articles
                   </Link>
-                  {(user.role === 'admin' || user.role === 'editeur' || user.role === 'auteur') && (
+                  {(user?.role === 'admin' || user?.role === 'editeur' || user?.role === 'auteur') && (
                     <Link to="/dashboard" className="text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white">
                       Dashboard
                     </Link>
@@ -70,11 +70,11 @@ export function Header() {
                   <div className="flex items-center space-x-4">
                     <Link to="/profile" className="flex items-center space-x-2">
                       <img
-                        src={user?.profile ? `${apiUrl}/${user.profile}` : user?.username || `https://ui-avatars.com/api/?name=${user.username}`}
-                        alt={user.username}
+                        src={user?.profile ? `${apiUrl}/${user.profile}` : user?.username || `https://ui-avatars.com/api/?name=${user?.username}`}
+                        alt={user?.username}
                         className="h-8 w-8 rounded-full"
                       />
-                      <span className="text-gray-700 dark:text-gray-200">{user.username}</span>
+                      <span className="text-gray-700 dark:text-gray-200">{user?.username}</span>
                     </Link>
                     <button
                       onClick={handleSignOut}
@@ -124,7 +124,7 @@ export function Header() {
         {isMenuOpen && (
           <div className="sm:hidden">
             <div className="pt-2 pb-3 space-y-1">
-              {user ? (
+              {isAuthenticated() ? (
                 <>
                   <Link
                     to="/articles"
@@ -132,7 +132,7 @@ export function Header() {
                   >
                     Articles
                   </Link>
-                  {(user.role === 'admin' || user.role === 'editeur' || user.role === 'auteur') && (
+                  {(user?.role === 'admin' || user?.role === 'editeur' || user?.role === 'auteur') && (
                     <Link
                       to="/dashboard"
                       className="block px-4 py-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700"

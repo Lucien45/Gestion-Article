@@ -42,11 +42,11 @@ const getAllArticles = () => {
 }
 
 const getArticle = (id: number | string) => {
-    return Axios.get(`/articles/${id}`)
+    return Axios.get(`/articles/article/${id}`)
 }
 
 const deleteArticle = (id: number | string) => {
-    return Axios.delete(`/articles/${id}`);
+    return Axios.delete(`/articles/article/${id}`);
 }
 
 const createArticle = (data: FormData): Promise<FormData> => {
@@ -58,7 +58,7 @@ const createArticle = (data: FormData): Promise<FormData> => {
 }
 
 const updateArticle = (id: number | string, data: Partial<FormData>): Promise<FormData> => {
-    return Axios.put(`/articles/${id}`, data,{
+    return Axios.put(`/articles/article/${id}`, data,{
         headers: {
             'Content-Type': 'multipart/form-data',
         }
