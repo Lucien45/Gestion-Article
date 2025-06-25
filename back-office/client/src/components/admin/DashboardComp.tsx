@@ -5,6 +5,7 @@ import { ArticleService } from '../../services/article.service';
 import { Token } from '../../utils/Token';
 import { UserService } from '../../services/user.service';
 import { useNavigate } from 'react-router';
+import { StyledTableCell, StyledTableRow } from '../../utils/Table';
 
 interface ArticleDetail {
   id: string;
@@ -132,40 +133,51 @@ export const AdminDash: React.FC = () => {
                 <TableContainer component={Paper}>
                     <Table>
                         <TableHead>
-                            <TableRow>
-                                <TableCell><strong>Nom</strong></TableCell>
-                                <TableCell><strong>Email</strong></TableCell>
-                                <TableCell><strong>Rôle</strong></TableCell>
-                                <TableCell><strong>Dernier connexion</strong></TableCell>
-                                <TableCell><strong>Status</strong></TableCell>
-                            </TableRow>
+                            <StyledTableRow>
+                                <StyledTableCell><strong>Nom</strong></StyledTableCell>
+                                <StyledTableCell><strong>Email</strong></StyledTableCell>
+                                <StyledTableCell><strong>Rôle</strong></StyledTableCell>
+                                <StyledTableCell><strong>Dernier connexion</strong></StyledTableCell>
+                                <StyledTableCell><strong>Status</strong></StyledTableCell>
+                            </StyledTableRow>
                         </TableHead>
                         {loading && (
-                            <>
-                                <Box
-                                display="flex"
-                                alignItems="center"
-                                justifyContent="center"
-                                height="100%"
-                                >
-                                <CircularProgress />
-                                </Box>
-                            </>
+                            <TableBody>
+                                {[...Array(5)].map((_, idx) => (
+                                <StyledTableRow key={idx}>
+                                    <StyledTableCell>
+                                        <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "80%", mx: "auto" }} />
+                                    </StyledTableCell>
+                                    <StyledTableCell>
+                                        <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "90%", mx: "auto" }} />
+                                    </StyledTableCell>
+                                    <StyledTableCell>
+                                        <Box sx={{ bgcolor: "#eee", height: 20, width: 1, borderRadius: "80%", mx: "auto" }} />
+                                    </StyledTableCell>
+                                    <StyledTableCell>
+                                        <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "70%", mx: "auto" }} />
+                                    </StyledTableCell>
+                                    <StyledTableCell>
+                                        <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "60%", mx: "auto" }} />
+                                    </StyledTableCell>
+                                </StyledTableRow>
+                                ))}
+                            </TableBody>
                         )}
                         {!loading && (
                             <TableBody>
                                 {recentUsers.map((user, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{user.name}</TableCell>
-                                        <TableCell>{user.email}</TableCell>
-                                        <TableCell>{user.role}</TableCell>
-                                        <TableCell>{user.last_login ? new Date(user.last_login).toLocaleString() : "Jamais connecté"}</TableCell>
-                                        <TableCell>
+                                    <StyledTableRow key={index}>
+                                        <StyledTableCell>{user.name}</StyledTableCell>
+                                        <StyledTableCell>{user.email}</StyledTableCell>
+                                        <StyledTableCell>{user.role}</StyledTableCell>
+                                        <StyledTableCell>{user.last_login ? new Date(user.last_login).toLocaleString() : "Jamais connecté"}</StyledTableCell>
+                                        <StyledTableCell>
                                             <Typography color={user.status === "Actif" ? "success.main" : "error.main"} fontWeight="bold">
                                                 {user.status}
                                             </Typography>
-                                        </TableCell>
-                                    </TableRow>
+                                        </StyledTableCell>
+                                    </StyledTableRow>
                                 ))}
                             </TableBody>
                         )}

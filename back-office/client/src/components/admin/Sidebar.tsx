@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider } from "@mui/material";
+import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Divider, Box, Typography } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import ArticleIcon from "@mui/icons-material/Article";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -90,6 +90,12 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           </ListItemButton>
         </ListItem>
       </List>
+
+      <Box sx={{ p: 2 }}>
+        <Typography variant="body2" color="textSecondary" align="center">
+          Version 1.0.0
+        </Typography>
+      </Box>
     </Drawer>
   );
 };

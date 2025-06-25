@@ -3,6 +3,7 @@ import React, { ChangeEvent, FormEvent, useState } from "react";
 import {
   Box, Button, TextField, Typography, Avatar, Select, MenuItem, InputLabel, FormControl,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
@@ -20,6 +21,7 @@ const AuthPage: React.FC = () => {
   const [image, setImage] = useState<File | null>(null);
   const [emailError, setEmailError] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
+  const [loader, setLoader] = useState(false);
 
   const loadProfile = (e: ChangeEvent<HTMLInputElement>) => {
     const photo = e.target.files?.[0];
@@ -31,6 +33,7 @@ const AuthPage: React.FC = () => {
 
   const handleSignIn = async (e: FormEvent) => {
     e.preventDefault();
+    setLoader(true);
     try {
       const res = await UserService.SignIn(signInData);
       Token.AddToken("authUser", res.data.token);
@@ -39,6 +42,8 @@ const AuthPage: React.FC = () => {
       window.location.href = "/admin";
     } catch {
       Utils.errorPage("Mot de passe ou login incorrect");
+    } finally {
+      setLoader(false);
     }
   };
 
@@ -150,7 +155,16 @@ const AuthPage: React.FC = () => {
         </Button>
       </form>
 
-
+      {loader && (
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          height="100%"
+        >
+          <CircularProgress />
+        </Box>
+      )}
       <form
         onSubmit={handleSignUp}
         className="sign-up-form"

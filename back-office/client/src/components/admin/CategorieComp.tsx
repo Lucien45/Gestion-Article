@@ -106,6 +106,7 @@ export const ListCategorie: React.FC = () => {
   const [successDialog, setSuccessDialog] = useState(false);
   const [ErrorDialog, setErrorDialog] = useState(false);
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const [selectedId, setSelectedId] = useState<number | string>(0);
   const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
@@ -115,10 +116,10 @@ export const ListCategorie: React.FC = () => {
   const [openSuggestionDetail, setOpenSuggestionDetail] = useState(false);
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestionLoading, setSuggestionLoading] = useState(false);
+  const [suggestionLoading] = useState(false);
 
   const fetchCategories = async () => {
-    setSuggestionLoading(true)
+    setLoading(true)
     await ArticleService.getAllCategories()
     .then((response) => {
       setCategories(response.data);
@@ -127,10 +128,10 @@ export const ListCategorie: React.FC = () => {
     })
     .catch((error) => {
       console.warn(error);
-      setSuggestionLoading(false);
+      setLoading(false);
     })
     .finally(() => {
-      setSuggestionLoading(false);
+      setLoading(false);
     })
   }
 
@@ -292,42 +293,65 @@ export const ListCategorie: React.FC = () => {
               <StyledTableCell>Actions</StyledTableCell>
             </StyledTableRow>
           </TableHead>
-          <TableBody>
-            {categories.map((categorie) => (
-              <StyledTableRow key={categorie.id}>
-                <StyledTableCell component="th" scope="row">
-                  {categorie.nom}
-                </StyledTableCell>
-                <StyledTableCell align="left">
-                  {categorie.description}
-                </StyledTableCell>
-                <StyledTableCell align="left">
-                  <IconButton
-                    aria-label="Gérer le categorie"
-                    onClick={() => handleEdit(categorie)}
-                  >
-                    <Edit
-                      titleAccess="Gérer le categorie"
-                      fontSize="medium"
-                      color="primary"
-                    ></Edit>
-                  </IconButton>
-                  {userProfile?.role === 'admin' && (
-
-                    <IconButton 
-                      onClick={() => handleDelete(categorie)}
-                    >
-                      <DeleteForever
-                        titleAccess="Supprimer le categorie"
-                        fontSize="medium"
-                        color="error"
-                      ></DeleteForever>
-                    </IconButton>
-                  )}
-                </StyledTableCell>
-              </StyledTableRow>
-            ))}
+          {loading && (
+            <TableBody>
+              {[...Array(5)].map((_, idx) => (
+                <StyledTableRow key={idx}>
+                  <StyledTableCell>
+                    <Box sx={{ bgcolor: "#9b968f", height: 20, borderRadius: 1, width: "80%", mx: "auto" }} />
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    <Box sx={{ bgcolor: "#9b968f", height: 20, borderRadius: 1, width: "90%", mx: "auto" }} />
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                      <Box sx={{ bgcolor: "#9b968f", width: 32, height: 32, borderRadius: "50%" }} />
+                      <Box sx={{ bgcolor: "#9b968f", width: 32, height: 32, borderRadius: "50%" }} />
+                      <Box sx={{ bgcolor: "#9b968f", width: 32, height: 32, borderRadius: "50%" }} />
+                    </Box>
+                  </StyledTableCell>
+                </StyledTableRow>
+              ))}
             </TableBody>
+          )}
+          {!loading && (
+            <TableBody>
+              {categories.map((categorie) => (
+                <StyledTableRow key={categorie.id}>
+                  <StyledTableCell component="th" scope="row">
+                    {categorie.nom}
+                  </StyledTableCell>
+                  <StyledTableCell align="left">
+                    {categorie.description}
+                  </StyledTableCell>
+                  <StyledTableCell align="left">
+                    <IconButton
+                      aria-label="Gérer le categorie"
+                      onClick={() => handleEdit(categorie)}
+                    >
+                      <Edit
+                        titleAccess="Gérer le categorie"
+                        fontSize="medium"
+                        color="primary"
+                      ></Edit>
+                    </IconButton>
+                    {userProfile?.role === 'admin' && (
+
+                      <IconButton 
+                        onClick={() => handleDelete(categorie)}
+                      >
+                        <DeleteForever
+                          titleAccess="Supprimer le categorie"
+                          fontSize="medium"
+                          color="error"
+                        ></DeleteForever>
+                      </IconButton>
+                    )}
+                  </StyledTableCell>
+                </StyledTableRow>
+              ))}
+            </TableBody>
+          )}
         </Table>
       </TableContainer>
 

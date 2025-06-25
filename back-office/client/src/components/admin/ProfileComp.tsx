@@ -516,14 +516,35 @@ export const UserList: React.FC = () => {
             </StyledTableRow>
           </TableHead>
           {loading && (
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              height="100%"
-            >
-              <CircularProgress />
-            </Box>
+            <TableBody>
+              {[...Array(5)].map((_, idx) => (
+                <StyledTableRow key={idx}>
+                  <StyledTableCell>
+                    <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "80%", mx: "auto" }} />
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "90%", mx: "auto" }} />
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    <Box sx={{ bgcolor: "#eee", height: 60, width: 60, borderRadius: 0, mx: "auto" }} />
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "70%", mx: "auto" }} />
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "60%", mx: "auto" }} />
+                  </StyledTableCell>
+                  <StyledTableCell>
+                    <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+                      <Box sx={{ bgcolor: "#eee", width: 32, height: 32, borderRadius: "50%" }} />
+                      <Box sx={{ bgcolor: "#eee", width: 32, height: 32, borderRadius: "50%" }} />
+                      <Box sx={{ bgcolor: "#eee", width: 32, height: 32, borderRadius: "50%" }} />
+                      <Box sx={{ bgcolor: "#eee", width: 32, height: 32, borderRadius: "50%" }} />
+                    </Box>
+                  </StyledTableCell>
+                </StyledTableRow>
+              ))}
+            </TableBody>
           )}
           {!loading && (
             <TableBody>
