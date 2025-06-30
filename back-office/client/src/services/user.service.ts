@@ -4,6 +4,23 @@ import Axios from "./axios"
 
 const token = Token.GetToken('authUser');
 
+interface User {
+  id: number | string;
+  username: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  profile?: string;
+  role: string;
+  nom: string;
+  prenom?: string;
+  lastLogin: string;
+  civilite: string;
+  date_naissance: string;
+  contact?: string
+  is_active: boolean;
+}
+
 export interface LoginResponse {
     identification: string;
     password: string;
@@ -16,7 +33,7 @@ interface UserStatus {
 
 export interface LoginSuccessResponse {
     token: string;
-    user: string;
+    user: User;
 }
 
 /**
@@ -63,7 +80,7 @@ const getAllUsers = () => {
     return Axios.get(`/users`);
 }
 
-const SignUp = (data: FormData): Promise<FormData> => {
+const SignUp = (data: FormData): Promise<AxiosResponse<User>> => {
     return Axios.post("/users/register", data,{
         headers: {
             'Content-Type': 'multipart/form-data',

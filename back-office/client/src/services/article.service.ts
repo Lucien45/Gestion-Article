@@ -53,11 +53,11 @@ const getAllArticles = () => {
 }
 
 const getArticle = (id: number | string) => {
-    return Axios.get(`/articles/${id}`)
+    return Axios.get(`/articles/article/${id}`)
 }
 
 const deleteArticle = (id: number | string) => {
-    return Axios.delete(`/articles/${id}`);
+    return Axios.delete(`/articles/article/${id}`);
 }
 
 const createArticle = (data: FormData): Promise<FormData> => {
@@ -73,7 +73,7 @@ const ImportcreateArticle = (data: ArticleData[]): Promise<ArticleData> => {
 }
 
 const updateArticle = (id: number | string, data: Partial<FormData>): Promise<FormData> => {
-    return Axios.patch(`/articles/${id}`, data,{
+    return Axios.patch(`/articles/article/${id}`, data,{
         headers: {
             'Content-Type': 'multipart/form-data',
         }

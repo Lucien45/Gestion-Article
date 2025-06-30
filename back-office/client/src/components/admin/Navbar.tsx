@@ -21,6 +21,7 @@ import { UserService } from "../../services/user.service";
 import { useNavigate } from "react-router";
 import { Utils } from "../../utils/Utils";
 import { logout } from "../../context/AuthContext";
+import { LogService } from "../../services/log.service";
 
 interface NavbarProps {
   isOpen: boolean;
@@ -108,6 +109,11 @@ const Navbar = ({ toggleSidebar, isOpen }: NavbarProps) => {
         'Êtes-vous sûr de vouloir vous déconnecter ?',
         async () => {
           logout();
+          const Log = {
+            action: 'déconnexion',
+            user: Number(userProfile?.id),
+          };
+          LogService.createLog(Log);
           navigate("/");
         },
         () => { 

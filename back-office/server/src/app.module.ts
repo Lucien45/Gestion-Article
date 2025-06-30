@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { SearchModule } from './search/search.module';
+import { LogModule } from './log/log.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { SearchModule } from './search/search.module';
     ArticlesModule,
     UsersModule,
     SearchModule,
+    LogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

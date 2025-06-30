@@ -11,6 +11,8 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import { logout } from "../../context/AuthContext";
 import { Utils } from "../../utils/Utils";
+import { LogService } from "../../services/log.service";
+import { Token } from "../../utils/Token";
 
 const drawerWidth = 240;
 
@@ -21,6 +23,7 @@ interface SidebarProps {
 
 const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const [activeOption, setActiveOption] = useState("dashboard");
+  const userProfile = JSON.parse(Token.GetToken("user") as string);
   const navigate = useNavigate();
 
   const handleOptionClick = (option: string, path: string) => {
@@ -33,6 +36,11 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
       "Êtes-vous sûr de vouloir déconnecter ?", 
       async () => {
         logout();
+        const Log = {
+          action: 'déconnexion',
+          user: Number(userProfile?.id),
+        };
+        LogService.createLog(Log);
         navigate("/");
       },
       () => { 
@@ -66,7 +74,7 @@ const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
           { text: "Articles", icon: <ArticleIcon />, path: "/admin/article", option: "articles" },
           { text: "Rapport", icon: <BarChartIcon />, path: "/admin/report", option: "report" },
           { text: "Institution", icon: <BusinessIcon />, path: "/admin/institution", option: "institution" },
-          { text: "Profile", icon: <AccountCircleIcon />, path: "/admin/profile", option: "profile" },
+          { text: "Utilisateurs", icon: <AccountCircleIcon />, path: "/admin/profile", option: "profile" },
           { text: "Paramètres", icon: <SettingsIcon />, path: "/admin/settings", option: "settings" },
         ].map(({ text, icon, path, option }) => (
           <ListItem key={option} disablePadding>

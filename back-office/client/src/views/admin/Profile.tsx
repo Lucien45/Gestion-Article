@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { AddUser, UserAccount, UserList } from '../../components/admin/ProfileComp';
+import { AddUser, LogUsers, UserAccount, UserList } from '../../components/admin/ProfileComp';
 import { Box, Tabs, Tab, Typography, Paper } from "@mui/material";
 import { Token } from '../../utils/Token';
 
@@ -14,7 +14,7 @@ const Profile = () => {
       tabs.push(
         { label: "Liste Utilisateurs", component: <UserList /> },
         { label: "Créer un utilisateur", component: <AddUser /> },
-        { label: "Logs", component: <Typography variant="h6">En cours...</Typography> }
+        { label: "Logs", component: <LogUsers/> }
       );
     }
 

@@ -36,6 +36,7 @@ import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 import { Token } from "../../utils/Token";
 import Papa from "papaparse";
 import { SearchService } from "../../services/search.service";
+import { LogService } from "../../services/log.service";
 
 interface Categorie {
   id: number;
@@ -185,6 +186,12 @@ export const ListCategorie: React.FC = () => {
     if (!selectedCategorie) return;
     try {
       await ArticleService.deleteCategorie(selectedCategorie.id);
+
+      const Log = {
+        action: 'suppression categorie',
+        user: Number(userProfile?.id),
+      }
+      await LogService.createLog(Log)
       setOpenDeleteDialog(false);
       fetchCategories();
       setSuccessDialog(true);
@@ -458,6 +465,7 @@ export const AddEditCategorie: React.FC = () => {
   const [processing, setProcessing] = useState(false);
   const [successDialog, setSuccessDialog] = useState(false);
   const [ErrorDialog, setErrorDialog] = useState(false);
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -476,6 +484,11 @@ export const AddEditCategorie: React.FC = () => {
     setProcessing(true);
     await ArticleService.createCategorie(newCategorie)
     .then((response) => {
+      const Log = {
+        action: 'ajout categorie',
+        user: Number(userProfile?.id),
+      };
+      LogService.createLog(Log);
       setNewCategorie({ nom: "", description: "" });
       setSuccessDialog(true);
       console.log('reponse server: ', response);
@@ -641,6 +654,7 @@ export const UpdateCategorie: React.FC<UpdateCategorieProps> = ({open, setOpen, 
 
   const [processMessage, setProcessMessage] = useState("");
   const [userUpdateSuccess, setUserUpdateSuccess] = useState<boolean>(false);
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
 
   const fetchCategorie = async () => {
     if (!id) return;
@@ -671,7 +685,12 @@ export const UpdateCategorie: React.FC<UpdateCategorieProps> = ({open, setOpen, 
     if (!dataCategorie) return;
     try {
       await ArticleService.updateCategorie(Number(id), dataCategorie);
-      setProcessMessage(`Le categorie ${dataCategorie?.nom} a été ajoutée avec succès ✅`);
+      setProcessMessage(`Le categorie ${dataCategorie?.nom} a été mis a jour avec succès ✅`);
+      const Log = {
+        action: 'modification categorie',
+        user: Number(userProfile?.id),
+      };
+      LogService.createLog(Log);
       await refreshCategorie();
       setOpenDialog(false);
       setSuccessDialog(true);
@@ -777,6 +796,7 @@ export const ImportCategorieCSVDialog: React.FC<ImportCategorieProps> = ({ open,
   const [loading, setLoading] = useState<boolean>(false);
   const [csvData, setCsvData] = useState<CategorieCSV[]>([]);
   const [selectedRows, setSelectedRows] = useState<number[]>([]);
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
 
   const handleFileChange = (e:ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
@@ -819,6 +839,11 @@ export const ImportCategorieCSVDialog: React.FC<ImportCategorieProps> = ({ open,
     try {
       const response = await ArticleService.ImportcreateCategorie(selectedCategories)
       console.log('reponse server: ', response);
+      const Log = {
+        action: 'import categorie',
+        user: Number(userProfile?.id),
+      };
+      LogService.createLog(Log);
       setLoading(false);
       setSelectedFile(null);
       setCsvData([]);

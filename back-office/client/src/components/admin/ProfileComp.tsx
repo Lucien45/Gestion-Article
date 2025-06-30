@@ -35,7 +35,9 @@ import {
   Snackbar,
   FormGroup,
   Switch,
-  Checkbox
+  Checkbox,
+  TableRow,
+  TableCell
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import SaveIcon from '@mui/icons-material/Save';
@@ -47,6 +49,7 @@ import { Token } from '../../utils/Token';
 import { UserService } from '../../services/user.service';
 import { apiUrl } from '../../services/api';
 import { SearchService } from '../../services/search.service';
+import { LogService } from '../../services/log.service';
 
 interface User {
   id: number | string;
@@ -311,6 +314,8 @@ export const UserList: React.FC = () => {
   const [openSuccess, setOpenSuccess] = useState(false);
   const [selectedId, setSelectedId] = useState<number | string>(0);
 
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
+
   const fetchUsers = async () => {
     setLoading(true);
     try {
@@ -361,6 +366,13 @@ export const UserList: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (!selectedId) return;
     try {
+      await UserService.deleteUser(selectedId);
+
+      const Log = {
+        action: 'suppression utilisateur',
+        user: Number(userProfile?.id),
+      }
+      await LogService.createLog(Log)
       setOpenDeleteDialog(false);
       setOpenSuccess(true);
       fetchUsers();
@@ -694,6 +706,8 @@ export const AddUser: React.FC = () => {
   const [userCreationSuccess, setUserCreationSuccess] = useState<boolean>(false);
   const [processMessage, setProcessMessage] = useState("");
 
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
+
   
   const loadProfile = (e: ChangeEvent<HTMLInputElement>) => {
     const photo = e.target.files?.[0];
@@ -812,6 +826,12 @@ export const AddUser: React.FC = () => {
     try {
       const response = await UserService.SignUp(formData);
       console.log("Réponse serveur :", response);
+
+      const Log = {
+        action: 'création utilisateur',
+        user: Number(userProfile?.id),
+      }
+      await LogService.createLog(Log)
       setProcessMessage(`L'utilisateur ${NewUserData.username} a été ajoutée avec succès.`);
       setNewUserData({ 
         username: '', email: '', password: '', confirmPassword: '', preview: '', 
@@ -1100,6 +1120,8 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
   const [emailError, setEmailError] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
 
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
+
   const [processMessage, setProcessMessage] = useState("");
   const [userUpdateSuccess, setUserUpdateSuccess] = useState<boolean>(false);
 
@@ -1238,6 +1260,13 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
     try {
       const response = await UserService.updateUser(Number(id), formData);
       console.log("Réponse serveur :", response);
+
+      const Log = {
+        action: 'modification utilisateur',
+        user: Number(userProfile?.id),
+      };
+      LogService.createLog(Log);
+      
       setProcessMessage(`L'utilisateur ${dataUserUpdate.username} a été ajoutée avec succès ✅`);
       await refreshUser();
       setOpenDialog(false);
@@ -1450,6 +1479,9 @@ export const UpdateStatus: React.FC<UpdateUserProps> = ({ open, setOpen, id, ref
   const [dataUserUpdate, setDataUserUpdate] = useState({status: false, role: '',});
   const [processMessage, setProcessMessage] = useState("");
   const [userUpdateSuccess, setUserUpdateSuccess] = useState<boolean>(false);
+  
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
+  
   const roleOptions = [
     {
       id: 1,
@@ -1502,6 +1534,13 @@ export const UpdateStatus: React.FC<UpdateUserProps> = ({ open, setOpen, id, ref
 
     try {
       const response = await UserService.updateUserStatus(Number(id), data)
+      
+        const Log = {
+          action: 'modification status utilisateur',
+          user: Number(userProfile?.id),
+        };
+        LogService.createLog(Log);
+
       setProcessMessage(`L'utilisateur a été ajoutée avec succès ✅`);
       await refreshUser();
       setOpenDialog(false);
@@ -1701,3 +1740,102 @@ export const DetailUser: React.FC<DetalUserProps> = ({open, setOpen, id}) => {
     </>
   )
 }
+
+interface Logs {
+  id: number;
+  action: string;
+  user: User;
+  date: string;
+}
+
+export const LogUsers: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [Logs, setLogs] = useState<Logs[]>([])
+
+  const fetchLogs = async() => {
+    setLoading(true)
+    try {
+      const res = await LogService.getAllLogs();
+      console.log('data: ',res);
+      
+      setLogs(res.data);
+    } catch (error) {
+      console.log(`Échec de récupération des logs ${error}`);
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getActionColor = (action: string) => {
+    const a = action.toLowerCase();
+    if (a.includes("connexion")) return "#1976d2"; // bleu
+    if (a.includes("ajout")) return "#388e3c"; // vert
+    if (a.includes("création")) return "#388e3c"; // vert
+    if (a.includes("suppression")) return "#d32f2f"; // rouge
+    if (a.includes("modification") || a.includes("update")) return "#fbc02d"; // jaune
+    if (a.includes("déconnexion")) return "#6d4c41"; // marron
+    if (a.includes("export")) return "#00897b"; // turquoise
+    if (a.includes("import")) return "#8e24aa"; // violet
+    return "#333"; // couleur par défaut
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  return (
+    <Paper elevation={3} sx={{ p: 3, mt: 4, mb: 2 }}>
+      <Typography variant="h6" mb={2} fontWeight="bold">
+        Historique des actions utilisateurs
+      </Typography>
+      <Divider sx={{ mb: 2 }} />
+      {loading ? (
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Action</TableCell>
+              <TableCell>Utilisateur</TableCell>
+              <TableCell>Date</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {[...Array(3)].map((_, idx) => (
+              <TableRow key={idx}>
+                <TableCell>
+                  <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "80%", mx: "auto" }} />
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "60%", mx: "auto" }} />
+                </TableCell>
+                <TableCell>
+                  <Box sx={{ bgcolor: "#eee", height: 20, borderRadius: 1, width: "70%", mx: "auto" }} />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Action</TableCell>
+              <TableCell>Utilisateur</TableCell>
+              <TableCell>Date</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {Logs.map((log) => (
+              <TableRow key={log.id}>
+                <TableCell sx={{ color: getActionColor(log.action), fontWeight: "bold" }}>
+                  {log.action}
+                </TableCell>
+                <TableCell>{log.user.username} ({log.user.email})</TableCell>
+                <TableCell>{log.date ? new Date(log.date).toLocaleString() : ''}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
+    </Paper>
+  );
+};

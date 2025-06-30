@@ -10,6 +10,7 @@ import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import { Utils } from "../../utils/Utils";
 import { UserService } from "../../services/user.service";
 import { Token } from "../../utils/Token";
+import { LogService } from "../../services/log.service";
 
 const AuthPage: React.FC = () => {
   const [signInData, setSignInData] = useState({ identification: '', password: '' });
@@ -39,6 +40,12 @@ const AuthPage: React.FC = () => {
       Token.AddToken("authUser", res.data.token);
       Token.AddToken("user", JSON.stringify(res.data.user));
       setSignInData({ identification: '', password: '' });
+
+      const Log = {
+        action: 'connexion',
+        user: Number(res.data.user.id),
+      }
+      await LogService.createLog(Log)
       window.location.href = "/admin";
     } catch {
       Utils.errorPage("Mot de passe ou login incorrect");
@@ -64,8 +71,16 @@ const AuthPage: React.FC = () => {
         if (image) formData.append("profile", image);
         if (signUpData.role) formData.append("role", signUpData.role);
 
-        await UserService.SignUp(formData);
+        const res = await UserService.SignUp(formData);
         Utils.success("Votre compte a été créé avec succès ✅! vous pouvez vous connecter maintenant.");
+        console.log('reponse: ',res);
+        
+        const Log = {
+          action: 'création compte',
+          user: Number(res.data.id),
+        }
+        await LogService.createLog(Log)
+        
         setSignInData({ identification: '', password: '' });
         setSignUpData({ username: '', email: '', password: '', confirmPassword: '', preview: '', role: '' });
         setImage(null);

@@ -54,6 +54,7 @@ import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 import Papa from "papaparse";
 import { UserService } from "../../services/user.service";
 import { SearchService } from "../../services/search.service";
+import { LogService } from "../../services/log.service";
 
 interface Article {
   id: string;
@@ -266,6 +267,13 @@ export const ListArticle: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (!selectedArticle) return;
     try {
+      await ArticleService.deleteArticle(selectedArticle.id)
+      
+      const Log = {
+        action: 'suppression artcile',
+        user: Number(userProfile?.id),
+      }
+      await LogService.createLog(Log)
       setOpenDeleteDialog(false);
       setOpenSuccess(true);
       fetchArticles();
@@ -716,7 +724,7 @@ export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id,
   const [categories, setCategories] = useState<Categorie[]>([]);
   const [image, setImage] = useState<File | null>(null);
   const [pdf, setPdf] = useState<File | null>(null);
-
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
   const [processMessage, setProcessMessage] = useState("");
   const [userUpdateSuccess, setUserUpdateSuccess] = useState<boolean>(false);
 
@@ -755,7 +763,7 @@ export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id,
       };
       setDataArticleUpdate(data);
     } catch (error) {
-      console.log(`Échec de récupération des détails du club ${error}`);
+      console.log(`Échec de récupération des détails de l'article ${error}`);
     }
   }
 
@@ -793,6 +801,12 @@ export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id,
     try {
       await ArticleService.updateArticle(Number(id), formData);
       setProcessMessage(`L'Article ${dataArticleUpdate?.titre} a été mis a jour avec succès ✅`);
+      
+      const Log = {
+        action: 'modification article',
+        user: Number(userProfile?.id),
+      };
+      LogService.createLog(Log);
       await refreshArticle();
       setOpenDialog(false);
       setSuccessDialog(true);
@@ -1083,6 +1097,14 @@ export const AddEditArticle: React.FC = () => {
     try {
       const response = await ArticleService.createArticle(formData);
       console.log("Réponse serveur :", response);
+      
+      const Log = {
+        action: 'création article',
+        user: Number(userProfile?.id),
+      };
+      LogService.createLog(Log);
+
+
       setNewArticles({ titre: "", description: "", contenu: '', couverture: '', auteur: 0, categorie: "", status: "", reading_time:0, featured: false });
       setSuccessDialog(true);
     } catch (error: any) {
@@ -1334,7 +1356,7 @@ export const ImportArtcileCSVDialog: React.FC<ImportArticlesProps> = ({ open, on
   const [auteurs, setAuteurs] = useState<User[]>([]);
   const [image, setImage] = useState<File | null>(null);
   const [pdf, setPdf] = useState<File | null>(null);
-
+  const userProfile = JSON.parse(Token.GetToken("user") as string) || {};
   const loadCouverture = (idx: number) => (e: ChangeEvent<HTMLInputElement>) => {
     const photo = e.target.files?.[0];
     if (photo) {
@@ -1399,6 +1421,13 @@ export const ImportArtcileCSVDialog: React.FC<ImportArticlesProps> = ({ open, on
       console.log('selected: ',selectedArticles)
       const response = await ArticleService.ImportcreateArticle(selectedArticles);
       console.log("Réponse serveur :", response);
+
+      const Log = {
+        action: 'import article',
+        user: Number(userProfile?.id),
+      };
+      LogService.createLog(Log);
+
       setLoading(false);
       setSelectedFile(null);
       setCsvData([]);
