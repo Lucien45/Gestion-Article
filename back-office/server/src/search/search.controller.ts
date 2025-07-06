@@ -27,4 +27,22 @@ export class SearchController {
   searchUser(@Query('q') text: string, @Query('m') mode: string) {
     return this.serachService.getFilterUser(text, mode);
   }
+
+  /**
+   * SEARCH ARTICLES ROUTES APP
+   **/
+
+  @Get('suggestions')
+  getSuggestions(@Query('q') text: string) {
+    return this.serachService.getSuggestions(text);
+  }
+
+  @Get('results')
+  getSearchResults(
+    @Query('q') text: string,
+    @Query('categorie') categorie: string,
+    @Query('auteur') auteur: string,
+  ) {
+    return this.serachService.getSearchResults(text, categorie, auteur);
+  }
 }

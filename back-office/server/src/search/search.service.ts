@@ -103,4 +103,81 @@ export class SearchService {
     }));
     return users;
   }
+
+  /**
+   * SEARCH ARTICLES SERVICE APP
+   **/
+  async getSuggestions(text: string): Promise<any[]> {
+    const categories = await this.categorieRepository
+      .createQueryBuilder('categorie')
+      .where('categorie.nom ~* :regex', { regex: text })
+      .getMany();
+    const articles = await this.articleRepository
+      .createQueryBuilder('article')
+      .where('article.titre ~* :regex', { regex: text })
+      .andWhere('article.status = :status', { status: 'publié' })
+      .getMany();
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.nom ~* :regex', { regex: text })
+      .andWhere('user.role IN (:...roles)', { roles: ['editeur', 'auteur'] })
+      .getMany();
+    const suggestions = [
+      ...categories.map((c) => ({ type: 'categorie', label: c.nom })),
+      ...articles.map((a) => ({ type: 'article', label: a.titre })),
+      ...users.map((u) => ({ type: 'user', label: u.nom })),
+    ];
+    return suggestions;
+  }
+
+  async getSearchResults(
+    text: string,
+    categorie: string,
+    auteur: string,
+  ): Promise<any[]> {
+    const articles = await this.categorieRepository.find({
+      relations: ['articles'],
+    });
+
+    let filtered = articles;
+
+    if (text) {
+      filtered = filtered.filter((c) =>
+        c.articles.some(
+          (a) =>
+            a.status === 'publié' &&
+            (a.titre.toLowerCase().includes(text.toLowerCase()) ||
+              a.description.toLowerCase().includes(text.toLowerCase()) ||
+              a.categorie.nom.toLowerCase().includes(text.toLowerCase()) ||
+              (a.auteur &&
+                ['editeur', 'auteur'].includes(a.auteur.role) &&
+                (a.auteur.nom.toLowerCase().includes(text.toLowerCase()) ||
+                  a.auteur.username
+                    .toLowerCase()
+                    .includes(text.toLowerCase())))),
+        ),
+      );
+    }
+    if (categorie) {
+      filtered = filtered.filter((c) =>
+        c.articles.some(
+          (a) =>
+            a.status === 'publié' &&
+            a.categorie.nom.toLowerCase().includes(categorie.toLowerCase()),
+        ),
+      );
+    }
+    if (auteur) {
+      filtered = filtered.filter((c) =>
+        c.articles.some(
+          (a) =>
+            a.status === 'publié' &&
+            a.auteur &&
+            ['editeur', 'auteur'].includes(a.auteur.role) &&
+            a.auteur.nom.toLowerCase().includes(auteur.toLowerCase()),
+        ),
+      );
+    }
+    return filtered;
+  }
 }

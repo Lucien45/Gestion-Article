@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion-Article - Documentation Technique</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #34495e;
+            border-left: 4px solid #e74c3c;
+            padding-left: 15px;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #2c3e50;
+            margin-top: 25px;
+        }
+        .feature-list {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .tech-stack {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .tech-card {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #e74c3c;
+        }
+        .structure {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-line;
+            overflow-x: auto;
+        }
+        .highlight {
+            background-color: #fff3cd;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #ffc107;
+        }
+        .api-section {
+            background-color: #e8f5e8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #e74c3c;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #7f8c8d;
+        }
+        .entity-diagram {
+            background-color: #f0f8ff;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📚 Gestion-Article - Documentation Technique</h1>
+        
+        <div class="highlight">
+            <strong>Version:</strong> 1.0.0<br>
+            <strong>Date de création:</strong> 2024<br>
+            <strong>Type de projet:</strong> Plateforme de gestion et publication d'articles<br>
+            <strong>Statut:</strong> Projet déployé - Développement continu
+        </div>
+
+        <h2>📋 Description Générale</h2>
+        <p>
+            Gestion-Article est une plateforme complète de gestion et publication d'articles 
+            développée avec NestJS. Le projet comprend un back-office pour la gestion 
+            administrative, un front-office pour la consultation publique, et une API robuste 
+            basée sur PostgreSQL. Le système permet la création, la publication et la gestion 
+            d'articles avec un système de catégories, commentaires et likes. 
+            <strong>Le projet est actuellement déployé et en développement continu</strong>, 
+            avec de nouvelles fonctionnalités en cours d'ajout et des améliorations continues.
+        </p>
+
+        <h2>🎯 Fonctionnalités Principales</h2>
+        <div class="feature-list">
+            <h3>Back-Office (Interface Administrative)</h3>
+            <ul>
+                <li><strong>Dashboard complet</strong> avec statistiques et métriques</li>
+                <li><strong>Gestion des articles</strong> (CRUD complet)</li>
+                <li><strong>Gestion des catégories</strong> d'articles</li>
+                <li><strong>Gestion des utilisateurs</strong> et rôles</li>
+                <li><strong>Système de commentaires</strong> modération</li>
+                <li><strong>Gestion des likes</strong> et interactions</li>
+                <li><strong>Upload de fichiers</strong> (images de couverture, PDF)</li>
+                <li><strong>Recherche avancée</strong> avec filtres multiples</li>
+                <li><strong>Système de logs</strong> pour le suivi des activités</li>
+                <li><strong>Import/Export</strong> de données</li>
+            </ul>
+
+            <h3>Front-Office (Interface Publique)</h3>
+            <ul>
+                <li><strong>Consultation des articles</strong> publiés</li>
+                <li><strong>Navigation par catégories</strong></li>
+                <li><strong>Système de recherche</strong> avec suggestions</li>
+                <li><strong>Lecture d'articles</strong> en PDF</li>
+                <li><strong>Système de commentaires</strong> public</li>
+                <li><strong>Système de likes</strong> et interactions</li>
+                <li><strong>Design responsive</strong> moderne</li>
+                <li><strong>Thème sombre/clair</strong> configurable</li>
+                <li><strong>Newsletter</strong> et abonnements</li>
+            </ul>
+
+            <h3>API Backend (NestJS)</h3>
+            <ul>
+                <li><strong>API RESTful complète</strong> avec documentation Swagger</li>
+                <li><strong>Authentification JWT</strong> sécurisée</li>
+                <li><strong>Base de données PostgreSQL</strong> avec TypeORM</li>
+                <li><strong>Upload de fichiers</strong> avec Multer</li>
+                <li><strong>Validation des données</strong> avec class-validator</li>
+                <li><strong>Système de recherche</strong> avancé</li>
+                <li><strong>Gestion des médias</strong> (images, PDF)</li>
+                <li><strong>Logs système</strong> pour le monitoring</li>
+            </ul>
+        </div>
+
+        <h2>🛠️ Stack Technologique</h2>
+        <div class="tech-stack">
+            <div class="tech-card">
+                <h3>Backend (NestJS)</h3>
+                <ul>
+                    <li><strong>NestJS</strong> - Framework Node.js</li>
+                    <li><strong>TypeScript</strong> - Langage de programmation</li>
+                    <li><strong>TypeORM</strong> - ORM pour PostgreSQL</li>
+                    <li><strong>PostgreSQL</strong> - Base de données</li>
+                    <li><strong>JWT</strong> - Authentification</li>
+                    <li><strong>Multer</strong> - Gestion des uploads</li>
+                    <li><strong>Swagger</strong> - Documentation API</li>
+                </ul>
+            </div>
+            
+            <div class="tech-card">
+                <h3>Back-Office Frontend</h3>
+                <ul>
+                    <li><strong>React.js</strong> - Framework principal</li>
+                    <li><strong>TypeScript</strong> - Typage statique</li>
+                    <li><strong>Material-UI</strong> - Composants UI</li>
+                    <li><strong>React Router</strong> - Navigation</li>
+                    <li><strong>Axios</strong> - Client HTTP</li>
+                    <li><strong>React Toastify</strong> - Notifications</li>
+                    <li><strong>SweetAlert2</strong> - Modales</li>
+                </ul>
+            </div>
+            
+            <div class="tech-card">
+                <h3>Front-Office Frontend</h3>
+                <ul>
+                    <li><strong>React.js</strong> - Framework principal</li>
+                    <li><strong>TypeScript</strong> - Typage statique</li>
+                    <li><strong>Tailwind CSS</strong> - Framework CSS</li>
+                    <li><strong>Lucide React</strong> - Icônes</li>
+                    <li><strong>React Hook Form</strong> - Gestion des formulaires</li>
+                    <li><strong>Zustand</strong> - Gestion d'état</li>
+                    <li><strong>Date-fns</strong> - Manipulation des dates</li>
+                </ul>
+            </div>
+            
+            <div class="tech-card">
+                <h3>Outils & Déploiement</h3>
+                <ul>
+                    <li><strong>Render</strong> - Plateforme de déploiement cloud</li>
+                    <li><strong>Docker</strong> - Containerisation</li>
+                    <li><strong>Nginx</strong> - Serveur web</li>
+                    <li><strong>Vite</strong> - Build tool</li>
+                    <li><strong>ESLint</strong> - Linting</li>
+                    <li><strong>Jest</strong> - Tests unitaires</li>
+                    <li><strong>Git</strong> - Versioning</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>📁 Architecture du Projet</h2>
+        <div class="structure">
+Gestion-Article/
+├── back-office/                 # Back-office complet
+│   ├── client/                 # Interface admin React
+│   │   ├── src/
+│   │   │   ├── components/     # Composants admin
+│   │   │   ├── views/          # Pages admin
+│   │   │   ├── services/       # Services API
+│   │   │   ├── context/        # Contextes React
+│   │   │   └── utils/          # Utilitaires
+│   │   ├── public/             # Assets statiques
+│   │   └── nginx/              # Configuration Nginx
+│   │
+│   ├── server/                 # API NestJS
+│   │   ├── src/
+│   │   │   ├── articles/       # Module articles
+│   │   │   │   ├── entities/   # Entités TypeORM
+│   │   │   │   ├── dto/        # Data Transfer Objects
+│   │   │   │   ├── controller/ # Contrôleurs
+│   │   │   │   └── service/    # Services
+│   │   │   ├── users/          # Module utilisateurs
+│   │   │   ├── search/         # Module recherche
+│   │   │   └── log/            # Module logs
+│   │   ├── media/              # Fichiers uploadés
+│   │   │   ├── couverture/     # Images de couverture
+│   │   │   ├── livre/          # Fichiers PDF
+│   │   │   └── profiles/       # Photos de profil
+│   │   └── test/               # Tests
+│   │
+│   └── docker/                 # Configuration Docker
+│       ├── local/              # Environnement local
+│       └── prod/               # Environnement production
+│
+├── front-office/               # Front-office public
+│   ├── client/                 # Interface publique React
+│   │   ├── src/
+│   │   │   ├── components/     # Composants publics
+│   │   │   ├── pages/          # Pages publiques
+│   │   │   ├── services/       # Services API
+│   │   │   ├── context/        # Contextes React
+│   │   │   └── utils/          # Utilitaires
+│   │   ├── public/             # Assets statiques
+│   │   └── nginx/              # Configuration Nginx
+│   │
+│   └── docker-compose.yml      # Configuration Docker
+│
+└── docker-compose.global.yml   # Configuration globale Docker
+        </div>
+
+        <h2>🗄️ Modèles de Données</h2>
+        <div class="entity-diagram">
+            <h3>Entités Principales</h3>
+            
+            <h4>Article</h4>
+            <ul>
+                <li><strong>id</strong> - Identifiant unique</li>
+                <li><strong>titre</strong> - Titre de l'article</li>
+                <li><strong>contenu</strong> - Fichier PDF du contenu</li>
+                <li><strong>description</strong> - Description courte</li>
+                <li><strong>couverture</strong> - Image de couverture</li>
+                <li><strong>date_publication</strong> - Date de publication</li>
+                <li><strong>auteur</strong> - Référence à l'utilisateur</li>
+                <li><strong>categorie</strong> - Référence à la catégorie</li>
+                <li><strong>status</strong> - Statut (brouillon, publié, archivé)</li>
+                <li><strong>vue</strong> - Nombre de vues</li>
+                <li><strong>featured</strong> - Article en vedette</li>
+                <li><strong>reading_time</strong> - Temps de lecture estimé</li>
+            </ul>
+
+            <h4>Catégorie</h4>
+            <ul>
+                <li><strong>id</strong> - Identifiant unique</li>
+                <li><strong>nom</strong> - Nom de la catégorie</li>
+                <li><strong>description</strong> - Description de la catégorie</li>
+            </ul>
+
+            <h4>Utilisateur</h4>
+            <ul>
+                <li><strong>id</strong> - Identifiant unique</li>
+                <li><strong>nom</strong> - Nom de l'utilisateur</li>
+                <li><strong>email</strong> - Email unique</li>
+                <li><strong>password</strong> - Mot de passe hashé</li>
+                <li><strong>role</strong> - Rôle (admin, auteur, lecteur)</li>
+                <li><strong>profile_image</strong> - Photo de profil</li>
+            </ul>
+
+            <h4>Commentaire</h4>
+            <ul>
+                <li><strong>id</strong> - Identifiant unique</li>
+                <li><strong>contenu</strong> - Contenu du commentaire</li>
+                <li><strong>article</strong> - Référence à l'article</li>
+                <li><strong>utilisateur</strong> - Référence à l'utilisateur</li>
+                <li><strong>date_creation</strong> - Date de création</li>
+            </ul>
+
+            <h4>Like</h4>
+            <ul>
+                <li><strong>id</strong> - Identifiant unique</li>
+                <li><strong>article</strong> - Référence à l'article</li>
+                <li><strong>utilisateur</strong> - Référence à l'utilisateur</li>
+                <li><strong>date_creation</strong> - Date de création</li>
+            </ul>
+        </div>
+
+        <h2>🔌 API Endpoints</h2>
+        <div class="api-section">
+            <h3>Routes Articles</h3>
+            <table>
+                <tr>
+                    <th>Méthode</th>
+                    <th>Endpoint</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/articles</td>
+                    <td>Créer un article (avec upload fichiers)</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/articles</td>
+                    <td>Récupérer tous les articles</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/articles/article/:id</td>
+                    <td>Récupérer un article par ID</td>
+                </tr>
+                <tr>
+                    <td>PATCH</td>
+                    <td>/articles/article/:id</td>
+                    <td>Modifier un article</td>
+                </tr>
+                <tr>
+                    <td>DELETE</td>
+                    <td>/articles/article/:id</td>
+                    <td>Supprimer un article</td>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/articles/import</td>
+                    <td>Importer plusieurs articles</td>
+                </tr>
+            </table>
+
+            <h3>Routes Catégories</h3>
+            <table>
+                <tr>
+                    <th>Méthode</th>
+                    <th>Endpoint</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>POST</td>
+                    <td>/articles/categories</td>
+                    <td>Créer une catégorie</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/articles/categories</td>
+                    <td>Récupérer toutes les catégories</td>
+                </tr>
+                <tr>
+                    <td>PUT</td>
+                    <td>/articles/categories/:id</td>
+                    <td>Modifier une catégorie</td>
+                </tr>
+                <tr>
+                    <td>DELETE</td>
+                    <td>/articles/categories/:id</td>
+                    <td>Supprimer une catégorie</td>
+                </tr>
+            </table>
+
+            <h3>Routes Recherche</h3>
+            <table>
+                <tr>
+                    <th>Méthode</th>
+                    <th>Endpoint</th>
+                    <th>Description</th>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/search/suggestions</td>
+                    <td>Suggestions de recherche (public)</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/search/results</td>
+                    <td>Résultats de recherche (public)</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/search/article</td>
+                    <td>Recherche d'articles (admin)</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/search/categorie</td>
+                    <td>Recherche de catégories (admin)</td>
+                </tr>
+                <tr>
+                    <td>GET</td>
+                    <td>/search/user</td>
+                    <td>Recherche d'utilisateurs (admin)</td>
+                </tr>
+            </table>
+        </div>
+
+        <h2>🔐 Sécurité et Authentification</h2>
+        <div class="feature-list">
+            <h3>Système d'Authentification</h3>
+            <ul>
+                <li><strong>JWT (JSON Web Tokens)</strong> pour l'authentification</li>
+                <li><strong>Hachage des mots de passe</strong> avec bcrypt</li>
+                <li><strong>Guards NestJS</strong> pour protéger les routes</li>
+                <li><strong>Validation des données</strong> avec class-validator</li>
+                <li><strong>Gestion des rôles</strong> (admin, auteur, lecteur)</li>
+            </ul>
+
+            <h3>Sécurité des Fichiers</h3>
+            <ul>
+                <li><strong>Validation des types de fichiers</strong> (images, PDF)</li>
+                <li><strong>Limitation de taille</strong> des uploads</li>
+                <li><strong>Noms de fichiers uniques</strong> pour éviter les conflits</li>
+                <li><strong>Séparation des dossiers</strong> par type de média</li>
+            </ul>
+        </div>
+
+        <h2>📊 Fonctionnalités Avancées</h2>
+        <div class="feature-list">
+            <h3>Système de Recherche</h3>
+            <ul>
+                <li><strong>Recherche en temps réel</strong> avec suggestions</li>
+                <li><strong>Filtres multiples</strong> (catégorie, auteur, date)</li>
+                <li><strong>Recherche dans le contenu</strong> des articles</li>
+                <li><strong>Historique de recherche</strong> pour les utilisateurs</li>
+            </ul>
+
+            <h3>Gestion des Médias</h3>
+            <ul>
+                <li><strong>Upload d'images</strong> pour les couvertures</li>
+                <li><strong>Upload de PDF</strong> pour le contenu des articles</li>
+                <li><strong>Optimisation automatique</strong> des images</li>
+                <li><strong>Système de stockage</strong> organisé</li>
+            </ul>
+
+            <h3>Analytics et Logs</h3>
+            <ul>
+                <li><strong>Compteur de vues</strong> par article</li>
+                <li><strong>Système de logs</strong> pour le suivi des activités</li>
+                <li><strong>Statistiques d'utilisation</strong> dans le dashboard</li>
+                <li><strong>Monitoring des performances</strong></li>
+            </ul>
+        </div>
+
+        <h2>🚀 Déploiement</h2>
+        <div class="feature-list">
+            <h3>Plateforme de Déploiement</h3>
+            <ul>
+                <li><strong>Render</strong> - Plateforme cloud pour le déploiement des applications</li>
+                <li><strong>PostgreSQL</strong> - Base de données cloud (Render PostgreSQL)</li>
+                <li><strong>GitHub</strong> - Intégration continue avec le repository</li>
+            </ul>
+
+            <h3>Configuration Cloud</h3>
+            <ul>
+                <li><strong>Base de données:</strong> PostgreSQL sur Render</li>
+                <li><strong>Backend API:</strong> Déployé sur Render (service web)</li>
+                <li><strong>Frontend Public:</strong> Déployé sur Render (site statique)</li>
+                <li><strong>Back-Office:</strong> Déployé sur Render (site statique)</li>
+                <li><strong>Variables d'environnement:</strong> Configurées dans Render</li>
+            </ul>
+
+            <h3>Configuration Docker (Local)</h3>
+            <ul>
+                <li><strong>Docker Compose</strong> pour l'orchestration</li>
+                <li><strong>Nginx</strong> comme reverse proxy</li>
+                <li><strong>PostgreSQL</strong> en conteneur</li>
+                <li><strong>Environnements séparés</strong> (local/prod)</li>
+                <li><strong>Volumes persistants</strong> pour les données</li>
+            </ul>
+
+            <h3>Commandes de Déploiement Local</h3>
+            <ol>
+                <li><code>docker-compose -f docker-compose.global.yml up -d</code></li>
+                <li><code>docker-compose -f back-office/docker-compose.yml up -d</code></li>
+                <li><code>docker-compose -f front-office/docker-compose.yml up -d</code></li>
+            </ol>
+
+            <h3>Statut de Déploiement</h3>
+            <div class="highlight">
+                <strong>Phase actuelle:</strong> Déploiement continu en production<br>
+                <strong>Environnement de production:</strong> Render (actif)<br>
+                <strong>Base de données:</strong> PostgreSQL Render (opérationnelle)<br>
+                <strong>Déploiement automatique:</strong> Intégration continue avec GitHub<br>
+                <strong>Statut:</strong> Projet live avec développement continu
+            </div>
+
+            <h3>Accès aux Applications</h3>
+            <div class="api-section">
+                <table>
+                    <tr>
+                        <th>Application</th>
+                        <th>URL</th>
+                        <th>Description</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Site Web Public</strong></td>
+                        <td><a href="https://gestion-article-frontoffice.onrender.com/" target="_blank">https://gestion-article-frontoffice.onrender.com/</a></td>
+                        <td>Interface publique pour la consultation des articles</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Interface d'Administration</strong></td>
+                        <td><a href="https://gestion-article-backoffice-client.onrender.com/" target="_blank">https://gestion-article-backoffice-client.onrender.com/</a></td>
+                        <td>Back-office pour la gestion des articles et utilisateurs</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h3>Informations de Connexion Admin</h3>
+            <div class="highlight">
+                <strong>URL Admin:</strong> <a href="https://gestion-article-backoffice-client.onrender.com/" target="_blank">https://gestion-article-backoffice-client.onrender.com/</a><br>
+                <strong>Identifiant:</strong> staff<br>
+                <strong>Email:</strong> staff@gmail.com<br>
+                <strong>Mot de passe:</strong> staff<br>
+                <em>Ces identifiants permettent d'accéder à l'interface d'administration complète en tant qu'auteur</em>
+            </div>
+        </div>
+
+        <h2>🔄 Développement Continu</h2>
+        <div class="feature-list">
+            <h3>Fonctionnalités en Cours de Développement</h3>
+            <ul>
+                <li><strong>Système de notifications</strong> en temps réel</li>
+                <li><strong>Analytics avancées</strong> pour les articles</li>
+                <li><strong>Système de tags</strong> pour une meilleure organisation</li>
+                <li><strong>API mobile</strong> pour applications mobiles</li>
+                <li><strong>Système de backup</strong> automatique</li>
+                <li><strong>Optimisation des performances</strong> frontend et backend</li>
+            </ul>
+
+            <h3>Bugs et Améliorations en Cours</h3>
+            <ul>
+                <li><strong>Correction des bugs</strong> d'affichage responsive</li>
+                <li><strong>Optimisation</strong> du système de recherche</li>
+                <li><strong>Amélioration</strong> de la gestion des fichiers</li>
+                <li><strong>Correction</strong> des problèmes d'authentification</li>
+                <li><strong>Optimisation</strong> des requêtes base de données</li>
+                <li><strong>Amélioration</strong> de l'expérience utilisateur</li>
+            </ul>
+
+            <h3>Processus de Développement</h3>
+            <ul>
+                <li><strong>Déploiement continu</strong> via Render</li>
+                <li><strong>Tests automatisés</strong> avant déploiement</li>
+                <li><strong>Monitoring</strong> des performances en production</li>
+                <li><strong>Gestion des versions</strong> avec Git</li>
+                <li><strong>Backup automatique</strong> des données</li>
+            </ul>
+        </div>
+
+        <h2>🌐 Accès en Ligne</h2>
+        <div class="feature-list">
+            <h3>Applications Déployées</h3>
+            <div class="api-section">
+                <h4>Site Web Public</h4>
+                <p><strong>URL:</strong> <a href="https://gestion-article-frontoffice.onrender.com/" target="_blank">https://gestion-article-frontoffice.onrender.com/</a></p>
+                <p><strong>Fonctionnalités:</strong></p>
+                <ul>
+                    <li>Consultation des articles publiés</li>
+                    <li>Navigation par catégories</li>
+                    <li>Système de recherche</li>
+                    <li>Lecture d'articles en PDF</li>
+                    <li>Système de commentaires</li>
+                    <li>Interface responsive</li>
+                </ul>
+
+                <h4>Interface d'Administration</h4>
+                <p><strong>URL:</strong> <a href="https://gestion-article-backoffice-client.onrender.com/" target="_blank">https://gestion-article-backoffice-client.onrender.com/</a></p>
+                <p><strong>Identifiants de connexion:</strong></p>
+                <div class="highlight">
+                    <strong>Identifiant:</strong> staff<br>
+                    <strong>Email:</strong> staff@gmail.com<br>
+                    <strong>Mot de passe:</strong> staff
+                </div>
+                <p><strong>Fonctionnalités:</strong></p>
+                <ul>
+                    <li>Dashboard administratif</li>
+                    <li>Gestion des articles (CRUD)</li>
+                    <li>Gestion des catégories</li>
+                    <li>Gestion des utilisateurs</li>
+                    <li>Modération des commentaires</li>
+                    <li>Upload de fichiers (images, PDF)</li>
+                    <li>Statistiques et analytics</li>
+                </ul>
+            </div>
+        </div>
+        </div>
+
+        <h2>🧪 Tests et Qualité</h2>
+        <div class="feature-list">
+            <ul>
+                <li><strong>Tests unitaires</strong> avec Jest</li>
+                <li><strong>Tests d'intégration</strong> pour l'API</li>
+                <li><strong>ESLint</strong> pour la qualité du code</li>
+                <li><strong>TypeScript</strong> pour la sécurité des types</li>
+                <li><strong>Validation des données</strong> côté serveur</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p><strong>Gestion-Article</strong> - Documentation Technique v1.0.0</p>
+            <p>Plateforme complète de gestion et publication d'articles avec NestJS</p>
+            <p><em>Projet déployé en production - Développement continu</em></p>
+        </div>
+    </div>
+</body>
+</html> 
