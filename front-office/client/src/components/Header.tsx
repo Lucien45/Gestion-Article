@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { BookOpen, Filter, LogOut, Menu, X } from 'lucide-react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Token } from '../utils/Token';
 import { UserService } from '../services/user.service';
 import { isAuthenticated, logout } from '../context/AuthContext';
@@ -9,6 +10,7 @@ import { Footer } from './Footer';
 import { ThemeToggle } from './ThemeToggle';
 import { Category } from '../types';
 import { ArticleService } from '../services/article.service';
+import { SearchService } from '../services/search.service';
 
 interface User {
   id: number;
@@ -34,7 +36,7 @@ export function Header() {
   });
   const [categoryList, setCategoryList] = useState<Category[]>([]);
   const [auteurList, setAuteurList] = useState<User[]>([]);
-
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   const fetchUser = async () => {
     if (userProfile) {
@@ -69,24 +71,51 @@ export function Header() {
     navigate('/');
   };
 
+  const handleInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+
+    if (value.trim() !== "") {
+      try {
+        const res = await SearchService.Suggestions(value);
+        console.log("reponse server: ", res);
+
+        setSuggestions(res.data);
+      } catch (err) {
+        console.error("Erreur suggestions:", err);
+      }
+    } else {
+      setSuggestions([]);
+    }
+  };
+
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (search.trim()) {
-      navigate(`/articles?search=${encodeURIComponent(search.trim())}`);
+      navigate(`/search?q=${encodeURIComponent(search.trim())}`);
       setIsMenuOpen(false);
+      setSuggestions([]);
+      setSearch('');
     }
   };
 
   const handleFilterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    let url = '/articles?';
-    if (search.trim()) url += `search=${encodeURIComponent(search.trim())}&`;
-    if (dataFilter.categroie) url += `category=${dataFilter.categroie}&`;
-    if (dataFilter.auteur) url += `author=${dataFilter.auteur}&`;
+    let url = '/search?';
+    if (search.trim()) url += `q=${encodeURIComponent(search.trim())}&`;
+    if (dataFilter.categroie) url += `categorie=${dataFilter.categroie}&`;
+    if (dataFilter.auteur) url += `auteur=${dataFilter.auteur}&`;
     navigate(url.replace(/&$/, ''));
     setShowFilters(false);
     setIsMenuOpen(false);
+    setSearch('');
+    setSuggestions([]);
+  };
+
+  const handleSuggestionClick = (item: any) => {
+    setSearch(item.label);
+    setSuggestions([]);
   };
 
   useEffect(() => {
@@ -120,15 +149,41 @@ export function Header() {
             </div>
 
             {/* Barre de recherche + bouton filtre */}
-            <div className="flex items-center space-x-4 mr-4 relative">
-              <form onSubmit={handleSearch} className="flex items-center space-x-2">
+            <div className="relative w-[550px] mr-4 flex items-center">
+               <form onSubmit={handleSearch} className="flex items-center space-x-2 relative flex-1">
                 <input
                   type="text"
                   value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="Rechercher un article..."
-                  className="w-64 px-4 py-2 rounded-xl border border-gray-300 shadow focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all duration-200 bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
+                  onChange={handleInputChange}
+                  placeholder="Rechercher un article, un auteur, une catégorie..."
+                  className="w-full px-4 py-2 rounded-xl border border-gray-300 shadow focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-all duration-200 bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100"
                 />
+                {/* suggestions */}
+                {search.trim() !== "" && (
+                  <div className="absolute left-0 top-full z-20 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg w-full mt-1">
+                    <div className="bg-white border border-gray-200 rounded-2xl shadow-2xl backdrop-blur-lg p-4 dark:bg-gray-800 dark:border-gray-700">
+                      {suggestions.length > 0 ? (
+                        <ul className="space-y-2">
+                          {suggestions.map((item, index) => (
+                            <li 
+                              key={index} 
+                              className="px-4 py-2 cursor-pointer hover:bg-indigo-50 dark:hover:bg-gray-700 rounded-xl transition"
+                              onClick={() => handleSuggestionClick(item)}
+                            >
+                              dans{" "}
+                              <span className="font-semibold text-indigo-600 dark:text-blue-400">
+                                {item.type} :
+                              </span>{" "}
+                              {item.label}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-gray-500 dark:text-gray-400">Aucune suggestion trouvée</p>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <button
                   type="submit"
                   className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-lg shadow-md hover:from-indigo-700 hover:to-blue-600 transition-all duration-200 font-semibold"
@@ -138,7 +193,7 @@ export function Header() {
               </form>
               <button
                 onClick={() => setShowFilters((v) => !v)}
-                className="px-4 py-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white rounded-xl shadow-md font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center"
+                className="ml-2 px-4 py-2 bg-gradient-to-r from-indigo-500 to-blue-500 text-white rounded-xl shadow-md font-semibold hover:from-indigo-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center"
                 type="button"
                 aria-label="Filtres"
               >

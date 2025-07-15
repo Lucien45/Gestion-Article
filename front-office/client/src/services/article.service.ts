@@ -11,6 +11,11 @@ interface DataComment {
     article_id: number;
 }
 
+interface DataLike {
+    user_id: number;
+    article_id: number;
+}
+
 /**
  * service for categories
  */
@@ -126,11 +131,11 @@ const deletLike = (id: number | string) => {
     return Axios.delete(`/articles/likes/${id}`);
 }
 
-const createLike = (data: FormData): Promise<FormData> => {
+const createLike = (data: DataLike): Promise<DataLike> => {
     return Axios.post("/articles/likes", data);
 }
 
-const updateLike = (id: number | string, data: Partial<FormData>): Promise<FormData> => {
+const updateLike = (id: number | string, data: Partial<DataLike>): Promise<DataLike> => {
     return Axios.put(`/articles/likes/${id}`, data);
 }
 
