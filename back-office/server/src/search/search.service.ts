@@ -125,7 +125,7 @@ export class SearchService {
     const suggestions = [
       ...categories.map((c) => ({ type: 'categorie', label: c.nom })),
       ...articles.map((a) => ({ type: 'article', label: a.titre })),
-      ...users.map((u) => ({ type: 'user', label: u.nom })),
+      ...users.map((u) => ({ type: 'auteur', label: u.username })),
     ];
     return suggestions;
   }
@@ -135,49 +135,54 @@ export class SearchService {
     categorie: string,
     auteur: string,
   ): Promise<any[]> {
-    const articles = await this.categorieRepository.find({
-      relations: ['articles'],
+    let articles = await this.articleRepository.find({
+      relations: ['auteur', 'categorie', 'commentaires', 'likes'],
     });
 
-    let filtered = articles;
-
+    // Filtre par texte
     if (text) {
-      filtered = filtered.filter((c) =>
-        c.articles.some(
-          (a) =>
-            a.status === 'publié' &&
-            (a.titre.toLowerCase().includes(text.toLowerCase()) ||
-              a.description.toLowerCase().includes(text.toLowerCase()) ||
-              a.categorie.nom.toLowerCase().includes(text.toLowerCase()) ||
-              (a.auteur &&
-                ['editeur', 'auteur'].includes(a.auteur.role) &&
-                (a.auteur.nom.toLowerCase().includes(text.toLowerCase()) ||
+      articles = articles.filter(
+        (a) =>
+          a.status === 'publié' &&
+          (a.titre.toLowerCase().includes(text.toLowerCase()) ||
+            a.description.toLowerCase().includes(text.toLowerCase()) ||
+            (a.categorie &&
+              a.categorie.nom &&
+              a.categorie.nom.toLowerCase().includes(text.toLowerCase())) ||
+            (a.auteur &&
+              ['editeur', 'auteur'].includes(a.auteur.role) &&
+              ((a.auteur.nom &&
+                a.auteur.nom.toLowerCase().includes(text.toLowerCase())) ||
+                (a.auteur.username &&
                   a.auteur.username
                     .toLowerCase()
-                    .includes(text.toLowerCase())))),
-        ),
+                    .includes(text.toLowerCase()))))),
       );
     }
+
+    // Filtre par catégorie
     if (categorie) {
-      filtered = filtered.filter((c) =>
-        c.articles.some(
-          (a) =>
-            a.status === 'publié' &&
-            a.categorie.nom.toLowerCase().includes(categorie.toLowerCase()),
-        ),
+      articles = articles.filter(
+        (a) =>
+          a.status === 'publié' &&
+          a.categorie &&
+          a.categorie.nom &&
+          a.categorie.nom.toLowerCase().includes(categorie.toLowerCase()),
       );
     }
+
+    // Filtre par auteur
     if (auteur) {
-      filtered = filtered.filter((c) =>
-        c.articles.some(
-          (a) =>
-            a.status === 'publié' &&
-            a.auteur &&
-            ['editeur', 'auteur'].includes(a.auteur.role) &&
-            a.auteur.nom.toLowerCase().includes(auteur.toLowerCase()),
-        ),
+      articles = articles.filter(
+        (a) =>
+          a.status === 'publié' &&
+          a.auteur &&
+          ['editeur', 'auteur'].includes(a.auteur.role) &&
+          a.auteur.nom &&
+          a.auteur.nom.toLowerCase().includes(auteur.toLowerCase()),
       );
     }
-    return filtered;
+
+    return articles;
   }
 }

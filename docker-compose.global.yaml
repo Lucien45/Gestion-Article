@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  bo-server:
+    container_name: bo-server
+    build:
+      context: ./back-office/server/
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./back-office/server/.env
+
+  bo-client:
+    container_name: bo-client
+    build:
+      context: ./back-office/client/
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./back-office/client/.env
+    depends_on:
+      - bo-server
+
+  fo-client:
+    container_name: fo-client
+    build:
+      context: ./front-office/client/
+      dockerfile: Dockerfile
+    env_file:
+      - ./front-office/client/.env
+    ports:
+      - "5000:80"
+    depends_on:
+      - bo-server
+
+  nginx:
+    image: nginx:alpine
+    container_name: gestion-article-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - bo-client
+      - fo-client
+      - bo-server
+    networks:
+      - gestion-article-network
+
+networks:
+  gestion-article-network:
+    driver: bridge
+

@@ -1,0 +1,16 @@
+{
+    "name": "gestion-article",
+    "version": "1.0.0",
+    "description": "Gestion des articles",
+    "author": "SAVAKA LUCIEN",
+    "license": "MIT",
+    "scripts": {
+        "deploy:start": "bash delpoyement.sh start",
+        "deploy:stop": "bash delpoyement.sh stop",
+        "deploy:restart": "bash delpoyement.sh restart",
+        "deploy:logs": "bash doepoyement.sh logs",
+        "deploy:status": "bash delpoyement.sh status",
+        "deploy:update": "bash delpoyement.sh update",
+        "deploy:clean": "bash delpoyement.sh clean"
+    }
+}
