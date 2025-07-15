@@ -17,8 +17,13 @@ const success = (textSuccess: string): void => {
     icon: 'success',
     title: 'Succès',
     text: textSuccess,
+    toast: true,
+    position: 'bottom-end',
     timer: 3000,
     showConfirmButton: false,
+    background: '#f0f9ff',
+    color: '#2563eb',
+    iconColor: '#22c55e',
   });
 };
 

@@ -8,6 +8,7 @@ import { Utils } from '../../utils/Utils';
 
 interface CommentFormProps {
   articleId: number | string;
+  onCommentAdded?: () => void;
 }
 
 interface User {
@@ -18,7 +19,7 @@ interface User {
   role: string;
 }
 
-export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
+export const CommentForm: React.FC<CommentFormProps> = ({ articleId, onCommentAdded }) => {
   const [user, setUser]  = useState<User | null>(null);
   const userProfile = JSON.parse(Token.GetToken("profile") as string);
   const [comment, setComment] = useState('');
@@ -39,6 +40,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
       await ArticleService.createCommentaire(data);
       setComment('')
       Utils.success('commentaire ajouter');
+      if (onCommentAdded) onCommentAdded();
     }catch{
       setComment('')
       Utils.errorPage('Il y a un erreur')
@@ -65,7 +67,7 @@ export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
 
   if (!user) {
     return (
-      <div className="text-center py-4 text-gray-600">
+      <div className="text-center py-4 text-gray-600 dark:text-gray-400">
         vous devez vous inscrire ou vous connecter pour poster un commentaire.
       </div>
     );
@@ -84,14 +86,14 @@ export const CommentForm: React.FC<CommentFormProps> = ({ articleId }) => {
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="Partagez votre avis..."
-          className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          className="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:focus:border-blue-400 dark:focus:ring-blue-400"
         />
       </div>
       <div className="flex justify-end">
         <button
           type="submit"
           disabled={isSubmitting || !comment.trim()}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Send className="h-4 w-4 mr-2" />
           {isSubmitting ? 'Envoi...' : 'Envoyer'}
