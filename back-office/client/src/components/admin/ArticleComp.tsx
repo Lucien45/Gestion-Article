@@ -807,7 +807,7 @@ export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id,
         user: Number(userProfile?.id),
       };
       LogService.createLog(Log);
-      await refreshArticle();
+      await refreshArticle()
       setOpenDialog(false);
       setSuccessDialog(true);
       setUserUpdateSuccess(true)

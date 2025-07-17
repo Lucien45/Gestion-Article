@@ -217,7 +217,7 @@ export const RegisterForm1: React.FC = () => {
         nom: '', prenom: '', civilite: '', date_naissance: ''
       });
       setImage(null);
-      navigate('auth/login');
+      window.location.href = "/auth/login";
     } catch (error: any) {
       console.error('Registration error:', error);
       setError(error.response?.data?.message ||'Une erreur est survenue lors de l\'inscription. Veuillez réessayer.');
