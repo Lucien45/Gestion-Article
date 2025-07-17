@@ -17,16 +17,16 @@ SET client_min_messages = warning;
 SET row_security = off;
 
 --
--- Name: public; Type: SCHEMA; Schema: -; Owner: article_db_n8al_user
+-- Name: public; Type: SCHEMA; Schema: -; Owner: lucien
 --
 
 -- *not* creating schema, since initdb creates it
 
 
-ALTER SCHEMA public OWNER TO article_db_n8al_user;
+ALTER SCHEMA public OWNER TO lucien;
 
 --
--- Name: article_status_enum; Type: TYPE; Schema: public; Owner: article_db_n8al_user
+-- Name: article_status_enum; Type: TYPE; Schema: public; Owner: lucien
 --
 
 CREATE TYPE public.article_status_enum AS ENUM (
@@ -36,10 +36,10 @@ CREATE TYPE public.article_status_enum AS ENUM (
 );
 
 
-ALTER TYPE public.article_status_enum OWNER TO article_db_n8al_user;
+ALTER TYPE public.article_status_enum OWNER TO lucien;
 
 --
--- Name: commentaire_status_enum; Type: TYPE; Schema: public; Owner: article_db_n8al_user
+-- Name: commentaire_status_enum; Type: TYPE; Schema: public; Owner: lucien
 --
 
 CREATE TYPE public.commentaire_status_enum AS ENUM (
@@ -49,10 +49,10 @@ CREATE TYPE public.commentaire_status_enum AS ENUM (
 );
 
 
-ALTER TYPE public.commentaire_status_enum OWNER TO article_db_n8al_user;
+ALTER TYPE public.commentaire_status_enum OWNER TO lucien;
 
 --
--- Name: users_role_enum; Type: TYPE; Schema: public; Owner: article_db_n8al_user
+-- Name: users_role_enum; Type: TYPE; Schema: public; Owner: lucien
 --
 
 CREATE TYPE public.users_role_enum AS ENUM (
@@ -63,14 +63,14 @@ CREATE TYPE public.users_role_enum AS ENUM (
 );
 
 
-ALTER TYPE public.users_role_enum OWNER TO article_db_n8al_user;
+ALTER TYPE public.users_role_enum OWNER TO lucien;
 
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
 
 --
--- Name: article; Type: TABLE; Schema: public; Owner: article_db_n8al_user
+-- Name: article; Type: TABLE; Schema: public; Owner: lucien
 --
 
 CREATE TABLE public.article (
@@ -89,10 +89,10 @@ CREATE TABLE public.article (
 );
 
 
-ALTER TABLE public.article OWNER TO article_db_n8al_user;
+ALTER TABLE public.article OWNER TO lucien;
 
 --
--- Name: article_id_seq; Type: SEQUENCE; Schema: public; Owner: article_db_n8al_user
+-- Name: article_id_seq; Type: SEQUENCE; Schema: public; Owner: lucien
 --
 
 CREATE SEQUENCE public.article_id_seq
@@ -104,17 +104,17 @@ CREATE SEQUENCE public.article_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.article_id_seq OWNER TO article_db_n8al_user;
+ALTER SEQUENCE public.article_id_seq OWNER TO lucien;
 
 --
--- Name: article_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: article_db_n8al_user
+-- Name: article_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: lucien
 --
 
 ALTER SEQUENCE public.article_id_seq OWNED BY public.article.id;
 
 
 --
--- Name: categorie; Type: TABLE; Schema: public; Owner: article_db_n8al_user
+-- Name: categorie; Type: TABLE; Schema: public; Owner: lucien
 --
 
 CREATE TABLE public.categorie (
@@ -124,10 +124,10 @@ CREATE TABLE public.categorie (
 );
 
 
-ALTER TABLE public.categorie OWNER TO article_db_n8al_user;
+ALTER TABLE public.categorie OWNER TO lucien;
 
 --
--- Name: categorie_id_seq; Type: SEQUENCE; Schema: public; Owner: article_db_n8al_user
+-- Name: categorie_id_seq; Type: SEQUENCE; Schema: public; Owner: lucien
 --
 
 CREATE SEQUENCE public.categorie_id_seq
@@ -139,17 +139,17 @@ CREATE SEQUENCE public.categorie_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.categorie_id_seq OWNER TO article_db_n8al_user;
+ALTER SEQUENCE public.categorie_id_seq OWNER TO lucien;
 
 --
--- Name: categorie_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: article_db_n8al_user
+-- Name: categorie_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: lucien
 --
 
 ALTER SEQUENCE public.categorie_id_seq OWNED BY public.categorie.id;
 
 
 --
--- Name: commentaire; Type: TABLE; Schema: public; Owner: article_db_n8al_user
+-- Name: commentaire; Type: TABLE; Schema: public; Owner: lucien
 --
 
 CREATE TABLE public.commentaire (
@@ -162,10 +162,10 @@ CREATE TABLE public.commentaire (
 );
 
 
-ALTER TABLE public.commentaire OWNER TO article_db_n8al_user;
+ALTER TABLE public.commentaire OWNER TO lucien;
 
 --
--- Name: commentaire_id_seq; Type: SEQUENCE; Schema: public; Owner: article_db_n8al_user
+-- Name: commentaire_id_seq; Type: SEQUENCE; Schema: public; Owner: lucien
 --
 
 CREATE SEQUENCE public.commentaire_id_seq
@@ -177,17 +177,17 @@ CREATE SEQUENCE public.commentaire_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.commentaire_id_seq OWNER TO article_db_n8al_user;
+ALTER SEQUENCE public.commentaire_id_seq OWNER TO lucien;
 
 --
--- Name: commentaire_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: article_db_n8al_user
+-- Name: commentaire_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: lucien
 --
 
 ALTER SEQUENCE public.commentaire_id_seq OWNED BY public.commentaire.id;
 
 
 --
--- Name: historique; Type: TABLE; Schema: public; Owner: article_db_n8al_user
+-- Name: historique; Type: TABLE; Schema: public; Owner: lucien
 --
 
 CREATE TABLE public.historique (
@@ -198,10 +198,10 @@ CREATE TABLE public.historique (
 );
 
 
-ALTER TABLE public.historique OWNER TO article_db_n8al_user;
+ALTER TABLE public.historique OWNER TO lucien;
 
 --
--- Name: historique_id_seq; Type: SEQUENCE; Schema: public; Owner: article_db_n8al_user
+-- Name: historique_id_seq; Type: SEQUENCE; Schema: public; Owner: lucien
 --
 
 CREATE SEQUENCE public.historique_id_seq
@@ -213,17 +213,17 @@ CREATE SEQUENCE public.historique_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.historique_id_seq OWNER TO article_db_n8al_user;
+ALTER SEQUENCE public.historique_id_seq OWNER TO lucien;
 
 --
--- Name: historique_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: article_db_n8al_user
+-- Name: historique_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: lucien
 --
 
 ALTER SEQUENCE public.historique_id_seq OWNED BY public.historique.id;
 
 
 --
--- Name: likes; Type: TABLE; Schema: public; Owner: article_db_n8al_user
+-- Name: likes; Type: TABLE; Schema: public; Owner: lucien
 --
 
 CREATE TABLE public.likes (
@@ -234,10 +234,10 @@ CREATE TABLE public.likes (
 );
 
 
-ALTER TABLE public.likes OWNER TO article_db_n8al_user;
+ALTER TABLE public.likes OWNER TO lucien;
 
 --
--- Name: likes_id_seq; Type: SEQUENCE; Schema: public; Owner: article_db_n8al_user
+-- Name: likes_id_seq; Type: SEQUENCE; Schema: public; Owner: lucien
 --
 
 CREATE SEQUENCE public.likes_id_seq
@@ -249,17 +249,17 @@ CREATE SEQUENCE public.likes_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.likes_id_seq OWNER TO article_db_n8al_user;
+ALTER SEQUENCE public.likes_id_seq OWNER TO lucien;
 
 --
--- Name: likes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: article_db_n8al_user
+-- Name: likes_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: lucien
 --
 
 ALTER SEQUENCE public.likes_id_seq OWNED BY public.likes.id;
 
 
 --
--- Name: logs; Type: TABLE; Schema: public; Owner: article_db_n8al_user
+-- Name: logs; Type: TABLE; Schema: public; Owner: lucien
 --
 
 CREATE TABLE public.logs (
@@ -270,10 +270,10 @@ CREATE TABLE public.logs (
 );
 
 
-ALTER TABLE public.logs OWNER TO article_db_n8al_user;
+ALTER TABLE public.logs OWNER TO lucien;
 
 --
--- Name: logs_id_seq; Type: SEQUENCE; Schema: public; Owner: article_db_n8al_user
+-- Name: logs_id_seq; Type: SEQUENCE; Schema: public; Owner: lucien
 --
 
 CREATE SEQUENCE public.logs_id_seq
@@ -285,17 +285,17 @@ CREATE SEQUENCE public.logs_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.logs_id_seq OWNER TO article_db_n8al_user;
+ALTER SEQUENCE public.logs_id_seq OWNER TO lucien;
 
 --
--- Name: logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: article_db_n8al_user
+-- Name: logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: lucien
 --
 
 ALTER SEQUENCE public.logs_id_seq OWNED BY public.logs.id;
 
 
 --
--- Name: users; Type: TABLE; Schema: public; Owner: article_db_n8al_user
+-- Name: users; Type: TABLE; Schema: public; Owner: lucien
 --
 
 CREATE TABLE public.users (
@@ -317,10 +317,10 @@ CREATE TABLE public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO article_db_n8al_user;
+ALTER TABLE public.users OWNER TO lucien;
 
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: article_db_n8al_user
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: lucien
 --
 
 CREATE SEQUENCE public.users_id_seq
@@ -332,66 +332,66 @@ CREATE SEQUENCE public.users_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.users_id_seq OWNER TO article_db_n8al_user;
+ALTER SEQUENCE public.users_id_seq OWNER TO lucien;
 
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: article_db_n8al_user
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: lucien
 --
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: article id; Type: DEFAULT; Schema: public; Owner: article_db_n8al_user
+-- Name: article id; Type: DEFAULT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.article ALTER COLUMN id SET DEFAULT nextval('public.article_id_seq'::regclass);
 
 
 --
--- Name: categorie id; Type: DEFAULT; Schema: public; Owner: article_db_n8al_user
+-- Name: categorie id; Type: DEFAULT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.categorie ALTER COLUMN id SET DEFAULT nextval('public.categorie_id_seq'::regclass);
 
 
 --
--- Name: commentaire id; Type: DEFAULT; Schema: public; Owner: article_db_n8al_user
+-- Name: commentaire id; Type: DEFAULT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.commentaire ALTER COLUMN id SET DEFAULT nextval('public.commentaire_id_seq'::regclass);
 
 
 --
--- Name: historique id; Type: DEFAULT; Schema: public; Owner: article_db_n8al_user
+-- Name: historique id; Type: DEFAULT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.historique ALTER COLUMN id SET DEFAULT nextval('public.historique_id_seq'::regclass);
 
 
 --
--- Name: likes id; Type: DEFAULT; Schema: public; Owner: article_db_n8al_user
+-- Name: likes id; Type: DEFAULT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.likes ALTER COLUMN id SET DEFAULT nextval('public.likes_id_seq'::regclass);
 
 
 --
--- Name: logs id; Type: DEFAULT; Schema: public; Owner: article_db_n8al_user
+-- Name: logs id; Type: DEFAULT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.logs ALTER COLUMN id SET DEFAULT nextval('public.logs_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: public; Owner: article_db_n8al_user
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Data for Name: article; Type: TABLE DATA; Schema: public; Owner: article_db_n8al_user
+-- Data for Name: article; Type: TABLE DATA; Schema: public; Owner: lucien
 --
 
 COPY public.article (id, titre, contenu, description, couverture, date_publication, status, vue, featured, reading_time, auteur_id, categorie_id) FROM stdin;
@@ -404,7 +404,7 @@ COPY public.article (id, titre, contenu, description, couverture, date_publicati
 
 
 --
--- Data for Name: categorie; Type: TABLE DATA; Schema: public; Owner: article_db_n8al_user
+-- Data for Name: categorie; Type: TABLE DATA; Schema: public; Owner: lucien
 --
 
 COPY public.categorie (id, nom, description) FROM stdin;
@@ -420,7 +420,7 @@ COPY public.categorie (id, nom, description) FROM stdin;
 
 
 --
--- Data for Name: commentaire; Type: TABLE DATA; Schema: public; Owner: article_db_n8al_user
+-- Data for Name: commentaire; Type: TABLE DATA; Schema: public; Owner: lucien
 --
 
 COPY public.commentaire (id, contenu, status, date_commantaire, user_id, article_id) FROM stdin;
@@ -432,7 +432,7 @@ COPY public.commentaire (id, contenu, status, date_commantaire, user_id, article
 
 
 --
--- Data for Name: historique; Type: TABLE DATA; Schema: public; Owner: article_db_n8al_user
+-- Data for Name: historique; Type: TABLE DATA; Schema: public; Owner: lucien
 --
 
 COPY public.historique (id, action, date_action, user_id) FROM stdin;
@@ -440,7 +440,7 @@ COPY public.historique (id, action, date_action, user_id) FROM stdin;
 
 
 --
--- Data for Name: likes; Type: TABLE DATA; Schema: public; Owner: article_db_n8al_user
+-- Data for Name: likes; Type: TABLE DATA; Schema: public; Owner: lucien
 --
 
 COPY public.likes (id, date_like, user_id, article_id) FROM stdin;
@@ -448,7 +448,7 @@ COPY public.likes (id, date_like, user_id, article_id) FROM stdin;
 
 
 --
--- Data for Name: logs; Type: TABLE DATA; Schema: public; Owner: article_db_n8al_user
+-- Data for Name: logs; Type: TABLE DATA; Schema: public; Owner: lucien
 --
 
 COPY public.logs (id, action, date, user_id) FROM stdin;
@@ -478,7 +478,7 @@ COPY public.logs (id, action, date, user_id) FROM stdin;
 
 
 --
--- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: article_db_n8al_user
+-- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: lucien
 --
 
 COPY public.users (id, email, password, username, nom, prenom, civilite, telephone, date_naissance, profile, role, is_active, date_creation, "updatedAt", "lastLogin") FROM stdin;
@@ -492,56 +492,56 @@ COPY public.users (id, email, password, username, nom, prenom, civilite, telepho
 
 
 --
--- Name: article_id_seq; Type: SEQUENCE SET; Schema: public; Owner: article_db_n8al_user
+-- Name: article_id_seq; Type: SEQUENCE SET; Schema: public; Owner: lucien
 --
 
 SELECT pg_catalog.setval('public.article_id_seq', 5, true);
 
 
 --
--- Name: categorie_id_seq; Type: SEQUENCE SET; Schema: public; Owner: article_db_n8al_user
+-- Name: categorie_id_seq; Type: SEQUENCE SET; Schema: public; Owner: lucien
 --
 
 SELECT pg_catalog.setval('public.categorie_id_seq', 9, true);
 
 
 --
--- Name: commentaire_id_seq; Type: SEQUENCE SET; Schema: public; Owner: article_db_n8al_user
+-- Name: commentaire_id_seq; Type: SEQUENCE SET; Schema: public; Owner: lucien
 --
 
 SELECT pg_catalog.setval('public.commentaire_id_seq', 4, true);
 
 
 --
--- Name: historique_id_seq; Type: SEQUENCE SET; Schema: public; Owner: article_db_n8al_user
+-- Name: historique_id_seq; Type: SEQUENCE SET; Schema: public; Owner: lucien
 --
 
 SELECT pg_catalog.setval('public.historique_id_seq', 1, false);
 
 
 --
--- Name: likes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: article_db_n8al_user
+-- Name: likes_id_seq; Type: SEQUENCE SET; Schema: public; Owner: lucien
 --
 
 SELECT pg_catalog.setval('public.likes_id_seq', 1, false);
 
 
 --
--- Name: logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: article_db_n8al_user
+-- Name: logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: lucien
 --
 
 SELECT pg_catalog.setval('public.logs_id_seq', 22, true);
 
 
 --
--- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: article_db_n8al_user
+-- Name: users_id_seq; Type: SEQUENCE SET; Schema: public; Owner: lucien
 --
 
 SELECT pg_catalog.setval('public.users_id_seq', 8, true);
 
 
 --
--- Name: article PK_40808690eb7b915046558c0f81b; Type: CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: article PK_40808690eb7b915046558c0f81b; Type: CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.article
@@ -549,7 +549,7 @@ ALTER TABLE ONLY public.article
 
 
 --
--- Name: historique PK_a3f568c26777290a99254aeb607; Type: CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: historique PK_a3f568c26777290a99254aeb607; Type: CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.historique
@@ -557,7 +557,7 @@ ALTER TABLE ONLY public.historique
 
 
 --
--- Name: users PK_a3ffb1c0c8416b9fc6f907b7433; Type: CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: users PK_a3ffb1c0c8416b9fc6f907b7433; Type: CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.users
@@ -565,7 +565,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: commentaire PK_a4fa195414f3428179d40988716; Type: CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: commentaire PK_a4fa195414f3428179d40988716; Type: CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.commentaire
@@ -573,7 +573,7 @@ ALTER TABLE ONLY public.commentaire
 
 
 --
--- Name: categorie PK_a761331f20634c53bf660312062; Type: CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: categorie PK_a761331f20634c53bf660312062; Type: CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.categorie
@@ -581,7 +581,7 @@ ALTER TABLE ONLY public.categorie
 
 
 --
--- Name: likes PK_a9323de3f8bced7539a794b4a37; Type: CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: likes PK_a9323de3f8bced7539a794b4a37; Type: CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.likes
@@ -589,7 +589,7 @@ ALTER TABLE ONLY public.likes
 
 
 --
--- Name: logs PK_fb1b805f2f7795de79fa69340ba; Type: CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: logs PK_fb1b805f2f7795de79fa69340ba; Type: CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.logs
@@ -597,7 +597,7 @@ ALTER TABLE ONLY public.logs
 
 
 --
--- Name: users UQ_97672ac88f789774dd47f7c8be3; Type: CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: users UQ_97672ac88f789774dd47f7c8be3; Type: CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.users
@@ -605,7 +605,7 @@ ALTER TABLE ONLY public.users
 
 
 --
--- Name: categorie UQ_e27c99f0289647ed290b49d17a2; Type: CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: categorie UQ_e27c99f0289647ed290b49d17a2; Type: CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.categorie
@@ -613,7 +613,7 @@ ALTER TABLE ONLY public.categorie
 
 
 --
--- Name: likes FK_0deaa79a910af56b33472c90ee0; Type: FK CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: likes FK_0deaa79a910af56b33472c90ee0; Type: FK CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.likes
@@ -621,7 +621,7 @@ ALTER TABLE ONLY public.likes
 
 
 --
--- Name: article FK_115bb330eb4250fa89ee1578e37; Type: FK CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: article FK_115bb330eb4250fa89ee1578e37; Type: FK CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.article
@@ -629,7 +629,7 @@ ALTER TABLE ONLY public.article
 
 
 --
--- Name: commentaire FK_118b592ab14cf2b5dfd74097d85; Type: FK CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: commentaire FK_118b592ab14cf2b5dfd74097d85; Type: FK CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.commentaire
@@ -637,7 +637,7 @@ ALTER TABLE ONLY public.commentaire
 
 
 --
--- Name: likes FK_3f519ed95f775c781a254089171; Type: FK CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: likes FK_3f519ed95f775c781a254089171; Type: FK CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.likes
@@ -645,7 +645,7 @@ ALTER TABLE ONLY public.likes
 
 
 --
--- Name: article FK_6bfd8b1eb4c52d8480a75c7e6fc; Type: FK CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: article FK_6bfd8b1eb4c52d8480a75c7e6fc; Type: FK CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.article
@@ -653,7 +653,7 @@ ALTER TABLE ONLY public.article
 
 
 --
--- Name: logs FK_70c2c3d40d9f661ac502de51349; Type: FK CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: logs FK_70c2c3d40d9f661ac502de51349; Type: FK CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.logs
@@ -661,7 +661,7 @@ ALTER TABLE ONLY public.logs
 
 
 --
--- Name: historique FK_df3736ef4dd9f637b8d90ffe988; Type: FK CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: historique FK_df3736ef4dd9f637b8d90ffe988; Type: FK CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.historique
@@ -669,7 +669,7 @@ ALTER TABLE ONLY public.historique
 
 
 --
--- Name: commentaire FK_f1ac9d3e6dff98db6ab5b6f7690; Type: FK CONSTRAINT; Schema: public; Owner: article_db_n8al_user
+-- Name: commentaire FK_f1ac9d3e6dff98db6ab5b6f7690; Type: FK CONSTRAINT; Schema: public; Owner: lucien
 --
 
 ALTER TABLE ONLY public.commentaire
@@ -680,28 +680,28 @@ ALTER TABLE ONLY public.commentaire
 -- Name: DEFAULT PRIVILEGES FOR SEQUENCES; Type: DEFAULT ACL; Schema: -; Owner: postgres
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON SEQUENCES TO article_db_n8al_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON SEQUENCES TO lucien;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR TYPES; Type: DEFAULT ACL; Schema: -; Owner: postgres
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TYPES TO article_db_n8al_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TYPES TO lucien;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR FUNCTIONS; Type: DEFAULT ACL; Schema: -; Owner: postgres
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON FUNCTIONS TO article_db_n8al_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON FUNCTIONS TO lucien;
 
 
 --
 -- Name: DEFAULT PRIVILEGES FOR TABLES; Type: DEFAULT ACL; Schema: -; Owner: postgres
 --
 
-ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TABLES TO article_db_n8al_user;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres GRANT ALL ON TABLES TO lucien;
 
 
 --
