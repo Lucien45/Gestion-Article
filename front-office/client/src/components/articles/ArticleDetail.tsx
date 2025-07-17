@@ -11,6 +11,10 @@ import { ArticleService } from '../../services/article.service';
 import { apiUrl } from '../../services/api';
 import { Token } from '../../utils/Token';
 import { Utils } from '../../utils/Utils';
+import { Worker, Viewer } from '@react-pdf-viewer/core';
+import '@react-pdf-viewer/core/lib/styles/index.css';
+import { defaultLayoutPlugin } from '@react-pdf-viewer/default-layout';
+import '@react-pdf-viewer/default-layout/lib/styles/index.css';
 
 export const ArticleDetail:  React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -45,23 +49,72 @@ export const ArticleDetail:  React.FC = () => {
     setLikeLoading(true);
     try {
       if (isLiked) {
-        // Supprimer le like
-        // Note: Il faudrait d'abord récupérer l'ID du like existant
-        // Pour simplifier, on va juste décrémenter le compteur
-        setLikeCount(prev => prev - 1);
-        setIsLiked(false);
-        Utils.customMessage({
-          icon: 'success',
-          title: 'Like retiré',
-          text: "Vous avez retiré votre like.",
-          toast: true,
-          position: 'bottom-end',
-          timer: 2500,
-          showConfirmButton: false,
-          background: '#f0fdf4',
-          color: '#16a34a',
-          iconColor: '#ef4444', 
-        });
+        try {
+          const lik = await ArticleService.getAlLikes();
+          console.log("like: ", lik.data);
+          const like = lik.data.find((like: any) => like.user?.id === userProfile.id && like.article?.id === Number(id));
+          console.log("like delete: ", like);
+          if (!like) {
+            Utils.customMessage({
+              icon: 'warning',
+              title: 'Like introuvable',
+              text: "Impossible de trouver votre like à retirer.",
+              toast: true,
+              position: 'top',
+              timer: 3500,
+              showConfirmButton: false,
+              background: '#fff7ed',
+              color: '#ea580c',
+              iconColor: '#f59e42',
+            });
+          } else {
+            try {
+              await ArticleService.deletLike(like.id);
+              setLikeCount(prev => prev - 1);
+              setIsLiked(false);
+              Utils.customMessage({
+                icon: 'success',
+                title: 'Like retiré',
+                text: "Vous avez retiré votre like.",
+                toast: true,
+                position: 'bottom-end',
+                timer: 2500,
+                showConfirmButton: false,
+                background: '#f0fdf4',
+                color: '#16a34a',
+                iconColor: '#ef4444', 
+              });
+            } catch (deleteError) {
+              console.error("Erreur lors de la suppression du like:", deleteError);
+              Utils.customMessage({
+                icon: 'error',
+                title: 'Erreur suppression',
+                text: "Impossible de retirer le like. Veuillez réessayer.",
+                toast: true,
+                position: 'top',
+                timer: 3500,
+                showConfirmButton: false,
+                background: '#fef2f2',
+                color: '#b91c1c',
+                iconColor: '#ef4444',
+              });
+            }
+          }
+        } catch (findError) {
+          console.error("Erreur lors de la récupération des likes:", findError);
+          Utils.customMessage({
+            icon: 'error',
+            title: 'Erreur',
+            text: "Impossible de vérifier votre like. Veuillez réessayer.",
+            toast: true,
+            position: 'top',
+            timer: 3500,
+            showConfirmButton: false,
+            background: '#fef2f2',
+            color: '#b91c1c',
+            iconColor: '#ef4444',
+          });
+        }
       } else {
         const data = {
           user_id: userProfile.id,
@@ -142,6 +195,8 @@ export const ArticleDetail:  React.FC = () => {
       checkUserLike();
     }
   }, [currentArticle, userProfile]);
+
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   if (loading) {
     return (
@@ -238,9 +293,19 @@ export const ArticleDetail:  React.FC = () => {
 
       {/* Contenu de l'article */}
       <div className="prose prose-lg max-w-none mb-12">
-        {/* Ici, vous pouvez charger le contenu de l'article depuis contentUrl */}
-        Lorem ipsum, dolor sit amet consectetur adipisicing elit. Commodi ab dolores veritatis suscipit eaque nulla temporibus non maiores quibusdam doloremque. Quo, iure praesentium numquam nam eveniet totam culpa quos debitis!
-        
+        {/* Affichage du PDF si currentArticle.contenu existe */}
+        {currentArticle.contenu ? (
+          <div className="my-4">
+            <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
+              <Viewer
+                fileUrl={`${apiUrl}/${currentArticle.contenu}`}
+                plugins={[defaultLayoutPluginInstance]}
+              />
+            </Worker>
+          </div>
+        ) : (
+          <div className="text-gray-500">Aucun contenu PDF disponible pour cet article.</div>
+        )}
       </div>
 
       {/* Section des commentaires */}

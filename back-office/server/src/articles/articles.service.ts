@@ -150,13 +150,16 @@ export class ArticlesService {
     }
 
     if (file) {
-      articleDto.couverture = `media/couverture/${file.filename}`;
+      articleDto.couverture = `media/couverture/${file?.filename}`;
     }
 
     if (pdf) {
-      articleDto.contenu = `media/livre/${file?.filename}`;
+      articleDto.contenu = `media/livre/${pdf?.filename}`;
     }
 
+    if (!pdf && 'contenu' in articleDto) {
+      delete articleDto.contenu;
+    }
     Object.assign(article, articleDto);
     return this.articleRepository.save(article);
   }
