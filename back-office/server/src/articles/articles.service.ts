@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Articles } from './entities/article.entity';
@@ -16,6 +16,7 @@ import {
 import { CreateHistoriqueDto, UpdateHistoriqueDto } from './dto/historique.dto';
 import { CreateLikeDto, UpdateLikeDto } from './dto/like.dto';
 import { Users } from 'src/users/entities/user.entity';
+import { SupabaseService } from 'src/supabase/supabase.service';
 
 @Injectable()
 export class ArticlesService {
@@ -30,6 +31,7 @@ export class ArticlesService {
     private readonly historiqueRepository: Repository<Historiques>,
     @InjectRepository(Likes) private readonly likeRepository: Repository<Likes>,
     @InjectRepository(Users) private readonly userRepository: Repository<Users>,
+    private readonly supabaseService: SupabaseService,
   ) {}
 
   /**
@@ -103,12 +105,40 @@ export class ArticlesService {
         `Categorie avec ID ${categorie_id} introuvable`,
       );
     }
+    let couverturePath: string | null = null;
+    let pdfPath: string | null = null;
+    if (file) {
+      const fileName = `couvertures/${Date.now()}-${file.originalname}`;
+      const { data, error } = await this.supabaseService.uploadFile(
+        fileName,
+        file.buffer,
+      );
+
+      if (error) throw new Error('Erreur upload couverture ➜ ' + error.message);
+
+      couverturePath = fileName;
+    }
+
+    if (pdf) {
+      const pdfName = `livres/${Date.now()}-${pdf.originalname}`;
+      const { data, error } = await this.supabaseService.uploadFile(
+        pdfName,
+        pdf.buffer,
+      );
+
+      if (error) throw new Error('Erreur upload PDF ➜ ' + error.message);
+
+      pdfPath = pdfName;
+    }
+
     const article = this.articleRepository.create({
       titre,
       description,
       status: status || 'publié',
-      contenu: pdf ? `media/livre/${pdf.filename}` : null,
-      couverture: file ? `media/couverture/${file.filename}` : null,
+      // contenu: pdf ? `media/livre/${pdf.filename}` : null,
+      // couverture: file ? `media/couverture/${file.filename}` : null,
+      contenu: pdfPath,
+      couverture: couverturePath,
       auteur,
       categorie,
       featured: articleDto.featured || false,
@@ -149,18 +179,49 @@ export class ArticlesService {
       throw new Error('Article non trouvé');
     }
 
+    let couverturePath = article.couverture;
+    let pdfPath = article.contenu;
+
+    // --- UPDATE COVER ---
     if (file) {
-      articleDto.couverture = `media/couverture/${file?.filename}`;
+      const fileName = `couvertures/${Date.now()}-${file.originalname}`;
+      const { error } = await this.supabaseService.uploadFile(
+        fileName,
+        file.buffer,
+      );
+      if (error) throw new Error('Erreur upload couverture ➜ ' + error.message);
+
+      couverturePath = fileName;
     }
 
+    // --- UPDATE PDF ---
     if (pdf) {
-      articleDto.contenu = `media/livre/${pdf?.filename}`;
+      const pdfName = `livres/${Date.now()}-${pdf.originalname}`;
+      const { error } = await this.supabaseService.uploadFile(
+        pdfName,
+        pdf.buffer,
+      );
+      if (error) throw new Error('Erreur upload PDF ➜ ' + error.message);
+
+      pdfPath = pdfName;
     }
+
+    // if (file) {
+    //   articleDto.couverture = `media/couverture/${file?.filename}`;
+    // }
+
+    // if (pdf) {
+    //   articleDto.contenu = `media/livre/${pdf?.filename}`;
+    // }
 
     if (!pdf && 'contenu' in articleDto) {
       delete articleDto.contenu;
     }
-    Object.assign(article, articleDto);
+    // Object.assign(article, articleDto);
+    Object.assign(article, articleDto, {
+      couverture: couverturePath,
+      contenu: pdfPath,
+    });
     return this.articleRepository.save(article);
   }
 

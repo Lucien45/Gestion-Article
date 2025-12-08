@@ -32,7 +32,7 @@ export class CreateUserDto {
 
   @IsString()
   @IsOptional()
-  profile?: string;
+  profile?: string | null;
 
   @IsEnum(['admin', 'editeur', 'auteur'])
   @IsOptional()
