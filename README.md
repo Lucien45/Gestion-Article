@@ -1,12 +1,12 @@
 # 📚 Gestion-Article - Plateforme de Gestion et Publication d'Articles
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/your-repo/gestion-article)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/your-repo/gestion-article)
 [![Status](https://img.shields.io/badge/status-Production%20Ready-green.svg)](https://gestion-article-frontoffice.onrender.com/)
 [![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
 ## 📋 Description Générale
 
-Gestion-Article est une plateforme complète de gestion et publication d'articles développée avec NestJS. Le projet comprend un back-office pour la gestion administrative, un front-office pour la consultation publique, et une API robuste basée sur PostgreSQL.
+Gestion-Article est une plateforme complète de gestion et publication d'articles développée avec NestJS, React, Supabase (stockage fichiers) et Neon (PostgreSQL Serverless). Le projet comprend un back-office pour la gestion administrative, un front-office pour la consultation publique, et une API robuste basée sur PostgreSQL.
 
 **Statut actuel :** Projet déployé en production avec développement continu
 
@@ -19,7 +19,7 @@ Gestion-Article est une plateforme complète de gestion et publication d'article
 - ✅ **Gestion des utilisateurs** et rôles
 - ✅ **Système de commentaires** modération
 - ✅ **Gestion des likes** et interactions
-- ✅ **Upload de fichiers** (images de couverture, PDF)
+- ✅ **Upload d’images & PDF via Supabase** (images de couverture, PDF, profile)
 - ✅ **Recherche avancée** avec filtres multiples
 - ✅ **Système de logs** pour le suivi des activités
 - ✅ **Import/Export** de données
@@ -38,8 +38,8 @@ Gestion-Article est une plateforme complète de gestion et publication d'article
 ### API Backend (NestJS)
 - ✅ **API RESTful complète** avec documentation Swagger
 - ✅ **Authentification JWT** sécurisée
-- ✅ **Base de données PostgreSQL** avec TypeORM
-- ✅ **Upload de fichiers** avec Multer
+- ✅ **Base de données PostgreSQL via Neon** avec TypeORM
+- ✅ **Upload fichiers via Supabase** avec Multer
 - ✅ **Validation des données** avec class-validator
 - ✅ **Système de recherche** avancé
 - ✅ **Gestion des médias** (images, PDF)
@@ -51,8 +51,9 @@ Gestion-Article est une plateforme complète de gestion et publication d'article
 - **NestJS** - Framework Node.js
 - **TypeScript** - Langage de programmation
 - **TypeORM** - ORM pour PostgreSQL
-- **PostgreSQL** - Base de données
-- **JWT** - Authentification
+- **Neon PostgreSQL** - Base de données Serverless
+- **Supabase Storage** - stockage images, PDF
+- **JWT, bcrypt** - Authentification
 - **Multer** - Gestion des uploads
 - **Swagger** - Documentation API
 
@@ -76,13 +77,15 @@ Gestion-Article est une plateforme complète de gestion et publication d'article
 
 ### Outils & Déploiement
 - **Render** - Plateforme de déploiement cloud
-- **Docker** - Containerisation
+- **Docker / Docker Compose** - Containerisation
 - **Nginx** - Serveur web
 - **Vite** - Build tool
 - **ESLint** - Linting
 - **Jest** - Tests unitaires
 - **Git** - Versioning
 - **JIRA** - Gestion de projet et suivi des tâches
+- **Supabase** - Gestion de stockage des fichiers
+- **Neon.tech** - Gestion de BD PostgreSQL Serverless
 
 ## 📁 Architecture du Projet
 
@@ -109,10 +112,6 @@ Gestion-Article/
 │   │   │   ├── users/          # Module utilisateurs
 │   │   │   ├── search/         # Module recherche
 │   │   │   └── log/            # Module logs
-│   │   ├── media/              # Fichiers uploadés
-│   │   │   ├── couverture/     # Images de couverture
-│   │   │   ├── livre/          # Fichiers PDF
-│   │   │   └── profiles/       # Photos de profil
 │   │   └── test/               # Tests
 │   │
 │   └── docker/                 # Configuration Docker
