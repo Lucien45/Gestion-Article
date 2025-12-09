@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Eye, Clock } from 'lucide-react';
 import { Article } from '../../types';
-import { apiUrl } from '../../services/api';
+import { supabaseBucket, supabaseUrl } from '../../services/api';
 import { ArticleService } from '../../services/article.service';
 
 export const PopularArticles: React.FC = () => {
@@ -68,7 +68,8 @@ export const PopularArticles: React.FC = () => {
                                 <img
                                     src={
                                     article?.couverture
-                                        ? `${apiUrl}/${article.couverture}`
+                                        // ? `${apiUrl}/${article.couverture}`
+                                        ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${article.couverture}`
                                         : 'https://images.unsplash.com/photo-1499750310107-5fef28a66643'
                                     }
                                     alt={article.titre}

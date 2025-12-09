@@ -44,7 +44,7 @@ export class UsersService {
         file.buffer,
       );
 
-      if (error) throw new Error('Erreur upload couverture ➜ ' + error.message);
+      if (error) throw new Error('Erreur upload profile ➜ ' + error.message);
 
       profilePath = fileName;
     }
@@ -134,7 +134,7 @@ export class UsersService {
         fileName,
         file.buffer,
       );
-      if (error) throw new Error('Erreur upload couverture ➜ ' + error.message);
+      if (error) throw new Error('Erreur upload profile ➜ ' + error.message);
 
       profilePath = fileName;
     }

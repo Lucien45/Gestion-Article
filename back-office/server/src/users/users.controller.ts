@@ -16,8 +16,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import * as multer from 'multer';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
 import { JwtAuthGuard } from './auth.guard';
 
@@ -28,17 +27,7 @@ export class UsersController {
   @Post('register')
   @UseInterceptors(
     FileInterceptor('profile', {
-      storage: diskStorage({
-        destination: './media/profiles',
-        filename: (_, file, callback) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          callback(
-            null,
-            `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`,
-          );
-        },
-      }),
+      storage: multer.memoryStorage(),
     }),
   )
   async register(
@@ -95,17 +84,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(
     FileInterceptor('profile', {
-      storage: diskStorage({
-        destination: './media/profiles',
-        filename: (_, file, callback) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          callback(
-            null,
-            `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`,
-          );
-        },
-      }),
+      storage: multer.memoryStorage(),
     }),
   )
   async updateUser(

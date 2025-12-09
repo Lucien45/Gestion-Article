@@ -47,7 +47,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 import { Token } from '../../utils/Token';
 import { UserService } from '../../services/user.service';
-import { apiUrl } from '../../services/api';
+import { apiUrl, supabaseBucket, supabaseUrl } from '../../services/api';
 import { SearchService } from '../../services/search.service';
 import { LogService } from '../../services/log.service';
 
@@ -225,7 +225,12 @@ export const UserAccount: React.FC = () => {
       <CardContent>
         <Box display="flex" justifyContent="center" mb={2}>
           <Avatar
-            src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : dataUser?.username}
+            src={
+              dataUser?.profile 
+              // ? `${apiUrl}/${dataUser.profile}` 
+              ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${dataUser?.profile}`
+              : dataUser?.username
+            }
             alt={dataUser?.username}
             sx={{ width: 80, height: 80, border: "3px solid #ddd" }}
           />
@@ -567,7 +572,11 @@ export const UserList: React.FC = () => {
                   </StyledTableCell>
                   <StyledTableCell align="left">
                     <Avatar
-                      src={user?.profile ? `${apiUrl}/${user.profile}` : ''}
+                      src={
+                        user?.profile 
+                        ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${user.profile}`
+                        : user.username
+                      }
                       alt={user.username || "profileDefault"}
                       sx={{ width: 60, height: 60, border: "2px solid #ddd", borderRadius: "10px" }}
                     />
@@ -1129,7 +1138,11 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
     const photo = e.target.files?.[0];
     if (photo) {
     setImage(photo);
-    setDataUserUpdate({ ...dataUserUpdate, profile: URL.createObjectURL(photo) });
+    // setDataUserUpdate({ ...dataUserUpdate, profile: URL.createObjectURL(photo) });
+    setDataUserUpdate((prev) => ({
+      ...prev,
+      profile: URL.createObjectURL(photo),
+    }));
     console.log(photo);
     }
   };
@@ -1142,7 +1155,7 @@ export const UpdateUser: React.FC<UpdateUserProps> = ({ open, setOpen, id, refre
         email: res.data.email,
         password: res.data.password, 
         confirme_mdp: "",
-        profile: res.data.profile ? `${apiUrl}/${res.data.profile}` : '',
+        profile: res.data.profile ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${res.data?.profile}` : '',
         nom: res.data.nom,
         prenom: res.data.prenom,
         civilite: res.data.civilite,
@@ -1684,7 +1697,12 @@ export const DetailUser: React.FC<DetalUserProps> = ({open, setOpen, id}) => {
         <DialogContent>
           <Box display="flex" justifyContent="center" mb={2}>
             <Avatar
-              src={dataUserUpdate?.profile ? `${apiUrl}/${dataUserUpdate.profile}` : ''}
+              src={
+                dataUserUpdate?.profile 
+                // ? `${apiUrl}/${dataUserUpdate.profile}`
+                ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${dataUserUpdate.profile}` 
+                : ''
+              }
               alt={dataUserUpdate?.username}
               sx={{ width: 80, height: 80, border: "3px solid #ddd" }}
             />

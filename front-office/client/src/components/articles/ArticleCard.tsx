@@ -1,7 +1,7 @@
 import { Clock, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Article } from '../../types';
-import { apiUrl } from '../../services/api';
+import { supabaseBucket, supabaseUrl } from '../../services/api';
 
 interface ArticleCardProps {
   article: Article;
@@ -18,7 +18,12 @@ export const ArticleCard: React.FC<ArticleCardProps> = ({ article, featured }) =
       <Link to={`/articles/${article.id}`} className="block">
         <div className="relative overflow-hidden rounded-lg aspect-[16/9]">
           <img
-            src={article?.couverture ? `${apiUrl}/${article.couverture}` : "https://images.unsplash.com/photo-1499750310107-5fef28a66643"}
+            src={
+              article?.couverture 
+              // ? `${apiUrl}/${article.couverture}` 
+              ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${article.couverture}`
+              : "https://images.unsplash.com/photo-1499750310107-5fef28a66643"
+            }
             alt=""
             className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
           />

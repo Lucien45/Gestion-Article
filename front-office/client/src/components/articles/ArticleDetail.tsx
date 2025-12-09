@@ -8,7 +8,7 @@ import { fr } from 'date-fns/locale';
 import { CommentForm } from '../comments/CommentForm';
 import { CommentList } from '../comments/CommentList';
 import { ArticleService } from '../../services/article.service';
-import { apiUrl } from '../../services/api';
+import { supabaseBucket, supabaseUrl } from '../../services/api';
 import { Token } from '../../utils/Token';
 import { Utils } from '../../utils/Utils';
 import { Worker, Viewer } from '@react-pdf-viewer/core';
@@ -231,7 +231,11 @@ export const ArticleDetail:  React.FC = () => {
       <header className="mb-8">
         <div className="relative aspect-[21/9] mb-6">
           <img
-            src={currentArticle.couverture ? `${apiUrl}/${currentArticle.couverture}` : currentArticle.titre || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643'}
+            src={
+              currentArticle.couverture 
+              // ? `${apiUrl}/${currentArticle.couverture}` 
+              ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${currentArticle.couverture}`
+              : currentArticle.titre || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643'}
             alt={currentArticle.titre}
             className="rounded-lg object-cover w-full h-full"
           />
@@ -298,7 +302,10 @@ export const ArticleDetail:  React.FC = () => {
           <div className="my-4">
             <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
               <Viewer
-                fileUrl={`${apiUrl}/${currentArticle.contenu}`}
+                fileUrl={
+                  // `${apiUrl}/${currentArticle.contenu}`
+                  `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${currentArticle.contenu}`
+                }
                 plugins={[defaultLayoutPluginInstance]}
               />
             </Worker>
