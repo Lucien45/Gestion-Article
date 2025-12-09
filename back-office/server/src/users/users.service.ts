@@ -13,12 +13,14 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { CreateUserDto, UpdateUserDto } from './dto/user.dto';
+import { SupabaseService } from 'src/supabase/supabase.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(Users) private readonly userRepository: Repository<Users>,
     private readonly jwtService: JwtService,
+    private readonly supabaseService: SupabaseService,
   ) {}
 
   async register(
@@ -34,12 +36,25 @@ export class UsersService {
 
     const hashedPassword: string = await bcrypt.hash(password, 10);
 
+    let profilePath: string | null = null;
+    if (file) {
+      const fileName = `profiles/${Date.now()}-${file.originalname}`;
+      const { error } = await this.supabaseService.uploadFile(
+        fileName,
+        file.buffer,
+      );
+
+      if (error) throw new Error('Erreur upload profile ➜ ' + error.message);
+
+      profilePath = fileName;
+    }
+
     const user = new Users();
     Object.assign(user, createUserDto);
     user.password = hashedPassword;
     user.date_creation = new Date();
     user.lastLogin = null;
-    user.profile = file ? `media/profiles/${file.filename}` : null;
+    user.profile = file ? profilePath : null;
     return await this.userRepository.save(user);
   }
 
@@ -110,8 +125,18 @@ export class UsersService {
       throw new Error('Utilisateur non trouvé');
     }
 
+    let profilePath = user?.profile;
+
     if (file) {
-      updateUserDto.profile = `media/profiles/${file.filename}`;
+      // updateUserDto.profile = `media/profiles/${file.filename}`;
+      const fileName = `profiles/${Date.now()}-${file.originalname}`;
+      const { error } = await this.supabaseService.uploadFile(
+        fileName,
+        file.buffer,
+      );
+      if (error) throw new Error('Erreur upload profile ➜ ' + error.message);
+
+      profilePath = fileName;
     }
 
     if (updateUserDto.password && updateUserDto.password.trim() !== '') {
@@ -123,6 +148,8 @@ export class UsersService {
     } else {
       delete updateUserDto.password;
     }
+
+    updateUserDto.profile = profilePath;
 
     Object.assign(user, updateUserDto);
     return this.userRepository.save(user);

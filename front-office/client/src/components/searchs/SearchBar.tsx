@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { SearchService } from '../../services/search.service';
 import { Article } from '../../types';
 import { LoadingArtcile } from '../LoadingSpinner';
-import { apiUrl } from '../../services/api';
+import { supabaseBucket, supabaseUrl } from '../../services/api';
 import { Clock, User } from 'lucide-react';
 
 function useQuery() {
@@ -122,7 +122,11 @@ export const SearchResult: React.FC = () => {
                             <Link to={`/articles/${article.id}`} className="block">
                                 <div className="relative overflow-hidden rounded-lg aspect-[16/9]">
                                     <img
-                                        src={article?.couverture ? `${apiUrl}/${article.couverture}` : "https://images.unsplash.com/photo-1499750310107-5fef28a66643"}
+                                        src={
+                                            article?.couverture 
+                                            // ? `${apiUrl}/${article.couverture}` 
+                                            ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${article.couverture}`
+                                            : "https://images.unsplash.com/photo-1499750310107-5fef28a66643"}
                                         alt=""
                                         className="object-cover w-full h-full transform group-hover:scale-105 transition-transform duration-300"
                                     />

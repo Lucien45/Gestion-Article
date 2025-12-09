@@ -21,6 +21,7 @@ import {
 } from './dto/commentaire.dto';
 import { CreateHistoriqueDto, UpdateHistoriqueDto } from './dto/historique.dto';
 import { CreateLikeDto, UpdateLikeDto } from './dto/like.dto';
+import * as multer from 'multer';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 
@@ -84,25 +85,7 @@ export class ArticlesController {
   @Post()
   @UseInterceptors(
     FilesInterceptor('files', 2, {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          if (file.mimetype.includes('image')) {
-            cb(null, './media/couverture');
-          } else if (file.mimetype.includes('pdf')) {
-            cb(null, './media/livre');
-          } else {
-            cb(new Error('Type de fichier non pris en charge'), '');
-          }
-        },
-        filename: (_, file, callback) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          callback(
-            null,
-            `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`,
-          );
-        },
-      }),
+      storage: multer.memoryStorage(),
     }),
   )
   createArticle(
@@ -136,25 +119,7 @@ export class ArticlesController {
   @Patch('article/:id')
   @UseInterceptors(
     FilesInterceptor('files', 2, {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          if (file.mimetype.includes('image')) {
-            cb(null, './media/couverture');
-          } else if (file.mimetype.includes('pdf')) {
-            cb(null, './media/livre');
-          } else {
-            cb(new Error('Type de fichier non pris en charge'), '');
-          }
-        },
-        filename: (_, file, callback) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          callback(
-            null,
-            `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`,
-          );
-        },
-      }),
+      storage: multer.memoryStorage(),
     }),
   )
   updateArticle(

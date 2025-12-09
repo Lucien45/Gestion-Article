@@ -15,7 +15,7 @@ import {
 import { FaCaretDown } from "react-icons/fa";
 import { Search, Menu as MenuIcon, Mail } from "@mui/icons-material";
 import { Token } from "../../utils/Token";
-import { apiUrl } from "../../services/api";
+import { supabaseBucket, supabaseUrl } from "../../services/api";
 import { styled } from '@mui/material/styles';
 import { UserService } from "../../services/user.service";
 import { useNavigate } from "react-router";
@@ -173,7 +173,12 @@ const Navbar = ({ toggleSidebar, isOpen }: NavbarProps) => {
               variant="dot"
             >
               <Avatar
-                src={dataUser?.profile ? `${apiUrl}/${dataUser.profile}` : dataUser?.username}
+                src={
+                  dataUser?.profile 
+                  // ? `${apiUrl}/${dataUser.profile}` 
+                  ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${dataUser?.profile}`
+                  : dataUser?.username
+                }
                 alt={dataUser?.username || "profileDefault"}
                 sx={{ width: 40, height: 40, border: "2px solid #ddd" }}
               />

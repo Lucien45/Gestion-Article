@@ -9,6 +9,7 @@ import { Historiques } from './entities/historique.entity';
 import { Likes } from './entities/like.entity';
 import { Users } from 'src/users/entities/user.entity';
 import { UsersModule } from 'src/users/users.module';
+import { SupabaseModule } from 'src/supabase/supabase.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UsersModule } from 'src/users/users.module';
       Likes,
       Users,
     ]),
+    SupabaseModule,
     UsersModule,
   ],
   providers: [ArticlesService],

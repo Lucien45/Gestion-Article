@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Camera, Mail, User as UserIcon } from 'lucide-react';
 import { Token } from '../utils/Token';
 import { UserService } from '../services/user.service';
-import { apiUrl } from '../services/api';
+import { supabaseBucket, supabaseUrl } from '../services/api';
 
 interface User {
     id: number;
@@ -72,7 +72,11 @@ export const ProfilePage: React.FC = () => {
           <div className="flex flex-col items-center -mt-20 mb-6">
             <div className="relative">
               <img
-                src={user?.profile ? `${apiUrl}/${user.profile}` : user?.username || `https://ui-avatars.com/api/?name=${user.username}`}
+                src={
+                  user?.profile 
+                  // ? `${apiUrl}/${user.profile}` 
+                  ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${user.profile}`
+                  : user?.username || `https://ui-avatars.com/api/?name=${user.username}`}
                 alt={user.username}
                 className="w-32 h-32 rounded-full border-4 border-white shadow-md"
               />

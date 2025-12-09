@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { SearchModule } from './search/search.module';
 import { LogModule } from './log/log.module';
+import { SupabaseModule } from './supabase/supabase.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { LogModule } from './log/log.module';
     UsersModule,
     SearchModule,
     LogModule,
+    SupabaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],

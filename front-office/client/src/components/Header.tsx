@@ -5,7 +5,7 @@ import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { Token } from '../utils/Token';
 import { UserService } from '../services/user.service';
 import { isAuthenticated, logout } from '../context/AuthContext';
-import { apiUrl } from '../services/api';
+import { supabaseBucket, supabaseUrl } from '../services/api';
 import { Footer } from './Footer';
 import { ThemeToggle } from './ThemeToggle';
 import { Category } from '../types';
@@ -255,7 +255,11 @@ export function Header() {
                   <div className="flex items-center space-x-4">
                     <Link to="/profile" className="flex items-center space-x-2">
                       <img
-                        src={user?.profile ? `${apiUrl}/${user.profile}` : user?.username || `https://ui-avatars.com/api/?name=${user?.username}`}
+                        src={
+                          user?.profile 
+                          // ? `${apiUrl}/${user.profile}` 
+                          ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${user?.profile}`
+                          : user?.username || `https://ui-avatars.com/api/?name=${user?.username}`}
                         alt={user?.username}
                         className="h-8 w-8 rounded-full"
                       />

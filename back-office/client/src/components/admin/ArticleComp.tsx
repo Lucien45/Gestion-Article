@@ -49,7 +49,7 @@ import { Visibility, Edit, DeleteForever, CalendarToday, Article, Description, C
 import { ArticleService } from "../../services/article.service";
 import { Token } from "../../utils/Token";
 import { Utils } from "../../utils/Utils";
-import { apiUrl } from "../../services/api";
+import { apiUrl, supabaseBucket, supabaseUrl } from "../../services/api";
 import { StyledTableCell, StyledTableRow } from "../../utils/Table";
 import Papa from "papaparse";
 import { UserService } from "../../services/user.service";
@@ -489,7 +489,11 @@ export const ListArticle: React.FC = () => {
                   </StyledTableCell>
                   <StyledTableCell component="th" scope="row">
                     <Avatar
-                      src={article?.couverture ? `${apiUrl}/${article.couverture}` : ''}
+                      src={
+                        article?.couverture 
+                        ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${article.couverture}`
+                        : ''
+                      }
                       alt={article.titre || "profileDefault"}
                       sx={{ width: 60, height: 60, border: "2px solid #ddd", borderRadius: 0 }}
                     />
@@ -658,7 +662,11 @@ export const DetailArticle: React.FC<DetalArticleProps> = ({open, setOpen, id}) 
         <DialogContent>
           <Box display="flex" justifyContent="center" mb={2}>
             <Avatar
-              src={dataArticle?.couverture ? `${apiUrl}/${dataArticle?.couverture}` : ''}
+              src={
+                dataArticle?.couverture 
+                ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${dataArticle?.couverture}`
+                : ''
+              }
               alt={dataArticle?.titre}
               sx={{ width: 100, height: 100, border: "3px solid #ddd", borderRadius: 0 }}
             />
@@ -729,20 +737,26 @@ export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id,
   const [userUpdateSuccess, setUserUpdateSuccess] = useState<boolean>(false);
 
   const loadCouverture = (e: ChangeEvent<HTMLInputElement>) => {
-    const photo = e.target.files?.[0];
-    if (photo) {
-      setImage(photo);
-      setDataArticleUpdate({ ...dataArticleUpdate, couverture: URL.createObjectURL(photo) });
-      console.log("image: ",photo);
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      setDataArticleUpdate((prev) => ({
+        ...prev,
+        couverture: URL.createObjectURL(file),
+      }));
+      console.log("image: ",file);
     }
   };
 
   const loadContenu = (e: ChangeEvent<HTMLInputElement>) => {
-    const photo = e.target.files?.[0];
-    if (photo) {
-      setPdf(photo);
-      setDataArticleUpdate({ ...dataArticleUpdate, contenu: URL.createObjectURL(photo) });
-      console.log("pdf: ",photo);
+    const file = e.target.files?.[0];
+    if (file) {
+      setPdf(file);
+      setDataArticleUpdate((prev) => ({
+        ...prev,
+        contenu: URL.createObjectURL(file), // preview
+      }));
+      console.log("pdf: ",file);
     }
   };
 
@@ -755,8 +769,8 @@ export const UpdateArticle: React.FC<UpdateArticleProps> = ({ open, setOpen, id,
         titre: res.data.titre,
         description: res.data.description,
         categorie: res.data.categorie.id, 
-        contenu: res.data.contenu ? `${apiUrl}/${res.data.contenu}` : '',
-        couverture: res.data.couverture ? `${apiUrl}/${res.data.couverture}` : '',
+        contenu: res.data.contenu ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${res.data?.contenu}` : '',
+        couverture: res.data.couverture ? `${supabaseUrl}/storage/v1/object/public/${supabaseBucket}/${res.data?.couverture}` : '',
         status: res.data.status,
         featured: res.data.featured,
         reading_time: res.data.reading_time,
