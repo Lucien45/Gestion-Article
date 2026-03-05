@@ -9,4 +9,4 @@ on:
 
 jobs:
   run-backoffice:
-    uses: ../back-office/.github/workflows/back-office-runner.yml
+    uses: ./back-office/.github/workflows/back-office-runner.yml
