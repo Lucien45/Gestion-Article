@@ -1,0 +1,12 @@
+name: Front Office Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "front-office/**"
+  workflow_dispatch:
+
+jobs:
+  run-frontoffice:
+    uses: ./.github/workflows/front-office-runner.yml

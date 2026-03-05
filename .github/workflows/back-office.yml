@@ -1,0 +1,12 @@
+name: Back Office Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "back-office/**"
+  workflow_dispatch:
+
+jobs:
+  run-backoffice:
+    uses: ./.github/workflows/back-office-runner.yml
