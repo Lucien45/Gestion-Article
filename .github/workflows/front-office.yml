@@ -1,4 +1,4 @@
-name: Hello World front-office
+name: Front Office Runner
 
 on:
   push:
