@@ -9,4 +9,4 @@ on:
 
 jobs:
   run-frontoffice:
-    uses: ./.github/workflows/front-office-runner.yml
+    uses: ../front-office/.github/workflows/front-office-runner.yml
