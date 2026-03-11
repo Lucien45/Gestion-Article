@@ -18,10 +18,18 @@ jobs:
     runs-on: ubuntu-24.04
     environment: staging  
     steps:
-      - run: deploy --url ${{ secrets.DATABASE_URL }}
+      - name: Installation de deploy-cli
+        run: npm install -g deploy-cli
+
+      - name: Deploiment staging
+        run: deploy --url ${{ secrets.DATABASE_URL }}
 
   deploy-prod:
     runs-on: ubuntu-24.04
     environment: production
     steps:
-      - run: deploy --url ${{ secrets.DATABASE_URL }}
+      - name: Installation de deploy-cli
+        run: npm install -g deploy-cli
+
+      - name: Deploiment prod
+        run: deploy --url ${{ secrets.DATABASE_URL }}
