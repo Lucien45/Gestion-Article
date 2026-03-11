@@ -1,0 +1,16 @@
+name: Build Runner
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Afficher la configuration
+        run: |
+          echo "Node version: ${{ vars.NODE_VERSION }}"
+          echo "Environment: ${{ vars.ENVIRONMENT }}"
