@@ -114,6 +114,8 @@ jobs:
           port: 22
           script: |
             cd /home/ubuntu/deploiment/Gestion-article/back-office/
+            docker-compose stop bo-server
+            docker-compose rm -f bo-server
             docker-compose up -d --build --no-deps bo-server
   
   deploy_client:
@@ -150,12 +152,8 @@ jobs:
           script: |
             if [ ! -d "/home/ubuntu/deploiment/Gestion-article/back-office/client" ]; then
               mkdir -p /home/ubuntu/deploiment/Gestion-article/back-office/client
-              if [ ! -f "/home/ubuntu/deploiment/Gestion-article/back-office/client/.env.example" ]; then
-                touch /home/ubuntu/deploiment/Gestion-article/back-office/client/.env.example
-                echo "Client .env.example created"
-              else
-                echo "Client .env directory already exists, skipping"
-              echo "Client directory created"
+              touch /home/ubuntu/deploiment/Gestion-article/back-office/client/.env.example
+              echo "Client directory and .env.example created"
             else
               echo "Client directory already exists, skipping"
             fi
@@ -163,7 +161,7 @@ jobs:
               touch /home/ubuntu/deploiment/Gestion-article/back-office/server/.env
               echo "server .env created"
             else
-              echo "environment server has already exists, skipping"
+              echo "server .env already exists, skipping"
             fi
 
       - name: Copy files to VPS
@@ -207,4 +205,6 @@ jobs:
           port: 22
           script: |
             cd /home/ubuntu/deploiment/Gestion-article/back-office/
+            docker-compose stop bo-client
+            docker-compose rm -f bo-client
             docker-compose up -d --build --no-deps bo-client
