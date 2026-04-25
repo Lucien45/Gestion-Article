@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths: 
-      -'back-office/**'
-      -'back-office/docker-compose.yml'
+      - 'back-office/**'
+      - 'back-office/docker-compose.yml'
   workflow_dispatch:
 
 jobs:
@@ -37,13 +37,12 @@ jobs:
           port: 22
           script: |
             if [ ! -d "/home/ubuntu/deploiment/Gestion-article/back-office/server" ]; then
-              mkdir -p /home/ubuntu/deploiment/Gestion-article/back-office/portfolio/server
+              mkdir -p /home/ubuntu/deploiment/Gestion-article/back-office/server
               echo "Server directory created"
             else
               echo "Server directory already exists, skipping"
             fi
             if [ ! -f "/home/ubuntu/deploiment/Gestion-article/back-office/server/.env" ]; then
-              mkdir -p /home/ubuntu/deploiment/Gestion-article/back-office/server
               touch /home/ubuntu/deploiment/Gestion-article/back-office/server/.env
               echo "server .env created"
             fi
@@ -55,7 +54,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "Gestion-Article/back-office/server/Dockerfile,Gestion-Article/back-office/server/package.json,Gestion-Article/back-office/server/package-lock.json"
+          source: "back-office/server/Dockerfile,back-office/server/package.json,back-office/server/package-lock.json"
           target: "/home/ubuntu/deploiment/Gestion-article/back-office/server/"
           strip_components: 1
 
@@ -66,7 +65,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "Gestion-Article/back-office/server/dist/"
+          source: "back-office/server/dist/"
           target: "/home/ubuntu/deploiment/Gestion-article/back-office/server/"
           strip_components: 1
 
@@ -77,7 +76,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "Gestion-Article/back-office/docker-compose.yml"
+          source: "back-office/docker-compose.yml"
           target: "/home/ubuntu/deploiment/Gestion-article/back-office/"
 
       - name: Create .env on VPS
@@ -127,11 +126,11 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        working-directory: ./client
+        working-directory: ./back-office/client
         run: npm install
 
       - name: Build admin
-        working-directory: ./client
+        working-directory: ./back-office/client
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
@@ -168,7 +167,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "Gestion-Article/back-office/client/Dockerfile,Gestion-Article/back-office/client/nginx/"
+          source: "back-office/client/Dockerfile,back-office/client/nginx/"
           target: "/home/ubuntu/deploiment/Gestion-article/back-office/client/"
           strip_components: 1
 
@@ -179,7 +178,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "admin/dist/"
+          source: "back-office/client/dist/"
           target: "/home/ubuntu/deploiment/Gestion-article/back-office/client/"
           strip_components: 1
 
@@ -190,7 +189,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
-          source: "docker-compose.yml"
+          source: "back-office/docker-compose.yml"
           target: "/home/ubuntu/deploiment/Gestion-article/back-office/client/"
 
       - name: SSH & Deploy Docker Compose
