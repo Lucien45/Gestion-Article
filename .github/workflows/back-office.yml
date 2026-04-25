@@ -37,6 +37,7 @@ jobs:
           port: 22
           script: |
             if [ ! -d "/home/ubuntu/deploiment/Gestion-article/back-office/server" ]; then
+              mkdir -p /home/ubuntu/deploiment/Gestion-article/back-office/client
               mkdir -p /home/ubuntu/deploiment/Gestion-article/back-office/server
               echo "Server directory created"
             else
