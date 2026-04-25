@@ -4,8 +4,8 @@
 curl -X POST http://localhost:3000/users/register \
     -H "Content-Type: application/json" \
     -d '{ 
-        "email" : "admin@gmail.com", 
-        "password" : "admin" ,
-        "usrname": "admin",
+        "email" : "lucien@gmail.com", 
+        "password" : "lucien" ,
+        "usrname": "lucien",
         "role": "admin"
     }'
