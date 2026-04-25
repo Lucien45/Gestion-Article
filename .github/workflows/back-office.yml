@@ -78,6 +78,7 @@ jobs:
           port: 22
           source: "back-office/docker-compose.yml"
           target: "/home/ubuntu/deploiment/Gestion-article/back-office/"
+          strip_components: 1
 
       - name: Create .env on VPS
         uses: appleboy/ssh-action@v0.1.5
