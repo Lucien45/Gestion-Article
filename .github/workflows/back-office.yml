@@ -1,19 +1,205 @@
-name: Back Office Runner
+name: Back Office Deploy Runner
 
 on:
   push:
     branches: [main]
+    paths: 
+      -'back-office/**'
+      -'back-office/docker-compose.yml'
   workflow_dispatch:
 
 jobs:
-  hello:
-    runs-on: ubuntu-24.04
+  deploy_server:
+    runs-on: ubuntu-latest
     steps:
-      - name: Dire bonjour
-        run: echo "Hello, GitHub Actions from Back Office!"
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Afficher des infos sur le contexte
-        run: |
-          echo "Repository: \${{ github.repository }}"
-          echo "Branche: \${{ github.ref_name }}"
-          echo "Auteur du commit: \${{ github.actor }}"
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: ./back-office/server
+        run: npm install
+
+      - name: Build server in back-office
+        working-directory: ./back-office/server
+        run: npm run build
+
+      - name: Prepare directories on VPS
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            if [ ! -d "/home/ubuntu/deploiment/Gestion-article/back-office/server" ]; then
+              mkdir -p /home/ubuntu/deploiment/Gestion-article/back-office/portfolio/server
+              echo "Server directory created"
+            else
+              echo "Server directory already exists, skipping"
+            fi
+            if [ ! -f "/home/ubuntu/deploiment/Gestion-article/back-office/server/.env" ]; then
+              mkdir -p /home/ubuntu/deploiment/Gestion-article/back-office/server
+              touch /home/ubuntu/deploiment/Gestion-article/back-office/server/.env
+              echo "server .env created"
+            fi
+
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "Gestion-Article/back-office/server/Dockerfile,Gestion-Article/back-office/server/package.json,Gestion-Article/back-office/server/package-lock.json"
+          target: "/home/ubuntu/deploiment/Gestion-article/back-office/server/"
+          strip_components: 1
+
+      - name: Copy build files to VPS
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "Gestion-Article/back-office/server/dist/"
+          target: "/home/ubuntu/deploiment/Gestion-article/back-office/server/"
+          strip_components: 1
+
+      - name: Copy docker-compose to VPS
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "Gestion-Article/back-office/docker-compose.yml"
+          target: "/home/ubuntu/deploiment/Gestion-article/back-office/"
+
+      - name: Create .env on VPS
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cat > /home/ubuntu/deploiment/Gestion-article/back-office/server/.env << 'EOF'
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_USER=${{ secrets.DB_USER }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_SCHEMA=production
+            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            SUPABASE_KEY=${{ secrets.SUPABASE_KEY }}
+            SUPABASE_BUCKET=${{ secrets.SUPABASE_BUCKET }}
+            PORT=3000
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
+            NODE_ENV=production
+            EOF
+
+      - name: SSH & Deploy Docker Compose
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/deploiment/Gestion-article/back-office/
+            docker-compose up -d --build --no-deps server
+  
+  deploy_client:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: ./client
+        run: npm install
+
+      - name: Build admin
+        working-directory: ./client
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_SUPABASE_BUCKET: ${{ secrets.VITE_SUPABASE_BUCKET }}
+
+      - name: Prepare directories on VPS
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            if [ ! -d "/home/ubuntu/deploiment/Gestion-article/back-office/client" ]; then
+              mkdir -p /home/ubuntu/deploiment/Gestion-article/back-office/client
+              touch /home/ubuntu/deploiment/Gestion-article/back-office/client/.env.exemple
+              echo "Client directory created"
+            else
+              echo "Client directory already exists, skipping"
+            fi
+            if [ ! -f "/home/ubuntu/deploiment/Gestion-article/back-office/server/.env" ]; then
+              mkdir -p /home/ubuntu/deploiment/Gestion-article/back-office/server
+              touch /home/ubuntu/deploiment/Gestion-article/back-office/server/.env
+              echo "server .env created"
+            else
+              echo "environment server has already exists, skipping"
+            fi
+
+      - name: Copy files to VPS
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "Gestion-Article/back-office/client/Dockerfile,Gestion-Article/back-office/client/nginx/"
+          target: "/home/ubuntu/deploiment/Gestion-article/back-office/client/"
+          strip_components: 1
+
+      - name: Copy build files to VPS
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "admin/dist/"
+          target: "/home/ubuntu/deploiment/Gestion-article/back-office/client/"
+          strip_components: 1
+
+      - name: Copy docker-compose to VPS
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          source: "docker-compose.yml"
+          target: "/home/ubuntu/deploiment/Gestion-article/back-office/client/"
+
+      - name: SSH & Deploy Docker Compose
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/deploiment/Gestion-article/back-office/
+            docker-compose up -d --build --no-deps admin
