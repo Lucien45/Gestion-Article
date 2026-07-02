@@ -96,6 +96,16 @@ const SignOut = () => {
     Token.RemoveToken('authUser')
     window.location.href = '/';
 };
+
+const forgotPassword = (data: { email: string }) => {
+    return Axios.post('/users/forgot-password', data);
+};
+
+const resetPassword = (data: { token: string; password: string }) => {
+    return Axios.post('/users/reset-password', data);
+};
+
 export const UserService = {
-    getUser, SignUp, SignIn, SignOut, getAllUsers, getUserById, updateUser, deleteUser, updateUserStatus
+    getUser, SignUp, SignIn, SignOut, getAllUsers, getUserById, updateUser, deleteUser, updateUserStatus,
+    forgotPassword, resetPassword,
 }

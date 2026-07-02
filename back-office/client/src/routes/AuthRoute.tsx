@@ -3,6 +3,7 @@ import { Route, Routes, useLocation } from 'react-router-dom';
 import Page404 from '../views/Page404';
 import AuthLayout from '../views/auth/AuthLayout';
 import AuthPage from '../views/auth/AuthPage';
+import PasswordReset from '../views/auth/passwordReset';
 
 interface AdminRouteProps {
     setLoading: (value: boolean) => void;
@@ -24,8 +25,10 @@ const AuthRoute = ({ setLoading }: AdminRouteProps) => {
     <Routes>
       <Route element={<AuthLayout/>}>
         <Route index element={<AuthPage/>} />
-        <Route path='*' element={<Page404/>} />
       </Route>
+      <Route path="forgot-password" element={<PasswordReset/>} />
+      <Route path="reset-password" element={<PasswordReset/>} />
+      <Route path="*" element={<Page404/>} />
     </Routes>
   )
 }
