@@ -56,6 +56,37 @@ export class UsersController {
     return this.usersService.login({ identifier: identification, password });
   }
 
+  @Post('forgot-password')
+  async forgotPassword(@Body() body: { email?: string }) {
+    const { email } = body;
+
+    if (!email || typeof email !== 'string') {
+      throw new BadRequestException(
+        'Le champ "email" est requis et doit être une chaîne.',
+      );
+    }
+
+    return this.usersService.forgotPassword(email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() body: { token?: string; password?: string }) {
+    const { token, password } = body;
+
+    if (!token || typeof token !== 'string') {
+      throw new BadRequestException(
+        'Le champ "token" est requis et doit être une chaîne.',
+      );
+    }
+    if (!password || typeof password !== 'string') {
+      throw new BadRequestException(
+        'Le champ "password" est requis et doit être une chaîne.',
+      );
+    }
+
+    return this.usersService.resetPassword(token, password);
+  }
+
   @Get()
   async getAllUsers() {
     return this.usersService.findAll();

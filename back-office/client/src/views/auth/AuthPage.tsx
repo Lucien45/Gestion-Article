@@ -4,7 +4,9 @@ import {
   Box, Button, TextField, Typography, Avatar, Select, MenuItem, InputLabel, FormControl,
   Alert,
   CircularProgress,
+  Link,
 } from "@mui/material";
+import { Link as RouterLink } from "react-router-dom";
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import VpnKeyIcon from '@mui/icons-material/VpnKey';
 import { Utils } from "../../utils/Utils";
@@ -159,6 +161,11 @@ const AuthPage: React.FC = () => {
           onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
           margin="normal"
         />
+        <Box textAlign="right">
+          <Link component={RouterLink} to="/forgot-password" underline="hover" variant="body2">
+            Mot de passe oublié ?
+          </Link>
+        </Box>
         <Button
           fullWidth
           variant="contained"

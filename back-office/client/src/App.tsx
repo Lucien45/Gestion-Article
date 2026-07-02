@@ -15,11 +15,10 @@ function App() {
       {loading && <LoadingSpinner/>}
       <ToastContainer position='top-center'/>
       <Routes>
-        <Route path='/' element={
+        <Route path='/admin/*' element={<AppRoute setLoading={setLoading}/>}/>
+        <Route path='/*' element={
           isAuthenticated() ? <Navigate to="/admin" replace /> : <AuthRoute setLoading={setLoading}/>
         }/>
-        <Route path='/admin/*' element={<AppRoute setLoading={setLoading}/>}/>
-        <Route path='*' element={<Navigate to="/" replace />}/>
       </Routes>
     </BrowserRouter>
   )

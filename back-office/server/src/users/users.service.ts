@@ -161,4 +161,48 @@ export class UsersService {
       throw new NotFoundException(`User avec ID ${userId} est introuvable`);
     await this.userRepository.remove(user);
   }
+
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (user) {
+      const resetToken = this.jwtService.sign(
+        { sub: user.id, type: 'password-reset' },
+        { expiresIn: '1h' },
+      );
+
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+      const resetLink = `${frontendUrl}/reset-password?token=${resetToken}`;
+      console.log(`Lien de réinitialisation pour ${email}: ${resetLink}`);
+    }
+
+    return {
+      message:
+        'Si un compte existe avec cet email, un lien de réinitialisation a été envoyé.',
+    };
+  }
+
+  async resetPassword(
+    token: string,
+    password: string,
+  ): Promise<{ message: string }> {
+    try {
+      const payload = this.jwtService.verify(token) as {
+        sub: number;
+        type?: string;
+      };
+
+      if (payload.type !== 'password-reset') {
+        throw new UnauthorizedException('Token invalide ou expiré.');
+      }
+
+      const user = await this.findUserById(payload.sub);
+      user.password = await bcrypt.hash(password, 10);
+      await this.userRepository.save(user);
+
+      return { message: 'Mot de passe réinitialisé avec succès.' };
+    } catch {
+      throw new UnauthorizedException('Token invalide ou expiré.');
+    }
+  }
 }
